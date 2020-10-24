@@ -3,7 +3,9 @@ if (MSVC)
 endif()
 add_library(BlastEngine SHARED)
 target_include_directories(BlastEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_sources(BlastEngine PUBLIC test.cpp)
+target_sources(BlastEngine PUBLIC
+        Source/Gfx/GfxDevice.cpp
+        Source/Gfx/Vulkan/VulkanDevice.cpp)
 
 if (WIN32)
     install(TARGETS BlastEngine
