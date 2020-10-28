@@ -4,3 +4,6 @@
 [submodule "Engine/External/volk"]
 	path = Engine/External/volk
 	url = git://github.com/zeux/volk
+[submodule "Engine/External/khronos/vulkan-headers"]
+	path = Engine/External/khronos/vulkan-headers
+	url = git://github.com/KhronosGroup/Vulkan-Headers
