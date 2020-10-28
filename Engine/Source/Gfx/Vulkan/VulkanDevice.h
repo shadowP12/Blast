@@ -10,5 +10,7 @@ namespace Blast {
 
     private:
         VkInstance mInstance = VK_NULL_HANDLE;
+        VkDebugUtilsMessengerEXT mDebugMessenger = VK_NULL_HANDLE;
+        VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
     };
 }
