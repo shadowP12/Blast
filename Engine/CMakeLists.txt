@@ -5,7 +5,9 @@ add_library(BlastEngine SHARED)
 target_include_directories(BlastEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_sources(BlastEngine PUBLIC
         Source/Gfx/GfxDevice.cpp
-        Source/Gfx/Vulkan/VulkanDevice.cpp)
+        Source/Gfx/GfxBuffer.cpp
+        Source/Gfx/Vulkan/VulkanDevice.cpp
+        Source/Gfx/Vulkan/VulkanBuffer.cpp)
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     target_compile_definitions(BlastEngine PUBLIC VULKAN_DEBUG)

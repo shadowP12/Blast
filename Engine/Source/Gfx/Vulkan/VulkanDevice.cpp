@@ -139,9 +139,128 @@ namespace Blast {
             VK_ASSERT(vkCreateDebugReportCallbackEXT(mInstance, &debugReportCreateInfo, nullptr, &mDebugReportCallback));
         }
 #endif
+        uint32_t gpuCount = 0;
+        VK_ASSERT(vkEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr));
+
+        std::vector<VkPhysicalDevice> gpus(gpuCount);
+        VK_ASSERT(vkEnumeratePhysicalDevices(mInstance, &gpuCount, gpus.data()));
+
+        for (auto &g : gpus) {
+            VkPhysicalDeviceProperties props;
+            vkGetPhysicalDeviceProperties(g, &props);
+            BLAST_LOGI("Found Vulkan GPU: %s\n", props.deviceName);
+            BLAST_LOGI("API: %u.%u.%u\n",
+                   VK_VERSION_MAJOR(props.apiVersion),
+                   VK_VERSION_MINOR(props.apiVersion),
+                   VK_VERSION_PATCH(props.apiVersion));
+            BLAST_LOGI("Driver: %u.%u.%u\n",
+                   VK_VERSION_MAJOR(props.driverVersion),
+                   VK_VERSION_MINOR(props.driverVersion),
+                   VK_VERSION_PATCH(props.driverVersion));
+        }
+
+        // todo
+        mPhyDevice = gpus.front();
+
+        vkGetPhysicalDeviceProperties(mPhyDevice, &mPhyDeviceProperties);
+        vkGetPhysicalDeviceFeatures(mPhyDevice, &mPhyDeviceFeatures);
+        vkGetPhysicalDeviceMemoryProperties(mPhyDevice, &mPhyDeviceMemoryProperties);
+
+        uint32_t queueFamiliesCount;
+        vkGetPhysicalDeviceQueueFamilyProperties(mPhyDevice, &queueFamiliesCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamiliesCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(mPhyDevice, &queueFamiliesCount, queueFamilyProperties.data());
+
+        uint32_t graphicsFamily = -1;
+        uint32_t computeFamily = -1;
+        uint32_t transferFamily = -1;
+
+        for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
+            if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) {
+                computeFamily = i;
+                break;
+            }
+        }
+
+        for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
+            if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) &&
+                ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) &&
+                ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) == 0)) {
+                transferFamily = i;
+                break;
+            }
+        }
+
+        for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
+            if (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                graphicsFamily = i;
+                break;
+            }
+        }
+
+        const float graphicsQueuePrio = 0.0f;
+        const float computeQueuePrio = 0.1f;
+        const float transferQueuePrio = 0.2f;
+
+        std::vector<VkDeviceQueueCreateInfo> queueInfo{};
+        queueInfo.resize(3);
+
+        queueInfo[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo[0].queueFamilyIndex = graphicsFamily;
+        queueInfo[0].queueCount = 1;
+        queueInfo[0].pQueuePriorities = &graphicsQueuePrio;
+
+        queueInfo[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo[1].queueFamilyIndex = computeFamily;
+        queueInfo[1].queueCount = 1;
+        queueInfo[1].pQueuePriorities = &computeQueuePrio;
+
+        queueInfo[2].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo[2].queueFamilyIndex = transferFamily;
+        queueInfo[2].queueCount = 1;
+        queueInfo[2].pQueuePriorities = &transferQueuePrio;
+
+        uint32_t deviceAvailableExtensionCount = 0;
+        VK_ASSERT(vkEnumerateDeviceExtensionProperties(mPhyDevice, nullptr, &deviceAvailableExtensionCount, nullptr));
+
+        std::vector<VkExtensionProperties> deviceAvailableExtensions(deviceAvailableExtensionCount);
+        VK_ASSERT(vkEnumerateDeviceExtensionProperties(mPhyDevice, nullptr, &deviceAvailableExtensionCount, deviceAvailableExtensions.data()));
+
+        std::vector<const char*> deviceRequiredExtensions;
+        std::vector<const char*> deviceExtensions;
+
+        deviceRequiredExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_MAINTENANCE2_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+
+        for (auto it = deviceExtensions.begin(); it != deviceExtensions.end(); ++it) {
+            if (isExtensionSupported(*it, deviceAvailableExtensions)) {
+                deviceExtensions.push_back(*it);
+            }
+        }
+
+        VkDeviceCreateInfo deviceInfo ;
+        deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        deviceInfo.pNext = nullptr;
+        deviceInfo.flags = 0;
+        deviceInfo.queueCreateInfoCount = queueInfo.size();
+        deviceInfo.pQueueCreateInfos = queueInfo.data();
+        deviceInfo.pEnabledFeatures = &mPhyDeviceFeatures;
+        deviceInfo.enabledExtensionCount = deviceExtensions.size();
+        deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
+        deviceInfo.enabledLayerCount = 0;
+        deviceInfo.ppEnabledLayerNames = nullptr;
+
+        VK_ASSERT(vkCreateDevice(mPhyDevice, &deviceInfo, nullptr, &mDevice));
     }
 
     VulkanDevice::~VulkanDevice() {
+        vkDeviceWaitIdle(mDevice);
+        vkDestroyDevice(mDevice, nullptr);
+
 #if VULKAN_DEBUG
         if (mDebugMessenger != VK_NULL_HANDLE) {
             vkDestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
