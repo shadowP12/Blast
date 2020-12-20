@@ -4,6 +4,7 @@
 #endif
 #include <volk.h>
 #include <stdlib.h>
+#include "../GfxDefine.h"
 #include "../../Utility/Logging.h"
 
 #ifdef VULKAN_DEBUG
@@ -19,3 +20,16 @@
 #else
 #define VK_ASSERT(x) ((void)0)
 #endif
+
+namespace Blast {
+    VkSampleCountFlagBits toVulkanSampleCount(SampleCount sampleCount);
+
+    VkFormat toVulkanFormat(Format format);
+
+    VkImageAspectFlags toVulkanAspectMask(Format format);
+
+    VkBufferUsageFlags toVulkanBufferUsage(ResourceType type);
+
+    VkImageUsageFlags toVulkanImageUsage(ResourceType type);
+}
+

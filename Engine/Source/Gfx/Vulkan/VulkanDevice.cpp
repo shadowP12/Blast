@@ -1,4 +1,5 @@
 #include "VulkanDevice.h"
+#include "VulkanBuffer.h"
 #include <vector>
 
 namespace Blast {
@@ -272,5 +273,20 @@ namespace Blast {
         }
 #endif
         vkDestroyInstance(mInstance, nullptr);
+    }
+
+    int VulkanDevice::findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties) {
+        for (int i = 0; i < mPhyDeviceMemoryProperties.memoryTypeCount; i++) {
+            if ((typeFilter & (1 << i)) && (mPhyDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    GfxBuffer* VulkanDevice::createBuffer(const GfxBufferDesc& desc) {
+        VulkanBuffer* buf = new VulkanBuffer(this, desc);
+        return (GfxBuffer*)buf;
     }
 }

@@ -6,7 +6,11 @@ namespace Blast {
     class VulkanDevice : public GfxDevice {
     public:
         VulkanDevice();
+        VkDevice getHandle() { return mDevice; }
+        VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
+        int findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
         virtual ~VulkanDevice();
+        virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc);
     private:
         VkInstance mInstance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT mDebugMessenger = VK_NULL_HANDLE;
