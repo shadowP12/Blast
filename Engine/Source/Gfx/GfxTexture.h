@@ -20,6 +20,10 @@ namespace Blast {
     class GfxTexture {
     public:
         GfxTexture(const GfxTextureDesc& desc);
+        uint32_t getWidth() { return mWidth; }
+        uint32_t getHeight() {return mHeight; }
+        Format getFormat() { return mFormat; }
+        SampleCount getSampleCount() { return mSampleCount; }
     protected:
         uint32_t mWidth;
         uint32_t mHeight;

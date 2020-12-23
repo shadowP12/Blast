@@ -306,4 +306,20 @@ namespace Blast {
             result |= VK_IMAGE_USAGE_STORAGE_BIT;
         return result;
     }
+
+    VkAttachmentLoadOp toVulkanLoadOp(LoadAction op) {
+        VkAttachmentLoadOp result = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        switch (op) {
+            case LOAD_ACTION_DONTCARE:
+                result = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                break;
+            case LOAD_ACTION_LOAD:
+                result = VK_ATTACHMENT_LOAD_OP_LOAD;
+                break;
+            case LOAD_ACTION_CLEAR:
+                result = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                break;
+        }
+        return result;
+    }
 }

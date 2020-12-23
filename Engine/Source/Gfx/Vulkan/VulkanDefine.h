@@ -31,5 +31,7 @@ namespace Blast {
     VkBufferUsageFlags toVulkanBufferUsage(ResourceType type);
 
     VkImageUsageFlags toVulkanImageUsage(ResourceType type);
+
+    VkAttachmentLoadOp toVulkanLoadOp(LoadAction op);
 }
 

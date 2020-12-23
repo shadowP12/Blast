@@ -7,10 +7,12 @@ target_sources(BlastEngine PUBLIC
         Source/Gfx/GfxDevice.cpp
         Source/Gfx/GfxBuffer.cpp
         Source/Gfx/GfxTexture.cpp
+        Source/Gfx/GfxRenderTarget.cpp
         Source/Gfx/Vulkan/VulkanDefine.cpp
         Source/Gfx/Vulkan/VulkanDevice.cpp
         Source/Gfx/Vulkan/VulkanBuffer.cpp
-        Source/Gfx/Vulkan/VulkanTexture.cpp)
+        Source/Gfx/Vulkan/VulkanTexture.cpp
+        Source/Gfx/Vulkan/VulkanRenderTarget.cpp)
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     target_compile_definitions(BlastEngine PUBLIC VULKAN_DEBUG)

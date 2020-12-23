@@ -212,4 +212,11 @@ namespace Blast {
         RESOURCE_TYPE_TEXTURE_CUBE = (RESOURCE_TYPE_TEXTURE | (RESOURCE_TYPE_INDIRECT_BUFFER << 1)),
     };
     MAKE_ENUM_FLAG(uint32_t, ResourceType)
+
+    enum LoadAction {
+        LOAD_ACTION_DONTCARE,
+        LOAD_ACTION_LOAD,
+        LOAD_ACTION_CLEAR,
+        MAX_LOAD_ACTION
+    };
 }
