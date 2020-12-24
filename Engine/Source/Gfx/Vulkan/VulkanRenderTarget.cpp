@@ -86,9 +86,34 @@ namespace Blast {
         renderPassInfo.pDependencies = NULL;
 
         VK_ASSERT(vkCreateRenderPass(mDevice->getHandle(), &renderPassInfo, nullptr, &(mRenderPass)));
+
+        std::vector<VkImageView> attachmentViews;
+        for (int i = 0; i < mNumColorAttachments; i++) {
+            VulkanTexture* vulkanTexture = (VulkanTexture*)mColor[i].texture;
+            attachmentViews.push_back(vulkanTexture->getView());
+        }
+
+        if(mHasDepth) {
+            VulkanTexture* vulkanTexture = (VulkanTexture*)mDepthStencil.texture;
+            attachmentViews.push_back(vulkanTexture->getView());
+        }
+
+        VkFramebufferCreateInfo framebufferInfo;
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.pNext = nullptr;
+        framebufferInfo.flags = 0;
+        framebufferInfo.attachmentCount = attachmentViews.size();
+        framebufferInfo.pAttachments = attachmentViews.data();
+        framebufferInfo.width = mColor[0].texture->getWidth();
+        framebufferInfo.height = mColor[0].texture->getHeight();
+        framebufferInfo.layers = 1;
+        framebufferInfo.renderPass = mRenderPass;
+
+        VK_ASSERT(vkCreateFramebuffer(mDevice->getHandle(), &framebufferInfo, nullptr, &mFramebuffer));
     }
 
     VulkanRenderTarget::~VulkanRenderTarget() {
+        vkDestroyFramebuffer(mDevice->getHandle(), mFramebuffer, nullptr);
         vkDestroyRenderPass(mDevice->getHandle(), mRenderPass, nullptr);
     }
 }

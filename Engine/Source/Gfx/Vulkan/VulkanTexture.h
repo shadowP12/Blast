@@ -9,6 +9,7 @@ namespace Blast {
     public:
         VulkanTexture(VulkanDevice *device, const GfxTextureDesc &desc);
         virtual ~VulkanTexture();
+        VkImageView getView() { return mView; }
     protected:
         VulkanDevice* mDevice = nullptr;
         VkImage mImage;

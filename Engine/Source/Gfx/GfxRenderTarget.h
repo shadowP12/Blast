@@ -16,10 +16,10 @@ namespace Blast {
     };
 
     struct GfxRenderTargetDesc {
-        GfxColorAttachmentInfo color[8];
-        GfxDepthStencilAttachmentInfo depthStencil;
         uint32_t numColorAttachments = 0;
         bool hasDepth = false;
+        GfxColorAttachmentInfo color[8];
+        GfxDepthStencilAttachmentInfo depthStencil;
         ResourceUsage usage;
         ResourceType type;
         ResourceState state;
@@ -29,10 +29,10 @@ namespace Blast {
     public:
         GfxRenderTarget(const GfxRenderTargetDesc &desc);
     protected:
-        GfxColorAttachmentInfo mColor[8];
-        GfxDepthStencilAttachmentInfo mDepthStencil;
         uint32_t mNumColorAttachments = 0;
         bool mHasDepth = false;
+        GfxColorAttachmentInfo mColor[8];
+        GfxDepthStencilAttachmentInfo mDepthStencil;
         ResourceUsage mUsage;
         ResourceType mType;
         ResourceState mState;

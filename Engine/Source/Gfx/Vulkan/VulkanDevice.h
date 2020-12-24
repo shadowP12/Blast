@@ -8,6 +8,7 @@ namespace Blast {
         VulkanDevice();
         VkDevice getHandle() { return mDevice; }
         VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
+        VkInstance getInstance() { return mInstance; }
         int findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
         virtual ~VulkanDevice();
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc);
