@@ -1,11 +1,11 @@
 #include "VulkanBuffer.h"
-#include "../GfxDevice.h"
-#include "VulkanDevice.h"
+#include "../GfxContext.h"
+#include "VulkanContext.h"
 
 namespace Blast {
-    VulkanBuffer::VulkanBuffer(VulkanDevice *device, const GfxBufferDesc &desc)
+    VulkanBuffer::VulkanBuffer(VulkanContext* context, const GfxBufferDesc& desc)
     : GfxBuffe(desc) {
-        mDevice = device;
+        mContext = context;
 
         VkBufferCreateInfo bufferInfo;
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -19,10 +19,10 @@ namespace Blast {
         if (mUsage == RESOURCE_USAGE_GPU_ONLY || mUsage == RESOURCE_USAGE_GPU_TO_CPU)
             bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        VK_ASSERT(vkCreateBuffer(mDevice->getHandle(), &bufferInfo, nullptr, &mBuffer));
+        VK_ASSERT(vkCreateBuffer(mContext->getDevice(), &bufferInfo, nullptr, &mBuffer));
 
         VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(mDevice->getHandle(), mBuffer, &memoryRequirements);
+        vkGetBufferMemoryRequirements(mContext->getDevice(), mBuffer, &memoryRequirements);
 
         VkMemoryPropertyFlags memoryPropertys;
         if (mUsage == RESOURCE_USAGE_GPU_ONLY)
@@ -35,16 +35,16 @@ namespace Blast {
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = mDevice->findMemoryType(memoryRequirements.memoryTypeBits, memoryPropertys);
+        memoryAllocateInfo.memoryTypeIndex = mContext->findMemoryType(memoryRequirements.memoryTypeBits, memoryPropertys);
 
-        VK_ASSERT(vkAllocateMemory(mDevice->getHandle(), &memoryAllocateInfo, nullptr, &mMemory));
+        VK_ASSERT(vkAllocateMemory(mContext->getDevice(), &memoryAllocateInfo, nullptr, &mMemory));
 
-        VK_ASSERT(vkBindBufferMemory(mDevice->getHandle(), mBuffer, mMemory, 0));
+        VK_ASSERT(vkBindBufferMemory(mContext->getDevice(), mBuffer, mMemory, 0));
     }
 
     VulkanBuffer::~VulkanBuffer() {
-        vkDestroyBuffer(mDevice->getHandle(), mBuffer, nullptr);
-        vkFreeMemory(mDevice->getHandle(), mMemory, nullptr);
+        vkDestroyBuffer(mContext->getDevice(), mBuffer, nullptr);
+        vkFreeMemory(mContext->getDevice(), mMemory, nullptr);
     }
 
     void VulkanBuffer::readData(uint32_t offset, uint32_t size, void* dest) {
@@ -52,9 +52,9 @@ namespace Blast {
             return;
 
         void* data;
-        vkMapMemory(mDevice->getHandle(), mMemory, offset, size, 0, &data);
+        vkMapMemory(mContext->getDevice(), mMemory, offset, size, 0, &data);
         memcpy(dest, data, static_cast<size_t>(size));
-        vkUnmapMemory(mDevice->getHandle(), mMemory);
+        vkUnmapMemory(mContext->getDevice(), mMemory);
     }
 
     void VulkanBuffer::writeData(uint32_t offset, uint32_t size, void* source) {
@@ -62,8 +62,8 @@ namespace Blast {
             return;
 
         void *data;
-        vkMapMemory(mDevice->getHandle(), mMemory, offset, size, 0, &data);
+        vkMapMemory(mContext->getDevice(), mMemory, offset, size, 0, &data);
         memcpy(data, source, static_cast<size_t>(size));
-        vkUnmapMemory(mDevice->getHandle(), mMemory);
+        vkUnmapMemory(mContext->getDevice(), mMemory);
     }
 }

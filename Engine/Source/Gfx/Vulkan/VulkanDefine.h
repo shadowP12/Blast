@@ -26,6 +26,8 @@ namespace Blast {
 
     VkFormat toVulkanFormat(Format format);
 
+    Format toGfxFormat(VkFormat format);
+
     VkImageAspectFlags toVulkanAspectMask(Format format);
 
     VkBufferUsageFlags toVulkanBufferUsage(ResourceType type);

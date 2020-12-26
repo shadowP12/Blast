@@ -1,4 +1,4 @@
-#include "VulkanDevice.h"
+#include "VulkanContext.h"
 #include "VulkanBuffer.h"
 #include <vector>
 
@@ -55,7 +55,7 @@ namespace Blast {
     }
 #endif
 
-    VulkanDevice::VulkanDevice() {
+    VulkanContext::VulkanContext() {
         if (volkInitialize() != VK_SUCCESS) {
             return;
         }
@@ -173,13 +173,9 @@ namespace Blast {
         std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamiliesCount);
         vkGetPhysicalDeviceQueueFamilyProperties(mPhyDevice, &queueFamiliesCount, queueFamilyProperties.data());
 
-        uint32_t graphicsFamily = -1;
-        uint32_t computeFamily = -1;
-        uint32_t transferFamily = -1;
-
         for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
             if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) {
-                computeFamily = i;
+                mComputeFamily = i;
                 break;
             }
         }
@@ -188,14 +184,14 @@ namespace Blast {
             if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) &&
                 ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) &&
                 ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) == 0)) {
-                transferFamily = i;
+                mTransferFamily = i;
                 break;
             }
         }
 
         for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
             if (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                graphicsFamily = i;
+                mGraphicsFamily = i;
                 break;
             }
         }
@@ -208,18 +204,18 @@ namespace Blast {
         queueInfo.resize(3);
 
         queueInfo[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[0].queueFamilyIndex = graphicsFamily;
-        queueInfo[0].queueCount = 1;
+        queueInfo[0].queueFamilyIndex = mGraphicsFamily;
+        queueInfo[0].queueCount = queueFamilyProperties[mGraphicsFamily].queueCount;
         queueInfo[0].pQueuePriorities = &graphicsQueuePrio;
 
         queueInfo[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[1].queueFamilyIndex = computeFamily;
-        queueInfo[1].queueCount = 1;
+        queueInfo[1].queueFamilyIndex = mComputeFamily;
+        queueInfo[1].queueCount = queueFamilyProperties[mComputeFamily].queueCount;
         queueInfo[1].pQueuePriorities = &computeQueuePrio;
 
         queueInfo[2].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[2].queueFamilyIndex = transferFamily;
-        queueInfo[2].queueCount = 1;
+        queueInfo[2].queueFamilyIndex = mTransferFamily;
+        queueInfo[2].queueCount = queueFamilyProperties[mTransferFamily].queueCount;
         queueInfo[2].pQueuePriorities = &transferQueuePrio;
 
         uint32_t deviceAvailableExtensionCount = 0;
@@ -258,7 +254,7 @@ namespace Blast {
         VK_ASSERT(vkCreateDevice(mPhyDevice, &deviceInfo, nullptr, &mDevice));
     }
 
-    VulkanDevice::~VulkanDevice() {
+    VulkanContext::~VulkanContext() {
         vkDeviceWaitIdle(mDevice);
         vkDestroyDevice(mDevice, nullptr);
 
@@ -275,7 +271,7 @@ namespace Blast {
         vkDestroyInstance(mInstance, nullptr);
     }
 
-    int VulkanDevice::findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties) {
+    int VulkanContext::findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties) {
         for (int i = 0; i < mPhyDeviceMemoryProperties.memoryTypeCount; i++) {
             if ((typeFilter & (1 << i)) && (mPhyDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
                 return i;
@@ -285,7 +281,7 @@ namespace Blast {
         return -1;
     }
 
-    GfxBuffer* VulkanDevice::createBuffer(const GfxBufferDesc& desc) {
+    GfxBuffer* VulkanContext::createBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* buf = new VulkanBuffer(this, desc);
         return (GfxBuffer*)buf;
     }

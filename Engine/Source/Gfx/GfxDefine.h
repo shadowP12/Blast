@@ -162,10 +162,9 @@ namespace Blast {
         FORMAT_BC7_UNORM_SRGB,
 
         FORMAT_X8_D24_UNORM_PACK32,
-        FORMAT_D32_SFLOAT,
         FORMAT_S8_UINT,
         FORMAT_D16_UNORM_S8_UINT,
-        FORMAT_D32_SFLOAT_S8_UINT
+        FORMAT_D32_FLOAT_S8_UINT
     };
 
     enum ResourceUsage {

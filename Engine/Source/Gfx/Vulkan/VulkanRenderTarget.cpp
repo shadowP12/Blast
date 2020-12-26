@@ -1,12 +1,12 @@
 #include "VulkanRenderTarget.h"
-#include "VulkanDevice.h"
+#include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include <vector>
 
 namespace Blast {
-    VulkanRenderTarget::VulkanRenderTarget(VulkanDevice *device, const GfxRenderTargetDesc &desc)
+    VulkanRenderTarget::VulkanRenderTarget(VulkanContext *context, const GfxRenderTargetDesc &desc)
     :GfxRenderTarget(desc) {
-        mDevice = device;
+        mContext = context;
 
         std::vector<VkAttachmentDescription> attachments;
         std::vector<VkAttachmentReference> colorAttachmentRefs;
@@ -85,7 +85,7 @@ namespace Blast {
         renderPassInfo.dependencyCount = 0;
         renderPassInfo.pDependencies = NULL;
 
-        VK_ASSERT(vkCreateRenderPass(mDevice->getHandle(), &renderPassInfo, nullptr, &(mRenderPass)));
+        VK_ASSERT(vkCreateRenderPass(mContext->getDevice(), &renderPassInfo, nullptr, &(mRenderPass)));
 
         std::vector<VkImageView> attachmentViews;
         for (int i = 0; i < mNumColorAttachments; i++) {
@@ -109,11 +109,11 @@ namespace Blast {
         framebufferInfo.layers = 1;
         framebufferInfo.renderPass = mRenderPass;
 
-        VK_ASSERT(vkCreateFramebuffer(mDevice->getHandle(), &framebufferInfo, nullptr, &mFramebuffer));
+        VK_ASSERT(vkCreateFramebuffer(mContext->getDevice(), &framebufferInfo, nullptr, &mFramebuffer));
     }
 
     VulkanRenderTarget::~VulkanRenderTarget() {
-        vkDestroyFramebuffer(mDevice->getHandle(), mFramebuffer, nullptr);
-        vkDestroyRenderPass(mDevice->getHandle(), mRenderPass, nullptr);
+        vkDestroyFramebuffer(mContext->getDevice(), mFramebuffer, nullptr);
+        vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
     }
 }

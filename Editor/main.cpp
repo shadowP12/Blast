@@ -1,11 +1,11 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
-#include <Gfx/GfxDevice.h>
-#include <Gfx/Vulkan/VulkanDevice.h>
+#include <Gfx/GfxContext.h>
+#include <Gfx/Vulkan/VulkanContext.h>
 
 int main() {
-    Blast::VulkanDevice* device = new Blast::VulkanDevice;
-    delete device;
+    Blast::VulkanContext* context = new Blast::VulkanContext;
+    delete context;
 //    glfwInit();
 //    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 //    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

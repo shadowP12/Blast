@@ -3,15 +3,16 @@
 #include "../GfxTexture.h"
 
 namespace Blast {
-    class VulkanDevice;
+    class VulkanContext;
 
     class VulkanTexture : public GfxTexture {
     public:
-        VulkanTexture(VulkanDevice *device, const GfxTextureDesc &desc);
+        VulkanTexture(VulkanContext* context, const GfxTextureDesc& desc);
+        VulkanTexture(VulkanContext* context, const VkImage& image, const GfxTextureDesc& desc);
         virtual ~VulkanTexture();
         VkImageView getView() { return mView; }
     protected:
-        VulkanDevice* mDevice = nullptr;
+        VulkanContext* mContext = nullptr;
         VkImage mImage;
         VkImageView mView;
         VkDeviceMemory mMemory;

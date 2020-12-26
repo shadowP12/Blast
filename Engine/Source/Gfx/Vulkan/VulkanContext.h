@@ -1,16 +1,19 @@
 #pragma once
-#include "../GfxDevice.h"
+#include "../GfxContext.h"
 #include "VulkanDefine.h"
 
 namespace Blast {
-    class VulkanDevice : public GfxDevice {
+    class VulkanContext : public GfxContext {
     public:
-        VulkanDevice();
-        VkDevice getHandle() { return mDevice; }
+        VulkanContext();
+        virtual ~VulkanContext();
+        VkDevice getDevice() { return mDevice; }
         VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
         VkInstance getInstance() { return mInstance; }
+        uint32_t getGraphicsFamily() { return mGraphicsFamily; }
+        uint32_t getComputeFamily() { return mComputeFamily; }
+        uint32_t getTransferFamily() { return mTransferFamily; }
         int findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
-        virtual ~VulkanDevice();
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc);
     private:
         VkInstance mInstance = VK_NULL_HANDLE;
@@ -21,5 +24,8 @@ namespace Blast {
         VkPhysicalDeviceFeatures mPhyDeviceFeatures;
         VkPhysicalDeviceMemoryProperties mPhyDeviceMemoryProperties;
         VkDevice mDevice = VK_NULL_HANDLE;
+        uint32_t mGraphicsFamily = -1;
+        uint32_t mComputeFamily = -1;
+        uint32_t mTransferFamily = -1;
     };
 }

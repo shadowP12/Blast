@@ -1,11 +1,11 @@
 #include "VulkanTexture.h"
-#include "VulkanDevice.h"
+#include "VulkanContext.h"
 #include <assert.h>
 
 namespace Blast {
-    VulkanTexture::VulkanTexture(VulkanDevice *device, const GfxTextureDesc &desc)
+    VulkanTexture::VulkanTexture(VulkanContext* context, const GfxTextureDesc& desc)
     :GfxTexture(desc) {
-        mDevice = device;
+        mContext = context;
         mOwnsImage = true;
 
         bool cubemapRequired = false;
@@ -55,10 +55,10 @@ namespace Blast {
             imageInfo.usage |= (VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
         }
 
-        VK_ASSERT(vkCreateImage(mDevice->getHandle(), &imageInfo, nullptr, &mImage));
+        VK_ASSERT(vkCreateImage(mContext->getDevice(), &imageInfo, nullptr, &mImage));
 
         VkMemoryRequirements memoryRequirements;
-        vkGetImageMemoryRequirements(mDevice->getHandle(), mImage, &memoryRequirements);
+        vkGetImageMemoryRequirements(mContext->getDevice(), mImage, &memoryRequirements);
 
         VkMemoryPropertyFlags memoryPropertys;
         if (mUsage == RESOURCE_USAGE_GPU_ONLY)
@@ -71,11 +71,11 @@ namespace Blast {
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = mDevice->findMemoryType(memoryRequirements.memoryTypeBits, memoryPropertys);
+        memoryAllocateInfo.memoryTypeIndex = mContext->findMemoryType(memoryRequirements.memoryTypeBits, memoryPropertys);
 
-        VK_ASSERT(vkAllocateMemory(mDevice->getHandle(), &memoryAllocateInfo, nullptr, &mMemory));
+        VK_ASSERT(vkAllocateMemory(mContext->getDevice(), &memoryAllocateInfo, nullptr, &mMemory));
 
-        VK_ASSERT(vkBindImageMemory(mDevice->getHandle(), mImage, mMemory, 0));
+        VK_ASSERT(vkBindImageMemory(mContext->getDevice(), mImage, mMemory, 0));
 
         // create image view
         VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
@@ -110,14 +110,69 @@ namespace Blast {
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = mArrayLayers;
 
-        VK_ASSERT(vkCreateImageView(mDevice->getHandle(), &viewInfo, nullptr, &mView));
+        VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &mView));
+    }
+
+    VulkanTexture::VulkanTexture(VulkanContext* context, const VkImage& image, const GfxTextureDesc& desc)
+    :GfxTexture(desc) {
+        mContext = context;
+        mImage = image;
+        mOwnsImage = false;
+
+        VkImageType imageType = VK_IMAGE_TYPE_MAX_ENUM;
+        if (mDepth > 1)
+            imageType = VK_IMAGE_TYPE_3D;
+        else if (mHeight > 1)
+            imageType = VK_IMAGE_TYPE_2D;
+        else
+            imageType = VK_IMAGE_TYPE_1D;
+
+        bool cubemapRequired = false;
+        if (RESOURCE_TYPE_TEXTURE_CUBE == (mType & RESOURCE_TYPE_TEXTURE_CUBE)) {
+            cubemapRequired = true;
+        }
+
+        VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+        switch (imageType) {
+            case VK_IMAGE_TYPE_1D:
+                viewType = mArrayLayers > 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_1D;
+                break;
+            case VK_IMAGE_TYPE_2D:
+                if (cubemapRequired)
+                    viewType = (mArrayLayers > 6) ? VK_IMAGE_VIEW_TYPE_CUBE_ARRAY : VK_IMAGE_VIEW_TYPE_CUBE;
+                else
+                    viewType = mArrayLayers > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
+                break;
+            case VK_IMAGE_TYPE_3D:
+                if (mArrayLayers > 1)
+                    assert(false);
+
+                viewType = VK_IMAGE_VIEW_TYPE_3D;
+                break;
+            default:
+                assert(false && "image format not supported!");
+                break;
+        }
+
+        VkImageViewCreateInfo viewInfo = {};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = mImage;
+        viewInfo.viewType = viewType;
+        viewInfo.format = toVulkanFormat(mFormat);
+        viewInfo.subresourceRange.aspectMask = toVulkanAspectMask(mFormat);
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = mMipLevels;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = mArrayLayers;
+
+        VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &mView));
     }
 
     VulkanTexture::~VulkanTexture() {
         if(mOwnsImage) {
-            vkDestroyImage(mDevice->getHandle(), mImage, nullptr);
-            vkFreeMemory(mDevice->getHandle(), mMemory, nullptr);
+            vkDestroyImage(mContext->getDevice(), mImage, nullptr);
+            vkFreeMemory(mContext->getDevice(), mMemory, nullptr);
         }
-        vkDestroyImageView(mDevice->getHandle(), mView, nullptr);
+        vkDestroyImageView(mContext->getDevice(), mView, nullptr);
     }
 }

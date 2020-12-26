@@ -3,14 +3,14 @@
 #include "../GfxRenderTarget.h"
 
 namespace Blast {
-    class VulkanDevice;
+    class VulkanContext;
 
     class VulkanRenderTarget : public GfxRenderTarget {
     public:
-        VulkanRenderTarget(VulkanDevice *device, const GfxRenderTargetDesc &desc);
+        VulkanRenderTarget(VulkanContext *device, const GfxRenderTargetDesc &desc);
         virtual ~VulkanRenderTarget();
     protected:
-        VulkanDevice* mDevice = nullptr;
+        VulkanContext* mContext = nullptr;
         VkRenderPass mRenderPass;
         VkFramebuffer mFramebuffer;
     };

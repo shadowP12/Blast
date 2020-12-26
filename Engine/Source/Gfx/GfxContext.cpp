@@ -1,8 +1,8 @@
-#include "GfxDevice.h"
+#include "GfxContext.h"
 #include <assert.h>
 
 namespace Blast {
-    uint32_t GfxDevice::getFormatStride(Format format) {
+    uint32_t GfxContext::getFormatStride(Format format) {
         switch (format) {
             case FORMAT_R32G32B32A32_FLOAT:
             case FORMAT_R32G32B32A32_UINT:
