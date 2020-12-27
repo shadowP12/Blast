@@ -9,12 +9,18 @@ target_sources(BlastEngine PUBLIC
         Source/Gfx/GfxTexture.cpp
         Source/Gfx/GfxRenderTarget.cpp
         Source/Gfx/GfxSwapchain.cpp
+        Source/Gfx/GfxCommandBuffer.cpp
+        Source/Gfx/GfxPipeline.cpp
+        Source/Gfx/GfxShader.cpp
         Source/Gfx/Vulkan/VulkanDefine.cpp
         Source/Gfx/Vulkan/VulkanContext.cpp
         Source/Gfx/Vulkan/VulkanBuffer.cpp
         Source/Gfx/Vulkan/VulkanTexture.cpp
         Source/Gfx/Vulkan/VulkanRenderTarget.cpp
-        Source/Gfx/Vulkan/VulkanSwapchain.cpp)
+        Source/Gfx/Vulkan/VulkanSwapchain.cpp
+        Source/Gfx/Vulkan/VulkanCommandBuffer.cpp
+        Source/Gfx/Vulkan/VulkanPipeline.cpp
+        Source/Gfx/Vulkan/VulkanShader.cpp)
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     target_compile_definitions(BlastEngine PUBLIC VULKAN_DEBUG)
