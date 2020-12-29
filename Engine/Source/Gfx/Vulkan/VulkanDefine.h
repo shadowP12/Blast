@@ -35,5 +35,29 @@ namespace Blast {
     VkImageUsageFlags toVulkanImageUsage(ResourceType type);
 
     VkAttachmentLoadOp toVulkanLoadOp(LoadAction op);
+
+    VkBlendOp toVulkanBlendOp(BlendOp op);
+
+    VkBlendFactor toVulkanBlendFactor(BlendConstant factor);
+
+    VkStencilOp toVulkanStencilOp(StencilOp op);
+
+    VkCompareOp toVulkanCompareOp(CompareMode op);
+
+    VkPolygonMode toVulkanFillMode(FillMode mode);
+
+    VkCullModeFlagBits toVulkanCullMode(CullMode mode);
+
+    VkFrontFace toVulkanFrontFace(FrontFace frontFace);
+
+    VkFilter toVulkanFilter(FilterType filter);
+
+    VkSamplerMipmapMode toVulkanMipmapMode(MipmapMode mode);
+
+    VkSamplerAddressMode toVulkanAddressMode(AddressMode mode);
+
+    VkShaderStageFlags toVulkanShaderStages(ShaderStage stages);
+
+    VkDescriptorType toVulkanDescriptorType(ResourceType type);
 }
 

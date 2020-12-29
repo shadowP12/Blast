@@ -2,37 +2,58 @@
 #include <stdint.h>
 #include "../Utility/Flag.h"
 
+#define MAX_VERTEX_ATTRIBS 15
+#define MAX_RENDER_TARGET_ATTACHMENTS 8
+
 namespace Blast {
 
-    enum StencilOp {
-        STENCIL_OP_KEEP,
-        STENCIL_OP_ZERO,
-        STENCIL_OP_REPLACE,
-        STENCIL_OP_INCR_SAT,
-        STENCIL_OP_DECR_SAT,
-        STENCIL_OP_INVERT,
-        STENCIL_OP_INCR,
-        STENCIL_OP_DECR,
+    enum BlendOp {
+        BLEND_OP_ADD,
+        BLEND_OP_SUBTRACT,
+        BLEND_OP_REV_SUBTRACT,
+        BLEND_OP_MIN,
+        BLEND_OP_MAX,
     };
 
     enum BlendConstant {
-        BLEND_ZERO,
+        BLEND_ZERO = 0,
         BLEND_ONE,
         BLEND_SRC_COLOR,
-        BLEND_INV_SRC_COLOR,
+        BLEND_ONE_MINUS_SRC_COLOR,
+        BLEND_DST_COLOR,
+        BLEND_ONE_MINUS_DST_COLOR,
         BLEND_SRC_ALPHA,
-        BLEND_INV_SRC_ALPHA,
-        BLEND_DEST_ALPHA,
-        BLEND_INV_DEST_ALPHA,
-        BLEND_DEST_COLOR,
-        BLEND_INV_DEST_COLOR,
-        BLEND_SRC_ALPHA_SAT,
+        BLEND_ONE_MINUS_SRC_ALPHA,
+        BLEND_DST_ALPHA,
+        BLEND_ONE_MINUS_DST_ALPHA,
+        BLEND_SRC_ALPHA_SATURATE,
         BLEND_BLEND_FACTOR,
-        BLEND_INV_BLEND_FACTOR,
-        BLEND_SRC1_COLOR,
-        BLEND_INV_SRC1_COLOR,
-        BLEND_SRC1_ALPHA,
-        BLEND_INV_SRC1_ALPHA,
+        BLEND_ONE_MINUS_BLEND_FACTOR,
+        MAX_BLEND_CONSTANTS
+    };
+
+    enum StencilOp {
+        STENCIL_OP_KEEP,
+        STENCIL_OP_SET_ZERO,
+        STENCIL_OP_REPLACE,
+        STENCIL_OP_INVERT,
+        STENCIL_OP_INCR,
+        STENCIL_OP_DECR,
+        STENCIL_OP_INCR_SAT,
+        STENCIL_OP_DECR_SAT,
+        MAX_STENCIL_OPS,
+    };
+
+    enum CompareMode {
+        COMPARE_NEVER,
+        COMPARE_LESS,
+        COMPARE_EQUAL,
+        COMPARE_LEQUAL,
+        COMPARE_GREATER,
+        COMPARE_NOTEQUAL,
+        COMPARE_GEQUAL,
+        COMPARE_ALWAYS,
+        MAX_COMPARE_MODES,
     };
 
     enum ColorWriteEnable {
@@ -44,23 +65,28 @@ namespace Blast {
         COLOR_WRITE_ENABLE_ALL = (((COLOR_WRITE_ENABLE_RED | COLOR_WRITE_ENABLE_GREEN) | COLOR_WRITE_ENABLE_BLUE) | COLOR_WRITE_ENABLE_ALPHA)
     };
 
-    enum BlendOp {
-        BLEND_OP_ADD,
-        BLEND_OP_SUBTRACT,
-        BLEND_OP_REV_SUBTRACT,
-        BLEND_OP_MIN,
-        BLEND_OP_MAX,
-    };
-
     enum FillMode {
-        FILL_WIREFRAME,
-        FILL_SOLID,
+        FILL_MODE_SOLID,
+        FILL_MODE_WIREFRAME,
+        MAX_FILL_MODES
     };
 
     enum CullMode {
-        CULL_NONE,
-        CULL_FRONT,
-        CULL_BACK,
+        CULL_MODE_NONE = 0,
+        CULL_MODE_BACK,
+        CULL_MODE_FRONT,
+        CULL_MODE_BOTH,
+        MAX_CULL_MODES
+    };
+
+    enum FrontFace {
+        FRONT_FACE_CCW = 0,
+        FRONT_FACE_CW
+    };
+
+    enum FilterType {
+        FILTER_NEAREST = 0,
+        FILTER_LINEAR,
     };
 
     enum AddressMode {
@@ -70,10 +96,23 @@ namespace Blast {
         ADDRESS_MODE_CLAMP_TO_BORDER
     };
 
-    enum MipMapMode {
+    enum MipmapMode {
         MIPMAP_MODE_NEAREST = 0,
         MIPMAP_MODE_LINEAR
     };
+
+    enum BlendStateTargets {
+        BLEND_STATE_TARGET_0 = 0x1,
+        BLEND_STATE_TARGET_1 = 0x2,
+        BLEND_STATE_TARGET_2 = 0x4,
+        BLEND_STATE_TARGET_3 = 0x8,
+        BLEND_STATE_TARGET_4 = 0x10,
+        BLEND_STATE_TARGET_5 = 0x20,
+        BLEND_STATE_TARGET_6 = 0x40,
+        BLEND_STATE_TARGET_7 = 0x80,
+        BLEND_STATE_TARGET_ALL = 0xFF,
+    };
+    MAKE_ENUM_FLAG(uint32_t, BlendStateTargets)
 
     enum SampleCount {
         SAMPLE_COUNT_1 = 1,
@@ -209,6 +248,7 @@ namespace Blast {
         RESOURCE_TYPE_INDEX_BUFFER = (RESOURCE_TYPE_VERTEX_BUFFER << 1),
         RESOURCE_TYPE_INDIRECT_BUFFER = (RESOURCE_TYPE_INDEX_BUFFER << 1),
         RESOURCE_TYPE_TEXTURE_CUBE = (RESOURCE_TYPE_TEXTURE | (RESOURCE_TYPE_INDIRECT_BUFFER << 1)),
+        RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = (RESOURCE_TYPE_TEXTURE_CUBE << 1),
     };
     MAKE_ENUM_FLAG(uint32_t, ResourceType)
 
@@ -254,5 +294,47 @@ namespace Blast {
         TEXTURE_DIM_CUBE_ARRAY,
         TEXTURE_DIM_COUNT,
         TEXTURE_DIM_UNDEFINED,
+    };
+
+    enum VertexAttribRate {
+        VERTEX_ATTRIB_RATE_VERTEX = 0,
+        VERTEX_ATTRIB_RATE_INSTANCE = 1,
+        VERTEX_ATTRIB_RATE_COUNT,
+    };
+
+    enum PrimitiveTopology {
+        PRIMITIVE_TOPO_POINT_LIST = 0,
+        PRIMITIVE_TOPO_LINE_LIST,
+        PRIMITIVE_TOPO_LINE_STRIP,
+        PRIMITIVE_TOPO_TRI_LIST,
+        PRIMITIVE_TOPO_TRI_STRIP,
+        PRIMITIVE_TOPO_PATCH_LIST,
+        PRIMITIVE_TOPO_COUNT,
+    };
+
+    enum IndexType {
+        INDEX_TYPE_UINT32 = 0,
+        INDEX_TYPE_UINT16,
+    };
+
+    enum ShaderSemantic {
+        SEMANTIC_UNDEFINED = 0,
+        SEMANTIC_POSITION,
+        SEMANTIC_NORMAL,
+        SEMANTIC_COLOR,
+        SEMANTIC_TANGENT,
+        SEMANTIC_BITANGENT,
+        SEMANTIC_JOINTS,
+        SEMANTIC_WEIGHTS,
+        SEMANTIC_TEXCOORD0,
+        SEMANTIC_TEXCOORD1,
+        SEMANTIC_TEXCOORD2,
+        SEMANTIC_TEXCOORD3,
+        SEMANTIC_TEXCOORD4,
+        SEMANTIC_TEXCOORD5,
+        SEMANTIC_TEXCOORD6,
+        SEMANTIC_TEXCOORD7,
+        SEMANTIC_TEXCOORD8,
+        SEMANTIC_TEXCOORD9,
     };
 }

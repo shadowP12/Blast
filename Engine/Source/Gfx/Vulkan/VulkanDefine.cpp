@@ -526,4 +526,271 @@ namespace Blast {
         }
         return result;
     }
+
+    VkBlendOp toVulkanBlendOp(BlendOp op) {
+        VkBlendOp result;
+        switch (op) {
+            case BLEND_OP_ADD:
+                result = VK_BLEND_OP_ADD;
+                break;
+            case BLEND_OP_SUBTRACT:
+                result = VK_BLEND_OP_SUBTRACT;
+                break;
+            case BLEND_OP_REV_SUBTRACT:
+                result = VK_BLEND_OP_REVERSE_SUBTRACT;
+                break;
+            case BLEND_OP_MIN:
+                result = VK_BLEND_OP_MIN;
+                break;
+            case BLEND_OP_MAX:
+                result = VK_BLEND_OP_MAX;
+                break;
+        }
+        return result;
+    }
+
+    VkBlendFactor toVulkanBlendFactor(BlendConstant factor) {
+        VkBlendFactor result;
+        switch (factor) {
+            case BLEND_ZERO:
+                result = VK_BLEND_FACTOR_ZERO;
+                break;
+            case BLEND_ONE:
+                result = VK_BLEND_FACTOR_ONE;
+                break;
+            case BLEND_SRC_COLOR:
+                result = VK_BLEND_FACTOR_SRC_COLOR;
+                break;
+            case BLEND_ONE_MINUS_SRC_COLOR:
+                result = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+                break;
+            case BLEND_DST_COLOR:
+                result = VK_BLEND_FACTOR_DST_COLOR;
+                break;
+            case BLEND_ONE_MINUS_DST_COLOR:
+                result = VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+                break;
+            case BLEND_SRC_ALPHA:
+                result = VK_BLEND_FACTOR_SRC_ALPHA;
+                break;
+            case BLEND_ONE_MINUS_SRC_ALPHA:
+                result = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                break;
+            case BLEND_DST_ALPHA:
+                result = VK_BLEND_FACTOR_DST_ALPHA;
+                break;
+            case BLEND_ONE_MINUS_DST_ALPHA:
+                result = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+                break;
+            case BLEND_SRC_ALPHA_SATURATE:
+                result = VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+                break;
+            case BLEND_BLEND_FACTOR:
+                result = VK_BLEND_FACTOR_CONSTANT_COLOR;
+                break;
+            case BLEND_ONE_MINUS_BLEND_FACTOR:
+                result = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+                break;
+        }
+        return result;
+    }
+
+    VkStencilOp toVulkanStencilOp(StencilOp op) {
+        VkStencilOp result;
+        switch (op) {
+            case STENCIL_OP_KEEP:
+                result = VK_STENCIL_OP_KEEP;
+                break;
+            case STENCIL_OP_SET_ZERO:
+                result = VK_STENCIL_OP_ZERO;
+                break;
+            case STENCIL_OP_REPLACE:
+                result = VK_STENCIL_OP_REPLACE;
+                break;
+            case STENCIL_OP_INVERT:
+                result = VK_STENCIL_OP_INVERT;
+                break;
+            case STENCIL_OP_INCR:
+                result = VK_STENCIL_OP_INCREMENT_AND_WRAP;
+                break;
+            case STENCIL_OP_DECR:
+                result = VK_STENCIL_OP_DECREMENT_AND_WRAP;
+                break;
+            case STENCIL_OP_INCR_SAT:
+                result = VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+                break;
+            case STENCIL_OP_DECR_SAT:
+                result = VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+                break;
+        }
+        return result;
+    }
+
+    VkCompareOp toVulkanCompareOp(CompareMode op) {
+        VkCompareOp result;
+        switch (op) {
+            case COMPARE_NEVER:
+                result = VK_COMPARE_OP_NEVER;
+                break;
+            case COMPARE_LESS:
+                result = VK_COMPARE_OP_LESS;
+                break;
+            case COMPARE_EQUAL:
+                result = VK_COMPARE_OP_EQUAL;
+                break;
+            case COMPARE_LEQUAL:
+                result = VK_COMPARE_OP_LESS_OR_EQUAL;
+                break;
+            case COMPARE_GREATER:
+                result = VK_COMPARE_OP_GREATER;
+                break;
+            case COMPARE_NOTEQUAL:
+                result = VK_COMPARE_OP_NOT_EQUAL;
+                break;
+            case COMPARE_GEQUAL:
+                result = VK_COMPARE_OP_GREATER_OR_EQUAL;
+                break;
+            case COMPARE_ALWAYS:
+                result = VK_COMPARE_OP_ALWAYS;
+                break;
+        }
+        return result;
+    }
+
+    VkPolygonMode toVulkanFillMode(FillMode mode) {
+        VkPolygonMode result;
+        switch (mode) {
+            case FILL_MODE_SOLID:
+                result = VK_POLYGON_MODE_FILL;
+                break;
+            case FILL_MODE_WIREFRAME:
+                result = VK_POLYGON_MODE_LINE;
+                break;
+        }
+        return result;
+    }
+
+    VkCullModeFlagBits toVulkanCullMode(CullMode mode) {
+        VkCullModeFlagBits result;
+        switch (mode) {
+            case CULL_MODE_NONE:
+                result = VK_CULL_MODE_NONE;
+                break;
+            case CULL_MODE_BACK:
+                result = VK_CULL_MODE_BACK_BIT;
+                break;
+            case CULL_MODE_FRONT:
+                result = VK_CULL_MODE_FRONT_BIT;
+                break;
+        }
+        return result;
+    }
+
+    VkFrontFace toVulkanFrontFace(FrontFace frontFace) {
+        VkFrontFace result;
+        switch (frontFace) {
+            case FRONT_FACE_CCW:
+                result = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+                break;
+            case FRONT_FACE_CW:
+                result = VK_FRONT_FACE_CLOCKWISE;
+                break;
+        }
+        return result;
+    }
+
+    VkFilter toVulkanFilter(FilterType filter) {
+        VkFilter result;
+        switch (filter) {
+            case FILTER_NEAREST:
+                result = VK_FILTER_NEAREST;
+                break;
+            case FILTER_LINEAR:
+                result = VK_FILTER_LINEAR;
+                break;
+        }
+        return result;
+    }
+
+    VkSamplerMipmapMode toVulkanMipmapMode(MipmapMode mode) {
+        VkSamplerMipmapMode result;
+        switch (mode) {
+            case MIPMAP_MODE_NEAREST:
+                result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                break;
+            case MIPMAP_MODE_LINEAR:
+                result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+                break;
+        }
+        return result;
+    }
+
+    VkSamplerAddressMode toVulkanAddressMode(AddressMode mode) {
+        VkSamplerAddressMode result;
+        switch (mode) {
+            case ADDRESS_MODE_MIRROR:
+                result = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+                break;
+            case ADDRESS_MODE_REPEAT:
+                result = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                break;
+            case ADDRESS_MODE_CLAMP_TO_EDGE:
+                result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+                break;
+            case ADDRESS_MODE_CLAMP_TO_BORDER:
+                result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+                break;
+        }
+        return result;
+    }
+
+    VkShaderStageFlags toVulkanShaderStages(ShaderStage stages) {
+        VkShaderStageFlags result = 0;
+        if (SHADER_STAGE_ALL_GRAPHICS == (stages & SHADER_STAGE_ALL_GRAPHICS)) {
+            result = VK_SHADER_STAGE_ALL_GRAPHICS;
+        }
+        else {
+            if (SHADER_STAGE_VERT == (stages & SHADER_STAGE_VERT)) {
+                result |= VK_SHADER_STAGE_VERTEX_BIT;
+            }
+            if (SHADER_STAGE_TESC == (stages & SHADER_STAGE_TESC)) {
+                result |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+            }
+            if (SHADER_STAGE_TESE == (stages & SHADER_STAGE_TESE)) {
+                result |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+            }
+            if (SHADER_STAGE_GEOM == (stages & SHADER_STAGE_GEOM)) {
+                result |= VK_SHADER_STAGE_GEOMETRY_BIT;
+            }
+            if (SHADER_STAGE_FRAG == (stages & SHADER_STAGE_FRAG)) {
+                result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+            }
+            if (SHADER_STAGE_COMP == (stages & SHADER_STAGE_COMP)) {
+                result |= VK_SHADER_STAGE_COMPUTE_BIT;
+            }
+        }
+        return result;
+    }
+
+    VkDescriptorType toVulkanDescriptorType(ResourceType type) {
+        switch (type) {
+            case RESOURCE_TYPE_UNDEFINED:
+                return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+            case RESOURCE_TYPE_SAMPLER:
+                return VK_DESCRIPTOR_TYPE_SAMPLER;
+            case RESOURCE_TYPE_TEXTURE:
+                return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            case RESOURCE_TYPE_UNIFORM_BUFFER:
+                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            case RESOURCE_TYPE_RW_TEXTURE:
+                return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            case RESOURCE_TYPE_RW_BUFFER:
+                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            case RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER:
+                return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            default:
+                return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+                break;
+        }
+    }
 }

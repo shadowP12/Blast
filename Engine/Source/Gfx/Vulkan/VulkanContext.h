@@ -10,6 +10,7 @@ namespace Blast {
         VkDevice getDevice() { return mDevice; }
         VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
         VkInstance getInstance() { return mInstance; }
+        VkDescriptorPool getDescriptorPool() { return mDescriptorPool; }
         uint32_t getGraphicsFamily() { return mGraphicsFamily; }
         uint32_t getComputeFamily() { return mComputeFamily; }
         uint32_t getTransferFamily() { return mTransferFamily; }
@@ -24,6 +25,7 @@ namespace Blast {
         VkPhysicalDeviceFeatures mPhyDeviceFeatures;
         VkPhysicalDeviceMemoryProperties mPhyDeviceMemoryProperties;
         VkDevice mDevice = VK_NULL_HANDLE;
+        VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
         uint32_t mGraphicsFamily = -1;
         uint32_t mComputeFamily = -1;
         uint32_t mTransferFamily = -1;

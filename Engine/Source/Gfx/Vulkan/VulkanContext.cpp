@@ -252,10 +252,57 @@ namespace Blast {
         deviceInfo.ppEnabledLayerNames = nullptr;
 
         VK_ASSERT(vkCreateDevice(mPhyDevice, &deviceInfo, nullptr, &mDevice));
+
+        uint32_t setCount                  = 65535;
+        uint32_t sampledImageCount         = 32 * 65536;
+        uint32_t storageImageCount         = 1  * 65536;
+        uint32_t uniformBufferCount        = 1  * 65536;
+        uint32_t uniformBufferDynamicCount = 4  * 65536;
+        uint32_t storageBufferCount        = 1  * 65536;
+        uint32_t uniformTexelBufferCount   = 8192;
+        uint32_t storageTexelBufferCount   = 8192;
+        uint32_t samplerCount              = 2  * 65536;
+
+        VkDescriptorPoolSize poolSizes[8];
+
+        poolSizes[0].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        poolSizes[0].descriptorCount = sampledImageCount;
+
+        poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        poolSizes[1].descriptorCount = storageImageCount;
+
+        poolSizes[2].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSizes[2].descriptorCount = uniformBufferCount;
+
+        poolSizes[3].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        poolSizes[3].descriptorCount = uniformBufferDynamicCount;
+
+        poolSizes[4].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        poolSizes[4].descriptorCount = storageBufferCount;
+
+        poolSizes[5].type = VK_DESCRIPTOR_TYPE_SAMPLER;
+        poolSizes[5].descriptorCount = samplerCount;
+
+        poolSizes[6].type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+        poolSizes[6].descriptorCount = uniformTexelBufferCount;
+
+        poolSizes[7].type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+        poolSizes[7].descriptorCount = storageTexelBufferCount;
+
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+        descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        descriptorPoolCreateInfo.pNext = nullptr;
+        descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        descriptorPoolCreateInfo.maxSets = setCount;
+        descriptorPoolCreateInfo.poolSizeCount = 8;
+        descriptorPoolCreateInfo.pPoolSizes = poolSizes;
+
+        VK_ASSERT(vkCreateDescriptorPool(mDevice, &descriptorPoolCreateInfo, nullptr, &mDescriptorPool));
     }
 
     VulkanContext::~VulkanContext() {
         vkDeviceWaitIdle(mDevice);
+        vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
         vkDestroyDevice(mDevice, nullptr);
 
 #if VULKAN_DEBUG
