@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../Utility/Flag.h"
 
+#define MAX_VERTEX_BINDINGS 15
 #define MAX_VERTEX_ATTRIBS 15
 #define MAX_RENDER_TARGET_ATTACHMENTS 8
 

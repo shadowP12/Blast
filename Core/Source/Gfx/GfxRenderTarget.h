@@ -28,6 +28,7 @@ namespace Blast {
     class GfxRenderTarget {
     public:
         GfxRenderTarget(const GfxRenderTargetDesc &desc);
+        uint32_t getColorAttachmentCount() { return mNumColorAttachments; }
     protected:
         uint32_t mNumColorAttachments = 0;
         bool mHasDepth = false;

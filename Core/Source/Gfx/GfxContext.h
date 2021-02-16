@@ -5,7 +5,7 @@ namespace Blast {
 
     struct GfxBufferDesc;
     class GfxBuffer;
-
+    
     class GfxContext {
     public:
         uint32_t getFormatStride(Format format);

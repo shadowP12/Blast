@@ -17,5 +17,15 @@ namespace Blast {
         std::map<int, VkDescriptorSetLayout> mSetLayoutMap;
         VkPipelineLayout mPipelineLayout;
     };
+
+    class VulkanGraphicsPipeline : public GfxGraphicsPipeline {
+    public:
+        VulkanGraphicsPipeline(VulkanContext* context, const GfxGraphicsPipelineDesc& desc);
+        virtual ~VulkanGraphicsPipeline();
+        VkPipelineLayout getHandle() { return mPipeline; }
+    protected:
+        VulkanContext* mContext = nullptr;
+        VkPipeline mPipeline;
+    };
 }
 

@@ -9,6 +9,7 @@ namespace Blast {
     public:
         VulkanRenderTarget(VulkanContext *device, const GfxRenderTargetDesc &desc);
         virtual ~VulkanRenderTarget();
+        VkRenderPass getRenderPass() { return mRenderPass; }
     protected:
         VulkanContext* mContext = nullptr;
         VkRenderPass mRenderPass;

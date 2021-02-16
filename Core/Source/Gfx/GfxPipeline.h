@@ -25,7 +25,7 @@ namespace Blast {
         std::vector<GfxShaderReflection> mShaderReflections;
     };
 
-    struct VertexAttrib {
+    struct GfxVertexAttrib {
         std::string name;
         uint32_t binding;
         uint32_t location;
@@ -35,12 +35,12 @@ namespace Blast {
         VertexAttribRate rate;
     };
 
-    struct VertexLayout {
+    struct GfxVertexLayout {
         uint32_t attribCount;
-        VertexAttrib attribs[MAX_VERTEX_ATTRIBS];
+        GfxVertexAttrib attribs[MAX_VERTEX_ATTRIBS];
     };
 
-    struct BlendState {
+    struct GfxBlendState {
         BlendConstant srcFactors[MAX_RENDER_TARGET_ATTACHMENTS];
         BlendConstant dstFactors[MAX_RENDER_TARGET_ATTACHMENTS];
         BlendConstant srcAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS];
@@ -49,9 +49,10 @@ namespace Blast {
         BlendOp blendAlphaOps[MAX_RENDER_TARGET_ATTACHMENTS];
         BlendStateTargets targetMask;
         uint32_t masks[MAX_RENDER_TARGET_ATTACHMENTS];
+        bool independentBlend;
     };
 
-    struct DepthState {
+    struct GfxDepthState {
         bool depthTest;
         bool depthWrite;
         CompareMode depthFunc;
@@ -68,7 +69,7 @@ namespace Blast {
         StencilOp stencilBackPass;
     };
 
-    struct RasterizerState {
+    struct GfxRasterizerState {
         int32_t depthBias;
         float slopeScaledDepthBias;
         bool multiSample;
@@ -87,10 +88,10 @@ namespace Blast {
         GfxShader* geometryShader = nullptr;
         GfxShader* pixelShader = nullptr;
         GfxRootSignature* rootSignature = nullptr;
-        VertexLayout* vertexLayout = nullptr;
-        BlendState* blendState = nullptr;
-        DepthState* depthState = nullptr;
-        RasterizerState* rasterizerState = nullptr;
+        GfxVertexLayout* vertexLayout = nullptr;
+        GfxBlendState* blendState = nullptr;
+        GfxDepthState* depthState = nullptr;
+        GfxRasterizerState* rasterizerState = nullptr;
         PrimitiveTopology primitiveTopo;
     };
 
