@@ -22,7 +22,7 @@ namespace Blast {
     public:
         VulkanGraphicsPipeline(VulkanContext* context, const GfxGraphicsPipelineDesc& desc);
         virtual ~VulkanGraphicsPipeline();
-        VkPipelineLayout getHandle() { return mPipeline; }
+        VkPipeline getHandle() { return mPipeline; }
     protected:
         VulkanContext* mContext = nullptr;
         VkPipeline mPipeline;

@@ -200,22 +200,23 @@ namespace Blast {
         const float computeQueuePrio = 0.1f;
         const float transferQueuePrio = 0.2f;
 
+        // note:目前只使用三个queue
         std::vector<VkDeviceQueueCreateInfo> queueInfo{};
         queueInfo.resize(3);
 
         queueInfo[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueInfo[0].queueFamilyIndex = mGraphicsFamily;
-        queueInfo[0].queueCount = queueFamilyProperties[mGraphicsFamily].queueCount;
+        queueInfo[0].queueCount = 1;//queueFamilyProperties[mGraphicsFamily].queueCount;
         queueInfo[0].pQueuePriorities = &graphicsQueuePrio;
 
         queueInfo[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueInfo[1].queueFamilyIndex = mComputeFamily;
-        queueInfo[1].queueCount = queueFamilyProperties[mComputeFamily].queueCount;
+        queueInfo[1].queueCount = 1;//queueFamilyProperties[mComputeFamily].queueCount;
         queueInfo[1].pQueuePriorities = &computeQueuePrio;
 
         queueInfo[2].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueInfo[2].queueFamilyIndex = mTransferFamily;
-        queueInfo[2].queueCount = queueFamilyProperties[mTransferFamily].queueCount;
+        queueInfo[2].queueCount = 1;//queueFamilyProperties[mTransferFamily].queueCount;
         queueInfo[2].pQueuePriorities = &transferQueuePrio;
 
         uint32_t deviceAvailableExtensionCount = 0;

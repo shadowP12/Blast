@@ -22,4 +22,7 @@ namespace Blast {
             mShaderReflections.push_back(desc.compute);
         }
     }
+
+    GfxGraphicsPipeline::GfxGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) {
+    }
 }

@@ -205,7 +205,7 @@ namespace Blast {
     }
 
     VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanContext *context, const GfxGraphicsPipelineDesc &desc)
-    :GfxGraphicsPipeline(desc) {
+        :GfxGraphicsPipeline(desc) {
         mContext = context;
 
         std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
