@@ -160,7 +160,7 @@ namespace Blast {
                    VK_VERSION_PATCH(props.driverVersion));
         }
 
-        // todo
+        // todo: 支持多个GPU选择
         mPhyDevice = gpus.front();
 
         vkGetPhysicalDeviceProperties(mPhyDevice, &mPhyDeviceProperties);
@@ -173,9 +173,12 @@ namespace Blast {
         std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamiliesCount);
         vkGetPhysicalDeviceQueueFamilyProperties(mPhyDevice, &queueFamiliesCount, queueFamilyProperties.data());
 
+        uint32_t graphicsFamily = -1;
+        uint32_t computeFamily = -1;
+        uint32_t transferFamily = -1;
         for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
             if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) {
-                mComputeFamily = i;
+                computeFamily = i;
                 break;
             }
         }
@@ -184,14 +187,14 @@ namespace Blast {
             if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) &&
                 ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) &&
                 ((queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) == 0)) {
-                mTransferFamily = i;
+                transferFamily = i;
                 break;
             }
         }
 
         for (uint32_t i = 0; i < (uint32_t)queueFamilyProperties.size(); i++) {
             if (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                mGraphicsFamily = i;
+                graphicsFamily = i;
                 break;
             }
         }
@@ -205,17 +208,17 @@ namespace Blast {
         queueInfo.resize(3);
 
         queueInfo[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[0].queueFamilyIndex = mGraphicsFamily;
+        queueInfo[0].queueFamilyIndex = graphicsFamily;
         queueInfo[0].queueCount = 1;//queueFamilyProperties[mGraphicsFamily].queueCount;
         queueInfo[0].pQueuePriorities = &graphicsQueuePrio;
 
         queueInfo[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[1].queueFamilyIndex = mComputeFamily;
+        queueInfo[1].queueFamilyIndex = computeFamily;
         queueInfo[1].queueCount = 1;//queueFamilyProperties[mComputeFamily].queueCount;
         queueInfo[1].pQueuePriorities = &computeQueuePrio;
 
         queueInfo[2].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo[2].queueFamilyIndex = mTransferFamily;
+        queueInfo[2].queueFamilyIndex = transferFamily;
         queueInfo[2].queueCount = 1;//queueFamilyProperties[mTransferFamily].queueCount;
         queueInfo[2].pQueuePriorities = &transferQueuePrio;
 
@@ -253,6 +256,21 @@ namespace Blast {
         deviceInfo.ppEnabledLayerNames = nullptr;
 
         VK_ASSERT(vkCreateDevice(mPhyDevice, &deviceInfo, nullptr, &mDevice));
+
+        mGraphicsQueue = new VulkanQueue();
+        mGraphicsQueue->mType = QUEUE_TYPE_GRAPHICS;
+        mGraphicsQueue->mFamilyIndex = graphicsFamily;
+        vkGetDeviceQueue(mDevice, mGraphicsQueue->mFamilyIndex, 0, &mGraphicsQueue->mQueue);
+
+        mComputeQueue = new VulkanQueue();
+        mComputeQueue->mType = QUEUE_TYPE_COMPUTE;
+        mComputeQueue->mFamilyIndex = computeFamily;
+        vkGetDeviceQueue(mDevice, mComputeQueue->mFamilyIndex, 0, &mComputeQueue->mQueue);
+
+        mTransferQueue = new VulkanQueue();
+        mTransferQueue->mType = QUEUE_TYPE_TRANSFER;
+        mTransferQueue->mFamilyIndex = transferFamily;
+        vkGetDeviceQueue(mDevice, mTransferQueue->mFamilyIndex, 0, &mTransferQueue->mQueue);
 
         uint32_t setCount                  = 65535;
         uint32_t sampledImageCount         = 32 * 65536;
@@ -303,6 +321,22 @@ namespace Blast {
 
     VulkanContext::~VulkanContext() {
         vkDeviceWaitIdle(mDevice);
+
+        if (mGraphicsQueue) {
+            delete mGraphicsQueue;
+            mGraphicsQueue = nullptr;
+        }
+
+        if (mComputeQueue) {
+            delete mComputeQueue;
+            mComputeQueue = nullptr;
+        }
+
+        if (mTransferQueue) {
+            delete mTransferQueue;
+            mTransferQueue = nullptr;
+        }
+
         vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
         vkDestroyDevice(mDevice, nullptr);
 
@@ -329,8 +363,85 @@ namespace Blast {
         return -1;
     }
 
+    GfxQueue * VulkanContext::getQueue(QueueType type) {
+        if (type == QUEUE_TYPE_COMPUTE) {
+            return mComputeQueue;
+        } else if (type == QUEUE_TYPE_TRANSFER) {
+            return mTransferQueue;
+        }
+        else {
+            return mGraphicsQueue;
+        }
+        return nullptr;
+    }
+
+    GfxSemaphore* VulkanContext::createSemaphore() {
+        VulkanSemaphore* semaphore = new VulkanSemaphore(this);
+        return (GfxSemaphore*)semaphore;
+    }
+
     GfxBuffer* VulkanContext::createBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* buf = new VulkanBuffer(this, desc);
         return (GfxBuffer*)buf;
+    }
+
+    VulkanSemaphore::VulkanSemaphore(VulkanContext* context)
+        :GfxSemaphore(){
+        mContext = context;
+        VkSemaphoreCreateInfo semaphoreInfo = {};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        VK_ASSERT(vkCreateSemaphore(mContext->getDevice(), &semaphoreInfo, nullptr, &mSemaphore));
+    }
+
+    VulkanSemaphore::~VulkanSemaphore() {
+        vkDestroySemaphore(mContext->getDevice(), mSemaphore, nullptr);
+    }
+
+    VulkanFence::VulkanFence(VulkanContext* context)
+        :GfxFence(){
+        mContext = context;
+        VkFenceCreateInfo fenceInfo = {};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        VK_ASSERT(vkCreateFence(mContext->getDevice(), &fenceInfo, nullptr, &mFence));
+    }
+
+    VulkanFence::~VulkanFence() {
+        vkDestroyFence(mContext->getDevice(), mFence, nullptr);
+    }
+
+    FenceStatus VulkanFence::getFenceStatus() {
+        VkResult result = vkGetFenceStatus(mContext->getDevice(), mFence);
+        if(result == VK_SUCCESS) {
+            return FENCE_STATUS_COMPLETE;
+        }
+        return FENCE_STATUS_INCOMPLETE;
+    }
+
+    void VulkanFence::waitForComplete() {
+
+    }
+
+    void VulkanFence::reset() {
+        vkResetFences(mContext->getDevice(), 1, &mFence);
+    }
+
+    VulkanQueue::VulkanQueue() {
+    }
+
+    VulkanQueue::~VulkanQueue() {
+
+    }
+
+    void VulkanQueue::submit(const GfxSubmitInfo& info) {
+
+    }
+
+    void VulkanQueue::present(const GfxPresentInfo& info) {
+
+    }
+
+    void VulkanQueue::waitIdle() {
+        vkQueueWaitIdle(mQueue);
     }
 }

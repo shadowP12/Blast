@@ -338,4 +338,10 @@ namespace Blast {
         SEMANTIC_TEXCOORD8,
         SEMANTIC_TEXCOORD9,
     };
+
+    enum FenceStatus {
+        FENCE_STATUS_COMPLETE = 0,
+        FENCE_STATUS_INCOMPLETE,
+        FENCE_STATUS_NOTSUBMITTED,
+    };
 }

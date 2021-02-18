@@ -9,8 +9,8 @@ namespace Blast {
     public:
         VulkanBuffer(VulkanContext* context, const GfxBufferDesc& desc);
         virtual ~VulkanBuffer();
-        virtual void readData(uint32_t offset, uint32_t size, void* dest) override;
-        virtual void writeData(uint32_t offset, uint32_t size, void* source) override;
+        void readData(uint32_t offset, uint32_t size, void* dest) override;
+        void writeData(uint32_t offset, uint32_t size, void* source) override;
     protected:
         VulkanContext* mContext = nullptr;
         VkBuffer mBuffer;
