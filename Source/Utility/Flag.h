@@ -1,5 +1,6 @@
 #pragma once
 
+namespace Blast {
 #ifdef __cplusplus
 #ifndef MAKE_ENUM_FLAG
 #define MAKE_ENUM_FLAG(TYPE, ENUM_TYPE)                                                                        \
@@ -11,3 +12,4 @@
 #else
 #define MAKE_ENUM_FLAG(TYPE, ENUM_TYPE)
 #endif
+};
