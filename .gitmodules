@@ -4,3 +4,9 @@
 [submodule "External/volk"]
 	path = External/volk
 	url = https://github.com/zeux/volk.git
+[submodule "External/glslang"]
+	path = External/glslang
+	url = https://github.com/KhronosGroup/glslang.git
+[submodule "External/SPIRV-Cross"]
+	path = External/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git
