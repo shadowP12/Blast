@@ -1,7 +1,7 @@
 #include "GfxBuffer.h"
 
 namespace Blast {
-    GfxBuffe::GfxBuffe(const GfxBufferDesc &desc) {
+    GfxBuffer::GfxBuffer(const GfxBufferDesc &desc) {
         mSize = desc.size;
         mUsage = desc.usage;
         mType = desc.type;

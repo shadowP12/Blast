@@ -59,5 +59,13 @@ namespace Blast {
     VkShaderStageFlags toVulkanShaderStages(ShaderStage stages);
 
     VkDescriptorType toVulkanDescriptorType(ResourceType type);
+
+    VkIndexType toVulkanIndexType(IndexType type);
+
+    VkAccessFlags toVulkanAccessFlags(ResourceState state);
+
+    VkImageLayout toVulkanImageLayout(ResourceState state);
+
+    VkPipelineStageFlags toPipelineStageFlags(VkAccessFlags accessFlags, QueueType queueType);
 }
 

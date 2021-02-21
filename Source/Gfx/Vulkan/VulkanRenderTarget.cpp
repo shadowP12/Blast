@@ -98,14 +98,27 @@ namespace Blast {
             attachmentViews.push_back(vulkanTexture->getView());
         }
 
+        // note:RT的尺寸由附件纹理决定
+        uint32_t width = 0;
+        uint32_t height = 0;
+        if (mNumColorAttachments > 0) {
+            width = mColor[0].texture->getWidth();
+            height = mColor[0].texture->getHeight();
+        } else if (mHasDepth) {
+            width = mDepthStencil.texture->getWidth();
+            height = mDepthStencil.texture->getHeight();
+        }
+        mWidth = width;
+        mHeight = height;
+
         VkFramebufferCreateInfo framebufferInfo;
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.pNext = nullptr;
         framebufferInfo.flags = 0;
         framebufferInfo.attachmentCount = attachmentViews.size();
         framebufferInfo.pAttachments = attachmentViews.data();
-        framebufferInfo.width = mColor[0].texture->getWidth();
-        framebufferInfo.height = mColor[0].texture->getHeight();
+        framebufferInfo.width = width;
+        framebufferInfo.height = height;
         framebufferInfo.layers = 1;
         framebufferInfo.renderPass = mRenderPass;
 

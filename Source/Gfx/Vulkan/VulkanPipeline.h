@@ -2,6 +2,7 @@
 #include "VulkanDefine.h"
 #include "../GfxPipeline.h"
 #include <map>
+#include <vector>
 
 namespace Blast {
     class VulkanContext;
@@ -11,8 +12,10 @@ namespace Blast {
         VulkanRootSignature(VulkanContext* context, const GfxRootSignatureDesc& desc);
         virtual ~VulkanRootSignature();
         VkPipelineLayout getPipelineLayout() { return mPipelineLayout; }
+        const std::vector<VkDescriptorSet>& getSets() { return mSets; };
     protected:
         VulkanContext* mContext = nullptr;
+        std::vector<VkDescriptorSet> mSets;
         std::map<int, VkDescriptorSet> mSetMap;
         std::map<int, VkDescriptorSetLayout> mSetLayoutMap;
         VkPipelineLayout mPipelineLayout;

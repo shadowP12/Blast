@@ -89,6 +89,7 @@ namespace Blast {
             VkDescriptorSet set = VK_NULL_HANDLE;
             VK_ASSERT(vkAllocateDescriptorSets(mContext->getDevice(), &allocInfo, &set));
             mSetMap[bindings.first] = set;
+            mSets.push_back(set);
         }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};

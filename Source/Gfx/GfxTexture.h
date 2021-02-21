@@ -22,8 +22,12 @@ namespace Blast {
         GfxTexture(const GfxTextureDesc& desc);
         uint32_t getWidth() { return mWidth; }
         uint32_t getHeight() {return mHeight; }
+        uint32_t getDepth() {return mDepth; }
         Format getFormat() { return mFormat; }
         SampleCount getSampleCount() { return mSampleCount; }
+        ResourceType getResourceType() { return mType; }
+        ResourceState getResourceState() { return mState; }
+        void setResourceState(ResourceState state) { mState = state; }
     protected:
         uint32_t mWidth;
         uint32_t mHeight;

@@ -8,11 +8,14 @@ namespace Blast {
         ResourceType type;
     };
 
-    class GfxBuffe {
+    class GfxBuffer {
     public:
-        GfxBuffe(const GfxBufferDesc &desc);
+        GfxBuffer(const GfxBufferDesc &desc);
         virtual void readData(uint32_t offset, uint32_t size, void * dest) = 0;
         virtual void writeData(uint32_t offset, uint32_t size, void * dest) = 0;
+        ResourceType getResourceType() { return mType; }
+        ResourceState getResourceState() { return mState; }
+        void setResourceState(ResourceState state) { mState = state; }
     protected:
         uint32_t mSize;
         ResourceUsage mUsage;

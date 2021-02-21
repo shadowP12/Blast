@@ -793,4 +793,142 @@ namespace Blast {
                 break;
         }
     }
+
+    VkIndexType toVulkanIndexType(IndexType type) {
+        if (type == INDEX_TYPE_UINT16) {
+            return VK_INDEX_TYPE_UINT16;
+        }
+
+        if (type == INDEX_TYPE_UINT32) {
+            return VK_INDEX_TYPE_UINT32;
+        }
+
+        return VK_INDEX_TYPE_UINT32;
+    }
+
+    VkAccessFlags toVulkanAccessFlags(ResourceState state) {
+        // note: 通过当前资源的使用状态来决定access flags
+        VkAccessFlags ret = 0;
+        if (state & RESOURCE_STATE_COPY_SOURCE) {
+            ret |= VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        if (state & RESOURCE_STATE_COPY_DEST) {
+            ret |= VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        if (state & RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) {
+            ret |= VK_ACCESS_UNIFORM_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+        }
+        if (state & RESOURCE_STATE_INDEX_BUFFER) {
+            ret |= VK_ACCESS_INDEX_READ_BIT;
+        }
+        if (state & RESOURCE_STATE_UNORDERED_ACCESS) {
+            ret |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        }
+        if (state & RESOURCE_STATE_INDIRECT_ARGUMENT) {
+            ret |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+        }
+        if (state & RESOURCE_STATE_RENDER_TARGET) {
+            ret |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        }
+        if (state & RESOURCE_STATE_DEPTH_WRITE) {
+            ret |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        }
+        if ((state & RESOURCE_STATE_SHADER_RESOURCE) || (state & RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE)) {
+            ret |= VK_ACCESS_SHADER_READ_BIT;
+        }
+        if (state & RESOURCE_STATE_PRESENT) {
+            ret |= VK_ACCESS_MEMORY_READ_BIT;
+        }
+
+        return ret;
+    }
+
+    VkImageLayout toVulkanImageLayout(ResourceState state) {
+        // note: 通过当前资源的使用状态来决定image layout
+        if (state & RESOURCE_STATE_COPY_SOURCE)
+            return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+        if (state & RESOURCE_STATE_COPY_DEST)
+            return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+        if (state & RESOURCE_STATE_RENDER_TARGET)
+            return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        if (state & RESOURCE_STATE_DEPTH_WRITE)
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        if (state & RESOURCE_STATE_UNORDERED_ACCESS)
+            return VK_IMAGE_LAYOUT_GENERAL;
+
+        if ((state & RESOURCE_STATE_SHADER_RESOURCE) || (state & RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE))
+            return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        if (state & RESOURCE_STATE_PRESENT)
+            return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        if (state == RESOURCE_STATE_COMMON)
+            return VK_IMAGE_LAYOUT_GENERAL;
+
+        return VK_IMAGE_LAYOUT_UNDEFINED;
+    }
+
+    VkPipelineStageFlags toPipelineStageFlags(VkAccessFlags accessFlags, QueueType queueType) {
+        VkPipelineStageFlags flags = 0;
+
+        switch (queueType) {
+            case QUEUE_TYPE_GRAPHICS: {
+                if ((accessFlags & (VK_ACCESS_INDEX_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)) != 0)
+                    flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+
+                if ((accessFlags & (VK_ACCESS_UNIFORM_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT)) != 0) {
+                    flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+                    flags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                    flags |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
+                    flags |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
+                    flags |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
+                    flags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+                }
+
+                if ((accessFlags & VK_ACCESS_INPUT_ATTACHMENT_READ_BIT) != 0)
+                    flags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+                if ((accessFlags & (VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)) != 0)
+                    flags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+                if ((accessFlags & (VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)) != 0)
+                    flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                break;
+            }
+            case QUEUE_TYPE_COMPUTE: {
+                if ((accessFlags & (VK_ACCESS_INDEX_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)) != 0 ||
+                    (accessFlags & VK_ACCESS_INPUT_ATTACHMENT_READ_BIT) != 0 ||
+                    (accessFlags & (VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)) != 0 ||
+                    (accessFlags & (VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)) != 0)
+                    return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+                if ((accessFlags & (VK_ACCESS_UNIFORM_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT)) != 0)
+                    flags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+
+                break;
+            }
+            case QUEUE_TYPE_TRANSFER:
+                return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+            default:
+                break;
+        }
+
+        if ((accessFlags & VK_ACCESS_INDIRECT_COMMAND_READ_BIT) != 0)
+            flags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+
+        if ((accessFlags & (VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT)) != 0)
+            flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+        if ((accessFlags & (VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT)) != 0)
+            flags |= VK_PIPELINE_STAGE_HOST_BIT;
+
+        if (flags == 0)
+            flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+        return flags;
+    }
 }

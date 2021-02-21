@@ -344,4 +344,10 @@ namespace Blast {
         FENCE_STATUS_INCOMPLETE,
         FENCE_STATUS_NOTSUBMITTED,
     };
+
+    enum PipelineType {
+        PIPELINE_TYPE_GRAPHICS = 0,
+        PIPELINE_TYPE_COMPUTE,
+        MAX_PIPELINE_TYPE
+    };
 }
