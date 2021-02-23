@@ -1,5 +1,6 @@
 #include "VulkanContext.h"
 #include "VulkanBuffer.h"
+#include "VulkanSwapchain.h"
 #include <vector>
 
 namespace Blast {
@@ -390,8 +391,25 @@ namespace Blast {
         return (GfxBuffer*)buf;
     }
 
-    void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {
-        // todo
+    void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {;
+        VkSemaphore vkSemaphore = VK_NULL_HANDLE;
+        VkFence vkFence = VK_NULL_HANDLE;
+
+        VulkanSwapchain* internelSwapchain = static_cast<VulkanSwapchain*>(swapchain);
+
+        if(signalSemaphore) {
+            VulkanSemaphore* internelSemaphore = static_cast<VulkanSemaphore*>(signalSemaphore);
+            vkSemaphore = internelSemaphore->getHandle();
+        }
+
+        if(fence) {
+            VulkanFence* internelFence = static_cast<VulkanFence*>(fence);
+            vkFence = internelFence->getHandle();
+        }
+
+        if (vkAcquireNextImageKHR(mDevice, internelSwapchain->getHandle(), UINT64_MAX, vkSemaphore, vkFence, imageIndex) == VK_ERROR_OUT_OF_DATE_KHR) {
+            *imageIndex = -1;
+        }
     }
 
     VulkanSemaphore::VulkanSemaphore(VulkanContext* context)

@@ -18,6 +18,7 @@ namespace Blast {
     public:
         VulkanSwapchain(VulkanContext* context, const GfxSwapchainDesc& desc);
         virtual ~VulkanSwapchain();
+        VkSwapchainKHR getHandle() { return mSwapchain; }
         GfxRenderTarget* getRenderTarget(int idx) override;
     private:
         VulkanSwapchainSupportDetails querySwapChainSupport();
