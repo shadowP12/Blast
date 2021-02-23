@@ -9,7 +9,7 @@ namespace Blast {
         VulkanCommandBufferPool(VulkanContext* context, const GfxCommandBufferPoolDesc& desc);
         ~VulkanCommandBufferPool();
         GfxCommandBuffer* allocBuf(bool secondary) override;
-        QueueType getQueueType() { mQueueType; }
+        QueueType getQueueType() { return mQueueType; }
         VkCommandPool getHandle() { return mPool; }
     protected:
         VulkanContext* mContext = nullptr;

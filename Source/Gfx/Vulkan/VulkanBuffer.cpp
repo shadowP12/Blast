@@ -4,7 +4,7 @@
 
 namespace Blast {
     VulkanBuffer::VulkanBuffer(VulkanContext* context, const GfxBufferDesc& desc)
-    : GfxBuffe(desc) {
+    : GfxBuffer(desc) {
         mContext = context;
 
         VkBufferCreateInfo bufferInfo;

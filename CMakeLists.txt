@@ -24,12 +24,14 @@ target_sources(Blast PUBLIC
         Source/Gfx/Vulkan/VulkanSwapchain.cpp
         Source/Gfx/Vulkan/VulkanCommandBuffer.cpp
         Source/Gfx/Vulkan/VulkanPipeline.cpp
-        Source/Gfx/Vulkan/VulkanShader.cpp)
+        Source/Gfx/Vulkan/VulkanShader.cpp
+        Source/Utility/VulkanShaderCompiler.cpp)
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     target_compile_definitions(Blast PUBLIC VULKAN_DEBUG)
 endif()
 
+# volk
 add_library(volk STATIC External/volk/volk.c External/volk/volk.h)
 target_include_directories(volk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/External/volk)
 target_include_directories(volk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/External/Vulkan-headers/include)
@@ -38,8 +40,26 @@ if (WIN32)
 endif()
 target_link_libraries(Blast PUBLIC volk)
 
-#set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
-#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+# glslang
+set(BUILD_EXTERNAL OFF)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/External/glslang EXCLUDE_FROM_ALL)
+target_link_libraries(Blast PRIVATE glslang)
+target_link_libraries(Blast PRIVATE HLSL)
+target_link_libraries(Blast PRIVATE OGLCompiler)
+target_link_libraries(Blast PRIVATE OSDependent)
+target_link_libraries(Blast PRIVATE SPIRV)
+target_link_libraries(Blast PRIVATE SPVRemapper)
+
+set(SPIRV_CROSS_ENABLE_TESTS OFF)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/External/SPIRV-Cross EXCLUDE_FROM_ALL)
+target_link_libraries(Blast PRIVATE spirv-cross-c)
+target_link_libraries(Blast PRIVATE spirv-cross-core)
+target_link_libraries(Blast PRIVATE spirv-cross-cpp)
+target_link_libraries(Blast PRIVATE spirv-cross-glsl)
+target_link_libraries(Blast PRIVATE spirv-cross-hlsl)
+target_link_libraries(Blast PRIVATE spirv-cross-msl)
+target_link_libraries(Blast PRIVATE spirv-cross-reflect)
+target_link_libraries(Blast PRIVATE spirv-cross-util)
 
 #if (WIN32)
 #    install(TARGETS Blast

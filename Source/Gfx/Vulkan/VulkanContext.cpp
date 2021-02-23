@@ -380,9 +380,18 @@ namespace Blast {
         return (GfxSemaphore*)semaphore;
     }
 
+    GfxFence* VulkanContext::createFence() {
+        VulkanFence* fence = new VulkanFence(this);
+        return fence;
+    }
+
     GfxBuffer* VulkanContext::createBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* buf = new VulkanBuffer(this, desc);
         return (GfxBuffer*)buf;
+    }
+
+    void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {
+        // todo
     }
 
     VulkanSemaphore::VulkanSemaphore(VulkanContext* context)
