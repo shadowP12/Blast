@@ -20,6 +20,7 @@ namespace Blast {
         virtual ~VulkanSwapchain();
         VkSwapchainKHR getHandle() { return mSwapchain; }
         GfxRenderTarget* getRenderTarget(int idx) override;
+        uint32_t getImageCount() override;
     private:
         VulkanSwapchainSupportDetails querySwapChainSupport();
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -27,7 +28,8 @@ namespace Blast {
     protected:
         VulkanContext* mContext = nullptr;
         VkSurfaceKHR mSurface;
-        VkSwapchainKHR mSwapchain;
+        VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
+        uint32_t mImageCount = 0;
         std::vector<VulkanTexture*> mColorImages;
         std::vector<VulkanTexture*> mDepthStencilImages;
         std::vector<VulkanRenderTarget*> mRenderTargets;

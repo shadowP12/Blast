@@ -1,5 +1,6 @@
 #include "VulkanContext.h"
 #include "VulkanBuffer.h"
+#include "VulkanTexture.h"
 #include "VulkanSwapchain.h"
 #include <vector>
 
@@ -238,7 +239,7 @@ namespace Blast {
         deviceRequiredExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
         deviceRequiredExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
 
-        for (auto it = deviceExtensions.begin(); it != deviceExtensions.end(); ++it) {
+        for (auto it = deviceRequiredExtensions.begin(); it != deviceRequiredExtensions.end(); ++it) {
             if (isExtensionSupported(*it, deviceAvailableExtensions)) {
                 deviceExtensions.push_back(*it);
             }
@@ -388,7 +389,12 @@ namespace Blast {
 
     GfxBuffer* VulkanContext::createBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* buf = new VulkanBuffer(this, desc);
-        return (GfxBuffer*)buf;
+        return buf;
+    }
+
+    GfxSwapchain* VulkanContext::createSwapchain(const GfxSwapchainDesc& desc) {
+        VulkanSwapchain* swapchain = new VulkanSwapchain(this, desc);
+        return swapchain;
     }
 
     void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {;

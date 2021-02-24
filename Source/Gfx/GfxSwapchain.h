@@ -13,6 +13,7 @@ namespace Blast {
     class GfxSwapchain {
     public:
         GfxSwapchain(const GfxSwapchainDesc& desc);
+        virtual uint32_t getImageCount() = 0;
         virtual GfxRenderTarget* getRenderTarget(int idx) = 0;
     protected:
         uint32_t mWidth;

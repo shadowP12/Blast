@@ -50,6 +50,7 @@ namespace Blast {
         virtual GfxSemaphore* createSemaphore() = 0;
         virtual GfxFence* createFence() = 0;
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc) = 0;
+        virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
         virtual void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) = 0;
     };
 }

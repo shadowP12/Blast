@@ -32,6 +32,7 @@ namespace Blast {
         if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
             imageCount = swapChainSupport.capabilities.maxImageCount;
         }
+        mImageCount = imageCount;
 
         VkSwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -187,5 +188,9 @@ namespace Blast {
         }
 
         return VK_PRESENT_MODE_FIFO_KHR;
+    }
+
+    uint32_t VulkanSwapchain::getImageCount() {
+        return mImageCount;
     }
 }
