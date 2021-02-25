@@ -20,6 +20,14 @@ namespace Blast {
         VK_ASSERT(vkCreateWin32SurfaceKHR(mContext->getInstance(), &surfaceInfo, nullptr, &mSurface));
 #endif
 
+        VkBool32 supportsPresent;
+        VulkanQueue* GraphicsQueue = (VulkanQueue*)mContext->getQueue(QUEUE_TYPE_GRAPHICS);
+        vkGetPhysicalDeviceSurfaceSupportKHR(mContext->getPhyDevice(), GraphicsQueue->getFamilyIndex(), mSurface, &supportsPresent);
+        if (!supportsPresent) {
+            BLAST_LOGE("cannot find a graphics queue that also supports present operations.\n");
+            return;
+        }
+
         VkExtent2D swapChainExtent;
         swapChainExtent.width = mWidth;
         swapChainExtent.height = mHeight;
