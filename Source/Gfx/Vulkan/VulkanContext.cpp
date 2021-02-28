@@ -2,6 +2,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 #include "VulkanSwapchain.h"
+#include "VulkanCommandBuffer.h"
 #include <vector>
 
 namespace Blast {
@@ -397,6 +398,11 @@ namespace Blast {
         return swapchain;
     }
 
+    GfxCommandBufferPool* VulkanContext::createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) {
+        VulkanCommandBufferPool* cmdPool = new VulkanCommandBufferPool(this, desc);
+        return cmdPool;
+    }
+
     void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {;
         VkSemaphore vkSemaphore = VK_NULL_HANDLE;
         VkFence vkFence = VK_NULL_HANDLE;
@@ -452,7 +458,7 @@ namespace Blast {
     }
 
     void VulkanFence::waitForComplete() {
-
+        vkWaitForFences(mContext->getDevice(), 1, &mFence, VK_TRUE, UINT64_MAX);
     }
 
     void VulkanFence::reset() {
@@ -467,11 +473,60 @@ namespace Blast {
     }
 
     void VulkanQueue::submit(const GfxSubmitInfo& info) {
+        std::vector<VkPipelineStageFlags> waitStages;
+        std::vector<VkSemaphore> waitSemaphores;
+        std::vector<VkSemaphore> signalSemaphores;
+        std::vector<VkCommandBuffer> cmds;
 
+        VulkanFence* fence = static_cast<VulkanFence*>(info.signalFence);
+
+        for(int i = 0; i < info.waitSemaphoreCount; i++) {
+            waitStages.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+            VulkanSemaphore* semaphore = static_cast<VulkanSemaphore*>(info.waitSemaphores[i]);
+            waitSemaphores.push_back(semaphore->getHandle());
+        }
+
+        for(int i = 0; i < info.signalSemaphoreCount; i++) {
+            VulkanSemaphore* semaphore = static_cast<VulkanSemaphore*>(info.signalSemaphores[i]);
+            signalSemaphores.push_back(semaphore->getHandle());
+        }
+
+        for (int i = 0; i < info.cmdBufCount; ++i) {
+            VulkanCommandBuffer* cmd = static_cast<VulkanCommandBuffer*>(info.cmdBufs[i]);
+            cmds.push_back(cmd->getHandle());
+        }
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.waitSemaphoreCount = waitSemaphores.size();
+        submitInfo.pWaitSemaphores = waitSemaphores.data();
+        submitInfo.pWaitDstStageMask = waitStages.data();
+        submitInfo.signalSemaphoreCount = signalSemaphores.size();
+        submitInfo.pSignalSemaphores = signalSemaphores.data();
+        submitInfo.commandBufferCount = cmds.size();
+        submitInfo.pCommandBuffers = cmds.data();
+        VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, fence->getHandle()));
     }
 
     void VulkanQueue::present(const GfxPresentInfo& info) {
+        std::vector<VkSemaphore> waitSemaphores;
+        for(int i = 0; i < info.waitSemaphoreCount; i++) {
+            VulkanSemaphore* semaphore = static_cast<VulkanSemaphore*>(info.waitSemaphores[i]);
+            waitSemaphores.push_back(semaphore->getHandle());
+        }
 
+        VulkanSwapchain* swapchain = static_cast<VulkanSwapchain*>(info.swapchain);
+
+        VkPresentInfoKHR presentInfo = {};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = waitSemaphores.size();
+        presentInfo.pWaitSemaphores = waitSemaphores.data();
+        VkSwapchainKHR swapChains[] = { swapchain->getHandle() };
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &info.index;
+
+        VK_ASSERT(vkQueuePresentKHR(mQueue, &presentInfo));
     }
 
     void VulkanQueue::waitIdle() {

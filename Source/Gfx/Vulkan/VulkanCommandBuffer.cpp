@@ -1,6 +1,6 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
-#include "VulkanRenderTarget.h"
+#include "VulkanRenderPass.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 #include "VulkanPipeline.h"
@@ -66,8 +66,8 @@ namespace Blast {
         VK_ASSERT(vkEndCommandBuffer(mCommandBuffer));
     }
 
-    void VulkanCommandBuffer::bindRenderTarget(GfxRenderTarget* renderTarget, const GfxClearValue& clearValue) {
-        VulkanRenderTarget* internelRT = static_cast<VulkanRenderTarget*>(renderTarget);
+    void VulkanCommandBuffer::bindRenderPass(GfxRenderPass* renderPass, const GfxClearValue& clearValue) {
+        VulkanRenderPass* internelRT = static_cast<VulkanRenderPass*>(renderPass);
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = internelRT->getRenderPass();
@@ -86,7 +86,7 @@ namespace Blast {
         vkCmdBeginRenderPass(mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void VulkanCommandBuffer::unbindRenderTarget() {
+    void VulkanCommandBuffer::unbindRenderPass() {
         vkCmdEndRenderPass(mCommandBuffer);
     }
 

@@ -1,6 +1,6 @@
 #include "VulkanPipeline.h"
 #include "VulkanContext.h"
-#include "VulkanRenderTarget.h"
+#include "VulkanRenderPass.h"
 #include "VulkanShader.h"
 
 namespace Blast {
@@ -340,7 +340,7 @@ namespace Blast {
         VkPipelineColorBlendStateCreateInfo blendStateInfo = {};
         VkPipelineColorBlendAttachmentState blendAttachment[MAX_RENDER_TARGET_ATTACHMENTS];
         blendStateInfo = toBlendDesc(desc.blendState, blendAttachment);
-        blendStateInfo.attachmentCount = desc.renderTarget->getColorAttachmentCount();
+        blendStateInfo.attachmentCount = desc.renderPass->getColorAttachmentCount();
 
         VkDynamicState dynamicStates[6];
         dynamicStates[0] = VK_DYNAMIC_STATE_VIEWPORT;
@@ -373,7 +373,7 @@ namespace Blast {
         pipelineInfo.pColorBlendState = &blendStateInfo;
         pipelineInfo.pDynamicState = &dynamicStateInfo;
         pipelineInfo.layout = static_cast<VulkanRootSignature*>(desc.rootSignature)->getPipelineLayout();
-        pipelineInfo.renderPass = static_cast<VulkanRenderTarget*>(desc.renderTarget)->getRenderPass();
+        pipelineInfo.renderPass = static_cast<VulkanRenderPass*>(desc.renderPass)->getRenderPass();
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
         pipelineInfo.basePipelineIndex = -1;

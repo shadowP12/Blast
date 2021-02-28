@@ -5,8 +5,10 @@ namespace Blast {
 
     struct GfxBufferDesc;
     class GfxBuffer;
-    class GfxSwapchainDesc;
+    struct GfxSwapchainDesc;
     class GfxSwapchain;
+    struct GfxCommandBufferPoolDesc;
+    class GfxCommandBufferPool;
     class GfxCommandBuffer;
 
     class GfxSemaphore {
@@ -21,7 +23,8 @@ namespace Blast {
     };
 
     struct GfxSubmitInfo {
-        GfxCommandBuffer* cmdBuf;
+        uint32_t cmdBufCount = 0;
+        GfxCommandBuffer** cmdBufs;
         uint32_t waitSemaphoreCount = 0;
         GfxSemaphore** waitSemaphores = nullptr;
         uint32_t signalSemaphoreCount = 0;
@@ -30,7 +33,7 @@ namespace Blast {
     };
 
     struct GfxPresentInfo {
-        GfxSwapchain* swapChain;
+        GfxSwapchain* swapchain;
         uint32_t waitSemaphoreCount = 0;
         GfxSemaphore** waitSemaphores = nullptr;
         uint32_t index;
@@ -51,6 +54,7 @@ namespace Blast {
         virtual GfxFence* createFence() = 0;
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc) = 0;
         virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
+        virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) = 0;
         virtual void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) = 0;
     };
 }

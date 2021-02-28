@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace Blast {
-    class GfxRenderTarget;
+    class GfxRenderPass;
 
     struct GfxRootSignatureDesc {
         GfxShaderReflection vertex;
@@ -81,7 +81,7 @@ namespace Blast {
     };
 
     struct GfxGraphicsPipelineDesc {
-        GfxRenderTarget* renderTarget = nullptr;
+        GfxRenderPass* renderPass = nullptr;
         GfxShader* vertexShader = nullptr;
         GfxShader* hullShader = nullptr;
         GfxShader* domainShader = nullptr;

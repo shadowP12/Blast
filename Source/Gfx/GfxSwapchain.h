@@ -2,7 +2,8 @@
 #include "GfxDefine.h"
 
 namespace Blast {
-    class GfxRenderTarget;
+    class GfxRenderPass;
+    class GfxTexture;
 
     struct GfxSwapchainDesc {
         void* windowHandle;
@@ -14,7 +15,7 @@ namespace Blast {
     public:
         GfxSwapchain(const GfxSwapchainDesc& desc);
         virtual uint32_t getImageCount() = 0;
-        virtual GfxRenderTarget* getRenderTarget(int idx) = 0;
+        virtual GfxRenderPass* getRenderPass(uint32_t idx) = 0;
     protected:
         uint32_t mWidth;
         uint32_t mHeight;

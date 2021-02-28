@@ -1,11 +1,11 @@
-#include "VulkanRenderTarget.h"
+#include "VulkanRenderPass.h"
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include <vector>
 
 namespace Blast {
-    VulkanRenderTarget::VulkanRenderTarget(VulkanContext *context, const GfxRenderTargetDesc &desc)
-    :GfxRenderTarget(desc) {
+    VulkanRenderPass::VulkanRenderPass(VulkanContext *context, const GfxRenderPassDesc &desc)
+    :GfxRenderPass(desc) {
         mContext = context;
 
         std::vector<VkAttachmentDescription> attachments;
@@ -125,8 +125,16 @@ namespace Blast {
         VK_ASSERT(vkCreateFramebuffer(mContext->getDevice(), &framebufferInfo, nullptr, &mFramebuffer));
     }
 
-    VulkanRenderTarget::~VulkanRenderTarget() {
+    VulkanRenderPass::~VulkanRenderPass() {
         vkDestroyFramebuffer(mContext->getDevice(), mFramebuffer, nullptr);
         vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
+    }
+
+    GfxTexture* VulkanRenderPass::getColorRT(int idx) {
+        return mColor[idx].texture;
+    }
+
+    GfxTexture* VulkanRenderPass::getDepthRT() {
+        return mDepthStencil.texture;
     }
 }

@@ -1,18 +1,20 @@
 #pragma once
 #include "VulkanDefine.h"
-#include "../GfxRenderTarget.h"
+#include "../GfxRenderPass.h"
 
 namespace Blast {
     class VulkanContext;
 
-    class VulkanRenderTarget : public GfxRenderTarget {
+    class VulkanRenderPass : public GfxRenderPass {
     public:
-        VulkanRenderTarget(VulkanContext *device, const GfxRenderTargetDesc &desc);
-        virtual ~VulkanRenderTarget();
+        VulkanRenderPass(VulkanContext *device, const GfxRenderPassDesc &desc);
+        virtual ~VulkanRenderPass();
         VkRenderPass getRenderPass() { return mRenderPass; }
         VkFramebuffer getFramebuffer() { return mFramebuffer; }
         uint32_t getWidth() { return mWidth;}
         uint32_t getHeight() { return mHeight; }
+        GfxTexture* getColorRT(int idx) override;
+        GfxTexture* getDepthRT() override;
     protected:
         VulkanContext* mContext = nullptr;
         VkRenderPass mRenderPass;

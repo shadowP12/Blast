@@ -6,7 +6,7 @@ namespace Blast {
     class GfxTexture;
     class GfxQueue;
     class GfxCommandBuffer;
-    class GfxRenderTarget;
+    class GfxRenderPass;
     class GfxRootSignature;
     class GfxGraphicsPipeline;
 
@@ -57,8 +57,8 @@ namespace Blast {
         GfxCommandBuffer(const GfxCommandBufferDesc& desc);
         virtual void begin() = 0;
         virtual void end() = 0;
-        virtual void bindRenderTarget(GfxRenderTarget* renderTarget, const GfxClearValue& clearValue) = 0;
-        virtual void unbindRenderTarget() = 0;
+        virtual void bindRenderPass(GfxRenderPass* renderPass, const GfxClearValue& clearValue) = 0;
+        virtual void unbindRenderPass() = 0;
         virtual void setViewport(float x, float y, float w, float h) = 0;
         virtual void setScissor(int x, int y, int w, int h) = 0;
         virtual void bindVertexBuffer(GfxBuffer* vertexBuffer, uint32_t offset) = 0;

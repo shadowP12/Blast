@@ -15,7 +15,7 @@ namespace Blast {
         LoadAction stencilLoadOp = LOAD_ACTION_LOAD;
     };
 
-    struct GfxRenderTargetDesc {
+    struct GfxRenderPassDesc {
         uint32_t numColorAttachments = 0;
         bool hasDepth = false;
         GfxColorAttachmentInfo color[8];
@@ -25,10 +25,12 @@ namespace Blast {
         ResourceState state;
     };
 
-    class GfxRenderTarget {
+    class GfxRenderPass {
     public:
-        GfxRenderTarget(const GfxRenderTargetDesc &desc);
+        GfxRenderPass(const GfxRenderPassDesc &desc);
         uint32_t getColorAttachmentCount() { return mNumColorAttachments; }
+        virtual GfxTexture* getColorRT(int idx) = 0;
+        virtual GfxTexture* getDepthRT() = 0;
     protected:
         uint32_t mNumColorAttachments = 0;
         bool mHasDepth = false;

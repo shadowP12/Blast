@@ -1,7 +1,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
-#include "VulkanRenderTarget.h"
+#include "VulkanRenderPass.h"
 #if WIN32
 #include <windows.h>
 #endif
@@ -111,17 +111,17 @@ namespace Blast {
             depthStencil.depthLoadOp = LOAD_ACTION_CLEAR;
             depthStencil.stencilLoadOp = LOAD_ACTION_CLEAR;
 
-            GfxRenderTargetDesc renderTargetDesc;
-            renderTargetDesc.numColorAttachments = 1;
-            renderTargetDesc.color[0] = color;
-            renderTargetDesc.hasDepth = true;
-            renderTargetDesc.depthStencil = depthStencil;
-            renderTargetDesc.usage = RESOURCE_USAGE_GPU_ONLY;
-            renderTargetDesc.type = RESOURCE_TYPE_TEXTURE;
-            renderTargetDesc.state = RESOURCE_STATE_UNDEFINED;
+            GfxRenderPassDesc renderPassDesc;
+            renderPassDesc.numColorAttachments = 1;
+            renderPassDesc.color[0] = color;
+            renderPassDesc.hasDepth = true;
+            renderPassDesc.depthStencil = depthStencil;
+            renderPassDesc.usage = RESOURCE_USAGE_GPU_ONLY;
+            renderPassDesc.type = RESOURCE_TYPE_TEXTURE;
+            renderPassDesc.state = RESOURCE_STATE_UNDEFINED;
 
-            VulkanRenderTarget* renderTarget = new VulkanRenderTarget(mContext, renderTargetDesc);
-            mRenderTargets.push_back(renderTarget);
+            VulkanRenderPass* renderPass = new VulkanRenderPass(mContext, renderPassDesc);
+            mRenderPasses.push_back(renderPass);
         }
     }
 
@@ -136,17 +136,17 @@ namespace Blast {
         }
         mDepthStencilImages.clear();
 
-        for (int i = 0; i < mRenderTargets.size(); i++) {
-            delete mRenderTargets[i];
+        for (int i = 0; i < mRenderPasses.size(); i++) {
+            delete mRenderPasses[i];
         }
 
         vkDestroySwapchainKHR(mContext->getDevice(), mSwapchain, nullptr);
         vkDestroySurfaceKHR(mContext->getInstance(), mSurface, nullptr);
     }
 
-    GfxRenderTarget* VulkanSwapchain::getRenderTarget(int idx) {
-        if (idx > -1 && idx < mRenderTargets.size()) {
-            return (GfxRenderTarget*)mRenderTargets[idx];
+    GfxRenderPass* VulkanSwapchain::getRenderPass(uint32_t idx) {
+        if (idx >= 0 && idx < mRenderPasses.size()) {
+            return mRenderPasses[idx];
         }
         return nullptr;
     }

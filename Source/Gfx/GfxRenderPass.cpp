@@ -1,7 +1,7 @@
-#include "GfxRenderTarget.h"
+#include "GfxRenderPass.h"
 
 namespace Blast {
-    GfxRenderTarget::GfxRenderTarget(const GfxRenderTargetDesc &desc) {
+    GfxRenderPass::GfxRenderPass(const GfxRenderPassDesc &desc) {
         mNumColorAttachments = desc.numColorAttachments;
         mHasDepth = desc.hasDepth;
         for (int i = 0; i < 8; ++i) {

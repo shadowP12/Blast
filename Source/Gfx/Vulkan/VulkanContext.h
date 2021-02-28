@@ -54,6 +54,7 @@ namespace Blast {
         GfxFence* createFence() override;
         GfxBuffer* createBuffer(const GfxBufferDesc& desc) override;
         GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
+        virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
         void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) override;
         VkDevice getDevice() { return mDevice; }
         VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
