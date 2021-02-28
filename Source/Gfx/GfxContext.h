@@ -10,6 +10,10 @@ namespace Blast {
     struct GfxCommandBufferPoolDesc;
     class GfxCommandBufferPool;
     class GfxCommandBuffer;
+    struct GfxRenderPassDesc;
+    class GfxRenderPass;
+    struct GfxFramebufferDesc;
+    class GfxFramebuffer;
 
     class GfxSemaphore {
     public:
@@ -55,6 +59,8 @@ namespace Blast {
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc) = 0;
         virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
         virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) = 0;
+        virtual GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) = 0;
+        virtual GfxFramebuffer* createFramebuffer(const GfxFramebufferDesc& desc) = 0;
         virtual void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) = 0;
     };
 }

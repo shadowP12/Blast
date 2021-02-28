@@ -100,29 +100,6 @@ namespace Blast {
             VulkanTexture* depthStencilTexture = new VulkanTexture(mContext, depthStencilDesc);
             mDepthStencilImages.push_back(depthStencilTexture);
         }
-
-        for (int i = 0; i < imageCount; i++) {
-            GfxColorAttachmentInfo color;
-            color.texture = mColorImages[i];
-            color.loadOp = LOAD_ACTION_CLEAR;
-
-            GfxDepthStencilAttachmentInfo depthStencil;
-            depthStencil.texture = mDepthStencilImages[i];
-            depthStencil.depthLoadOp = LOAD_ACTION_CLEAR;
-            depthStencil.stencilLoadOp = LOAD_ACTION_CLEAR;
-
-            GfxRenderPassDesc renderPassDesc;
-            renderPassDesc.numColorAttachments = 1;
-            renderPassDesc.color[0] = color;
-            renderPassDesc.hasDepth = true;
-            renderPassDesc.depthStencil = depthStencil;
-            renderPassDesc.usage = RESOURCE_USAGE_GPU_ONLY;
-            renderPassDesc.type = RESOURCE_TYPE_TEXTURE;
-            renderPassDesc.state = RESOURCE_STATE_UNDEFINED;
-
-            VulkanRenderPass* renderPass = new VulkanRenderPass(mContext, renderPassDesc);
-            mRenderPasses.push_back(renderPass);
-        }
     }
 
     VulkanSwapchain::~VulkanSwapchain() {
@@ -136,17 +113,20 @@ namespace Blast {
         }
         mDepthStencilImages.clear();
 
-        for (int i = 0; i < mRenderPasses.size(); i++) {
-            delete mRenderPasses[i];
-        }
-
         vkDestroySwapchainKHR(mContext->getDevice(), mSwapchain, nullptr);
         vkDestroySurfaceKHR(mContext->getInstance(), mSurface, nullptr);
     }
 
-    GfxRenderPass* VulkanSwapchain::getRenderPass(uint32_t idx) {
-        if (idx >= 0 && idx < mRenderPasses.size()) {
-            return mRenderPasses[idx];
+    GfxTexture* VulkanSwapchain::getColorRenderTarget(uint32_t idx) {
+        if (idx >= 0 && idx < mColorImages.size()) {
+            return mColorImages[idx];
+        }
+        return nullptr;
+    }
+
+    GfxTexture* VulkanSwapchain::getDepthRenderTarget(uint32_t idx) {
+        if (idx >= 0 && idx < mDepthStencilImages.size()) {
+            return mDepthStencilImages[idx];
         }
         return nullptr;
     }

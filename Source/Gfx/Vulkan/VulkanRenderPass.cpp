@@ -8,6 +8,9 @@ namespace Blast {
     :GfxRenderPass(desc) {
         mContext = context;
 
+        /*
+         * note: VK_ATTACHMENT_LOAD_OP_DONT_CARE : 交由驱动去决定加载内容,适合对整个area进行overwrite时使用
+         */
         std::vector<VkAttachmentDescription> attachments;
         std::vector<VkAttachmentReference> colorAttachmentRefs;
         VkAttachmentReference depthStencilAttachmentRef;
@@ -16,8 +19,8 @@ namespace Blast {
         for (uint32_t i = 0; i < mNumColorAttachments; i++) {
             VkAttachmentDescription attachmentDesc = {};
             attachmentDesc.flags = 0;
-            attachmentDesc.format = toVulkanFormat(mColor[i].texture->getFormat());
-            attachmentDesc.samples = toVulkanSampleCount(mColor[i].texture->getSampleCount());
+            attachmentDesc.format = toVulkanFormat(mColor[i].format);
+            attachmentDesc.samples = toVulkanSampleCount(mColor[i].sampleCount);
             attachmentDesc.loadOp = toVulkanLoadOp(mColor[i].loadOp);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -36,8 +39,8 @@ namespace Blast {
         if (mHasDepth) {
             VkAttachmentDescription attachmentDesc = {};
             attachmentDesc.flags = 0;
-            attachmentDesc.format = toVulkanFormat(mDepthStencil.texture->getFormat());
-            attachmentDesc.samples = toVulkanSampleCount(mDepthStencil.texture->getSampleCount());
+            attachmentDesc.format = toVulkanFormat(mDepthStencil.format);
+            attachmentDesc.samples = toVulkanSampleCount(mDepthStencil.sampleCount);
             attachmentDesc.loadOp = toVulkanLoadOp(mDepthStencil.depthLoadOp);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDesc.stencilLoadOp = toVulkanLoadOp(mDepthStencil.stencilLoadOp);
@@ -86,30 +89,28 @@ namespace Blast {
         renderPassInfo.pDependencies = NULL;
 
         VK_ASSERT(vkCreateRenderPass(mContext->getDevice(), &renderPassInfo, nullptr, &(mRenderPass)));
+    }
+
+    VulkanRenderPass::~VulkanRenderPass() {
+        vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
+    }
+
+    VulkanFramebuffer::VulkanFramebuffer(VulkanContext* context, const GfxFramebufferDesc& desc)
+    :GfxFramebuffer(desc) {
+        mContext = context;
+
+        VulkanRenderPass* renderPass = (VulkanRenderPass*)mRenderPass;
 
         std::vector<VkImageView> attachmentViews;
-        for (int i = 0; i < mNumColorAttachments; i++) {
-            VulkanTexture* vulkanTexture = (VulkanTexture*)mColor[i].texture;
+        for (int i = 0; i < desc.colorCount; i++) {
+            VulkanTexture* vulkanTexture = (VulkanTexture*)desc.colors[i];
             attachmentViews.push_back(vulkanTexture->getView());
         }
 
-        if(mHasDepth) {
-            VulkanTexture* vulkanTexture = (VulkanTexture*)mDepthStencil.texture;
+        if(desc.hasDepth) {
+            VulkanTexture* vulkanTexture = (VulkanTexture*)desc.depth;
             attachmentViews.push_back(vulkanTexture->getView());
         }
-
-        // note:RT的尺寸由附件纹理决定
-        uint32_t width = 0;
-        uint32_t height = 0;
-        if (mNumColorAttachments > 0) {
-            width = mColor[0].texture->getWidth();
-            height = mColor[0].texture->getHeight();
-        } else if (mHasDepth) {
-            width = mDepthStencil.texture->getWidth();
-            height = mDepthStencil.texture->getHeight();
-        }
-        mWidth = width;
-        mHeight = height;
 
         VkFramebufferCreateInfo framebufferInfo;
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -117,24 +118,15 @@ namespace Blast {
         framebufferInfo.flags = 0;
         framebufferInfo.attachmentCount = attachmentViews.size();
         framebufferInfo.pAttachments = attachmentViews.data();
-        framebufferInfo.width = width;
-        framebufferInfo.height = height;
+        framebufferInfo.width = mWidth;
+        framebufferInfo.height = mHeight;
         framebufferInfo.layers = 1;
-        framebufferInfo.renderPass = mRenderPass;
+        framebufferInfo.renderPass = renderPass->getHandle();
 
         VK_ASSERT(vkCreateFramebuffer(mContext->getDevice(), &framebufferInfo, nullptr, &mFramebuffer));
     }
 
-    VulkanRenderPass::~VulkanRenderPass() {
+    VulkanFramebuffer::~VulkanFramebuffer() {
         vkDestroyFramebuffer(mContext->getDevice(), mFramebuffer, nullptr);
-        vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
-    }
-
-    GfxTexture* VulkanRenderPass::getColorRT(int idx) {
-        return mColor[idx].texture;
-    }
-
-    GfxTexture* VulkanRenderPass::getDepthRT() {
-        return mDepthStencil.texture;
     }
 }

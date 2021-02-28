@@ -8,8 +8,11 @@ namespace Blast {
             mColor[i] = desc.color[i];
         }
         mDepthStencil = desc.depthStencil;
-        mUsage = desc.usage;
-        mType = desc.type;
-        mState = desc.state;
+    }
+
+    GfxFramebuffer::GfxFramebuffer(const GfxFramebufferDesc& desc) {
+        mWidth = desc.width;
+        mHeight = desc.height;
+        mRenderPass = desc.renderPass;
     }
 }

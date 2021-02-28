@@ -373,7 +373,7 @@ namespace Blast {
         pipelineInfo.pColorBlendState = &blendStateInfo;
         pipelineInfo.pDynamicState = &dynamicStateInfo;
         pipelineInfo.layout = static_cast<VulkanRootSignature*>(desc.rootSignature)->getPipelineLayout();
-        pipelineInfo.renderPass = static_cast<VulkanRenderPass*>(desc.renderPass)->getRenderPass();
+        pipelineInfo.renderPass = static_cast<VulkanRenderPass*>(desc.renderPass)->getHandle();
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
         pipelineInfo.basePipelineIndex = -1;

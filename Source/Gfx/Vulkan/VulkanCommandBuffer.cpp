@@ -66,16 +66,17 @@ namespace Blast {
         VK_ASSERT(vkEndCommandBuffer(mCommandBuffer));
     }
 
-    void VulkanCommandBuffer::bindRenderPass(GfxRenderPass* renderPass, const GfxClearValue& clearValue) {
-        VulkanRenderPass* internelRT = static_cast<VulkanRenderPass*>(renderPass);
+    void VulkanCommandBuffer::bindFramebuffer(GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) {
+        VulkanFramebuffer* internelFB = static_cast<VulkanFramebuffer*>(framebuffer);
+        VulkanRenderPass* internelRP = (VulkanRenderPass*)internelFB->getRenderPass();
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = internelRT->getRenderPass();
-        renderPassInfo.framebuffer = internelRT->getFramebuffer();
+        renderPassInfo.renderPass = internelRP->getHandle();
+        renderPassInfo.framebuffer = internelFB->getHandle();
         renderPassInfo.renderArea.offset.x = 0;
         renderPassInfo.renderArea.offset.y = 0;
-        renderPassInfo.renderArea.extent.width = internelRT->getWidth();
-        renderPassInfo.renderArea.extent.height = internelRT->getHeight();
+        renderPassInfo.renderArea.extent.width = internelFB->getWidth();
+        renderPassInfo.renderArea.extent.height = internelFB->getHeight();
 
         VkClearValue clearValues[2];
         clearValues[0].color = { clearValue.color[0], clearValue.color[1], clearValue.color[2], clearValue.color[3] };
@@ -86,7 +87,7 @@ namespace Blast {
         vkCmdBeginRenderPass(mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void VulkanCommandBuffer::unbindRenderPass() {
+    void VulkanCommandBuffer::unbindFramebuffer() {
         vkCmdEndRenderPass(mCommandBuffer);
     }
 

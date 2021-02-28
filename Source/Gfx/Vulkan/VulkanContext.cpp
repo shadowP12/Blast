@@ -3,6 +3,7 @@
 #include "VulkanTexture.h"
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanRenderPass.h"
 #include <vector>
 
 namespace Blast {
@@ -401,6 +402,14 @@ namespace Blast {
     GfxCommandBufferPool* VulkanContext::createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) {
         VulkanCommandBufferPool* cmdPool = new VulkanCommandBufferPool(this, desc);
         return cmdPool;
+    }
+
+    GfxRenderPass* VulkanContext::createRenderPass(const GfxRenderPassDesc& desc) {
+        return new VulkanRenderPass(this, desc);
+    }
+
+    GfxFramebuffer* VulkanContext::createFramebuffer(const GfxFramebufferDesc& desc) {
+        return new VulkanFramebuffer(this, desc);
     }
 
     void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {;

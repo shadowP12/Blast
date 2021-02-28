@@ -7,19 +7,21 @@ namespace Blast {
 
     class VulkanRenderPass : public GfxRenderPass {
     public:
-        VulkanRenderPass(VulkanContext *device, const GfxRenderPassDesc &desc);
-        virtual ~VulkanRenderPass();
-        VkRenderPass getRenderPass() { return mRenderPass; }
-        VkFramebuffer getFramebuffer() { return mFramebuffer; }
-        uint32_t getWidth() { return mWidth;}
-        uint32_t getHeight() { return mHeight; }
-        GfxTexture* getColorRT(int idx) override;
-        GfxTexture* getDepthRT() override;
+        VulkanRenderPass(VulkanContext* context, const GfxRenderPassDesc &desc);
+        ~VulkanRenderPass();
+        VkRenderPass getHandle() { return mRenderPass; }
     protected:
         VulkanContext* mContext = nullptr;
         VkRenderPass mRenderPass;
+    };
+
+    class VulkanFramebuffer : public GfxFramebuffer {
+    public:
+        VulkanFramebuffer(VulkanContext* context, const GfxFramebufferDesc& desc);
+        ~VulkanFramebuffer();
+        VkFramebuffer getHandle() { return mFramebuffer; }
+    protected:
+        VulkanContext* mContext = nullptr;
         VkFramebuffer mFramebuffer;
-        uint32_t mWidth;
-        uint32_t mHeight;
     };
 }
