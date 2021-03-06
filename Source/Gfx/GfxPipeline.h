@@ -47,34 +47,33 @@ namespace Blast {
         BlendConstant dstAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS];
         BlendOp blendOps[MAX_RENDER_TARGET_ATTACHMENTS];
         BlendOp blendAlphaOps[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendStateTargets targetMask;
-        uint32_t masks[MAX_RENDER_TARGET_ATTACHMENTS];
-        bool independentBlend;
+        BlendStateTargets targetMask = BLEND_STATE_TARGET_ALL; // 默认当前Pass里面的所有RT都受Blend影响
+        uint32_t masks[MAX_RENDER_TARGET_ATTACHMENTS]; // 该mask用来设置最终写入RT的Color Component
+        bool independentBlend = false; // 默认所有RT统一使用相同设置
     };
 
     struct GfxDepthState {
-        bool depthTest;
-        bool depthWrite;
-        CompareMode depthFunc;
-        bool stencilTest;
-        uint8_t stencilReadMask;
-        uint8_t stencilWriteMask;
-        CompareMode stencilFrontFunc;
-        StencilOp stencilFrontFail;
-        StencilOp depthFrontFail;
-        StencilOp stencilFrontPass;
-        CompareMode stencilBackFunc;
-        StencilOp stencilBackFail;
-        StencilOp depthBackFail;
-        StencilOp stencilBackPass;
+        bool depthTest = false;
+        bool depthWrite = true;
+        CompareMode depthFunc = COMPARE_LEQUAL;
+        bool stencilTest = false;
+        uint8_t stencilReadMask = 0xFF; // 默认都可读
+        uint8_t stencilWriteMask = 0xFF; // 默认都可写
+        CompareMode stencilFrontFunc = COMPARE_ALWAYS;
+        StencilOp stencilFrontFail = STENCIL_OP_KEEP;
+        StencilOp depthFrontFail = STENCIL_OP_KEEP;
+        StencilOp stencilFrontPass = STENCIL_OP_KEEP;
+        CompareMode stencilBackFunc = COMPARE_ALWAYS;
+        StencilOp stencilBackFail = STENCIL_OP_KEEP;
+        StencilOp depthBackFail = STENCIL_OP_KEEP;
+        StencilOp stencilBackPass = STENCIL_OP_KEEP;
     };
 
     struct GfxRasterizerState {
-        int32_t depthBias;
-        float slopeScaledDepthBias;
-        bool multiSample;
-        bool scissor;
-        bool depthClampEnable;
+        int32_t depthBias = 0; // 默认为0
+        float slopeScaledDepthBias = 0.0; // 默认为0
+        bool multiSample = 1; // 默认一像素采样
+        bool depthClampEnable = false;
         FillMode fillMode;
         FrontFace frontFace;
         CullMode cullMode;

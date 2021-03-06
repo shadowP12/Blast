@@ -210,9 +210,8 @@ namespace Blast {
     enum ResourceUsage {
         RESOURCE_USAGE_UNKNOWN = 0,
         RESOURCE_USAGE_GPU_ONLY = 1,
-        RESOURCE_USAGE_CPU_ONLY = 2,
-        RESOURCE_USAGE_CPU_TO_GPU = 3,
-        RESOURCE_USAGE_GPU_TO_CPU = 4,
+        RESOURCE_USAGE_CPU_TO_GPU = 2,
+        RESOURCE_USAGE_GPU_TO_CPU = 3,
         RESOURCE_USAGE_COUNT,
         RESOURCE_USAGE_MAX_ENUM = 0x7FFFFFFF
     };

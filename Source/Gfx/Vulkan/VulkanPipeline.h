@@ -10,7 +10,7 @@ namespace Blast {
     class VulkanRootSignature : public GfxRootSignature {
     public:
         VulkanRootSignature(VulkanContext* context, const GfxRootSignatureDesc& desc);
-        virtual ~VulkanRootSignature();
+        ~VulkanRootSignature();
         VkPipelineLayout getPipelineLayout() { return mPipelineLayout; }
         const std::vector<VkDescriptorSet>& getSets() { return mSets; };
     protected:
@@ -24,7 +24,7 @@ namespace Blast {
     class VulkanGraphicsPipeline : public GfxGraphicsPipeline {
     public:
         VulkanGraphicsPipeline(VulkanContext* context, const GfxGraphicsPipelineDesc& desc);
-        virtual ~VulkanGraphicsPipeline();
+        ~VulkanGraphicsPipeline();
         VkPipeline getHandle() { return mPipeline; }
     protected:
         VulkanContext* mContext = nullptr;

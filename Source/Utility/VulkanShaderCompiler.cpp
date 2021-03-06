@@ -344,7 +344,8 @@ namespace Blast {
         // 1.获取所有Shader资源
         auto allResources = compiler->get_shader_resources();
         std::unordered_set<uint32_t> usedResouces;
-        for (auto it = compiler->get_active_interface_variables().begin(); it != compiler->get_active_interface_variables().end(); it++) {
+        auto tempUsedResouces = compiler->get_active_interface_variables();
+        for (auto it = tempUsedResouces.begin(); it != tempUsedResouces.end(); it++) {
             usedResouces.insert(*it);
         }
 

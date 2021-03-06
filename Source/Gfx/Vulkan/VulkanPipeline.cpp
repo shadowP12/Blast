@@ -217,6 +217,7 @@ namespace Blast {
             shaderInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
             shaderInfo.module = vulkanShader->getHandle();
             shaderInfo.pName = "main";
+            shaderInfos.push_back(shaderInfo);
         }
 
         if (desc.hullShader) {
@@ -226,6 +227,7 @@ namespace Blast {
             shaderInfo.stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
             shaderInfo.module = vulkanShader->getHandle();
             shaderInfo.pName = "main";
+            shaderInfos.push_back(shaderInfo);
         }
 
         if (desc.domainShader) {
@@ -235,6 +237,7 @@ namespace Blast {
             shaderInfo.stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
             shaderInfo.module = vulkanShader->getHandle();
             shaderInfo.pName = "main";
+            shaderInfos.push_back(shaderInfo);
         }
 
         if (desc.geometryShader) {
@@ -244,6 +247,7 @@ namespace Blast {
             shaderInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
             shaderInfo.module = vulkanShader->getHandle();
             shaderInfo.pName = "main";
+            shaderInfos.push_back(shaderInfo);
         }
 
         if (desc.pixelShader) {
@@ -253,6 +257,7 @@ namespace Blast {
             shaderInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
             shaderInfo.module = vulkanShader->getHandle();
             shaderInfo.pName = "main";
+            shaderInfos.push_back(shaderInfo);
         }
 
         uint32_t inputBindingCount = 0;

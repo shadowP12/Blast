@@ -48,9 +48,6 @@ namespace Blast {
     }
 
     void VulkanBuffer::readData(uint32_t offset, uint32_t size, void* dest) {
-        if (mUsage != RESOURCE_USAGE_GPU_TO_CPU)
-            return;
-
         void* data;
         vkMapMemory(mContext->getDevice(), mMemory, offset, size, 0, &data);
         memcpy(dest, data, static_cast<size_t>(size));
@@ -58,9 +55,6 @@ namespace Blast {
     }
 
     void VulkanBuffer::writeData(uint32_t offset, uint32_t size, void* source) {
-        if (mUsage != RESOURCE_USAGE_CPU_TO_GPU)
-            return;
-
         void *data;
         vkMapMemory(mContext->getDevice(), mMemory, offset, size, 0, &data);
         memcpy(data, source, static_cast<size_t>(size));

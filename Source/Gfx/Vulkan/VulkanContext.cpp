@@ -4,6 +4,8 @@
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanRenderPass.h"
+#include "VulkanShader.h"
+#include "VulkanPipeline.h"
 #include <vector>
 
 namespace Blast {
@@ -408,8 +410,16 @@ namespace Blast {
         return new VulkanRenderPass(this, desc);
     }
 
-    GfxFramebuffer* VulkanContext::createFramebuffer(const GfxFramebufferDesc& desc) {
-        return new VulkanFramebuffer(this, desc);
+    GfxShader* VulkanContext::createShader(const GfxShaderDesc& desc) {
+        return new VulkanShader(this, desc);
+    }
+
+    GfxRootSignature* VulkanContext::createRootSignature(const GfxRootSignatureDesc& desc) {
+        return new VulkanRootSignature(this, desc);
+    }
+
+    GfxGraphicsPipeline* VulkanContext::createGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) {
+        return new VulkanGraphicsPipeline(this, desc);
     }
 
     void VulkanContext::acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) {;

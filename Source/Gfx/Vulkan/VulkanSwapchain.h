@@ -17,7 +17,7 @@ namespace Blast {
     class VulkanSwapchain : public GfxSwapchain {
     public:
         VulkanSwapchain(VulkanContext* context, const GfxSwapchainDesc& desc);
-        virtual ~VulkanSwapchain();
+        ~VulkanSwapchain();
         VkSwapchainKHR getHandle() { return mSwapchain; }
         uint32_t getImageCount() override;
         GfxTexture* getColorRenderTarget(uint32_t idx) override;

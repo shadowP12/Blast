@@ -48,7 +48,7 @@ namespace Blast {
     class VulkanContext : public GfxContext {
     public:
         VulkanContext();
-        virtual ~VulkanContext();
+        ~VulkanContext();
         GfxQueue* getQueue(QueueType type) override;
         GfxSemaphore* createSemaphore() override;
         GfxFence* createFence() override;
@@ -56,7 +56,9 @@ namespace Blast {
         GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
         GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
         GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) override;
-        GfxFramebuffer* createFramebuffer(const GfxFramebufferDesc& desc) override;
+        GfxShader* createShader(const GfxShaderDesc& desc) override;
+        GfxRootSignature* createRootSignature(const GfxRootSignatureDesc& desc) override;
+        GfxGraphicsPipeline* createGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) override;
         void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) override;
         VkDevice getDevice() { return mDevice; }
         VkPhysicalDevice getPhyDevice() { return mPhyDevice; }

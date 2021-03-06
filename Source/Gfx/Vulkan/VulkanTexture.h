@@ -9,7 +9,7 @@ namespace Blast {
     public:
         VulkanTexture(VulkanContext* context, const GfxTextureDesc& desc);
         VulkanTexture(VulkanContext* context, const VkImage& image, const GfxTextureDesc& desc);
-        virtual ~VulkanTexture();
+        ~VulkanTexture();
         VkImage getImage() { return mImage; }
         VkImageView getView() { return mView; }
     protected:

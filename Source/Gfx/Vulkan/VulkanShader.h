@@ -8,7 +8,7 @@ namespace Blast {
     class VulkanShader : public GfxShader {
     public:
         VulkanShader(VulkanContext* context, const GfxShaderDesc& desc);
-        virtual ~VulkanShader();
+        ~VulkanShader();
         VkShaderModule getHandle() { return mShader; }
     protected:
         VulkanContext* mContext = nullptr;
