@@ -20,6 +20,7 @@ namespace Blast {
     class GfxRootSignature {
     public:
         GfxRootSignature(const GfxRootSignatureDesc& desc);
+        ShaderStage getShaderStages() { return mStages; }
     protected:
         ShaderStage mStages;
         std::vector<GfxShaderReflection> mShaderReflections;

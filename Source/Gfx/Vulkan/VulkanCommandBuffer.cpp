@@ -127,10 +127,11 @@ namespace Blast {
         vkCmdBindPipeline(mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, internelPipeline->getHandle());
     }
 
-    void VulkanCommandBuffer::bindRootSignature(GfxRootSignature* rootSignature, PipelineType type) {
+    void VulkanCommandBuffer::bindRootSignature(GfxRootSignature* rootSignature) {
         VulkanRootSignature* internelRootSignature = static_cast<VulkanRootSignature*>(rootSignature);
+        ShaderStage stages = internelRootSignature->getShaderStages();
 
-        if (type == PIPELINE_TYPE_GRAPHICS)
+        if (SHADER_STAGE_COMP == (stages & SHADER_STAGE_VERT)) {
             vkCmdBindDescriptorSets(mCommandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
                                     internelRootSignature->getPipelineLayout(),
@@ -139,7 +140,9 @@ namespace Blast {
                                     internelRootSignature->getSets().data(),
                                     0,
                                     nullptr);
-        else
+        }
+
+        if (SHADER_STAGE_COMP == (stages & SHADER_STAGE_COMP)) {
             vkCmdBindDescriptorSets(mCommandBuffer,
                                     VK_PIPELINE_BIND_POINT_COMPUTE,
                                     internelRootSignature->getPipelineLayout(),
@@ -148,6 +151,7 @@ namespace Blast {
                                     internelRootSignature->getSets().data(),
                                     0,
                                     nullptr);
+        }
     }
 
     void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {

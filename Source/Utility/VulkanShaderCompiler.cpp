@@ -222,7 +222,6 @@ namespace Blast {
                 result = RESOURCE_TYPE_UNDEFINED;
                 break;
             case SPIRV_TYPE_COMBINED_SAMPLERS:
-                // note: 暂时不支持
                 result = RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER;
                 break;
         }
