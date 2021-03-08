@@ -53,6 +53,8 @@ namespace Blast {
         GfxSemaphore* createSemaphore() override;
         GfxFence* createFence() override;
         GfxBuffer* createBuffer(const GfxBufferDesc& desc) override;
+        GfxTexture* createTexture(const GfxTextureDesc& desc) override;
+        GfxSampler* createSampler(const GfxSamplerDesc& desc) override;
         GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
         GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
         GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) override;

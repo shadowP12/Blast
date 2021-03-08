@@ -16,6 +16,7 @@ target_sources(Blast PUBLIC
         Source/Gfx/GfxCommandBuffer.cpp
         Source/Gfx/GfxPipeline.cpp
         Source/Gfx/GfxShader.cpp
+        Source/Gfx/GfxSampler.cpp
         Source/Gfx/Vulkan/VulkanDefine.cpp
         Source/Gfx/Vulkan/VulkanContext.cpp
         Source/Gfx/Vulkan/VulkanBuffer.cpp
@@ -25,6 +26,7 @@ target_sources(Blast PUBLIC
         Source/Gfx/Vulkan/VulkanCommandBuffer.cpp
         Source/Gfx/Vulkan/VulkanPipeline.cpp
         Source/Gfx/Vulkan/VulkanShader.cpp
+        Source/Gfx/Vulkan/VulkanSampler.cpp
         Source/Utility/VulkanShaderCompiler.cpp)
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")

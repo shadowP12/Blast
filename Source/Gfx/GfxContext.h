@@ -2,9 +2,12 @@
 #include "GfxDefine.h"
 #include <memory>
 namespace Blast {
-
     struct GfxBufferDesc;
     class GfxBuffer;
+    struct GfxTextureDesc;
+    class GfxTexture;
+    struct GfxSamplerDesc;
+    class GfxSampler;
     struct GfxSwapchainDesc;
     class GfxSwapchain;
     struct GfxCommandBufferPoolDesc;
@@ -61,6 +64,8 @@ namespace Blast {
         virtual GfxSemaphore* createSemaphore() = 0;
         virtual GfxFence* createFence() = 0;
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc) = 0;
+        virtual GfxTexture* createTexture(const GfxTextureDesc& desc) = 0;
+        virtual GfxSampler* createSampler(const GfxSamplerDesc& desc) = 0;
         virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
         virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) = 0;
         virtual GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) = 0;

@@ -1,6 +1,7 @@
 #include "VulkanContext.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
+#include "VulkanSampler.h"
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanRenderPass.h"
@@ -394,6 +395,14 @@ namespace Blast {
     GfxBuffer* VulkanContext::createBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* buf = new VulkanBuffer(this, desc);
         return buf;
+    }
+
+    GfxTexture* VulkanContext::createTexture(const GfxTextureDesc& desc) {
+        return new VulkanTexture(this, desc);
+    }
+
+    GfxSampler* VulkanContext::createSampler(const GfxSamplerDesc& desc) {
+        return new VulkanSampler(this, desc);
     }
 
     GfxSwapchain* VulkanContext::createSwapchain(const GfxSwapchainDesc& desc) {
