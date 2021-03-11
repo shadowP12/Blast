@@ -34,12 +34,9 @@ namespace Blast {
     };
 
     struct GfxCopyToImageHelper {
-        uint32_t bufOffset;
-        uint32_t imgMipLevel;
-        uint32_t imgArrayLayer;
-        uint32_t imgOffsetX = 0;
-        uint32_t imgOffsetY = 0;
-        uint32_t imgOffsetZ = 0;
+        uint32_t bufferOffset = 0;
+        uint32_t level = 0;
+        uint32_t layer = 0;
     };
 
     struct GfxBufferBarrier {

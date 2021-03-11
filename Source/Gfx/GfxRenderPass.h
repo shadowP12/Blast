@@ -6,11 +6,15 @@ namespace Blast {
 
     struct GfxColorAttachmentInfo {
         GfxTexture* target = nullptr;
+        uint32_t level = 0;
+        uint32_t layer = 0;
         LoadAction loadOp = LOAD_ACTION_LOAD;
     };
 
     struct GfxDepthStencilAttachmentInfo {
         GfxTexture* target = nullptr;
+        uint32_t level = 0;
+        uint32_t layer = 0;
         LoadAction depthLoadOp = LOAD_ACTION_LOAD;
         LoadAction stencilLoadOp = LOAD_ACTION_LOAD;
     };

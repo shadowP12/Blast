@@ -11,6 +11,11 @@ namespace Blast {
     public:
         VulkanRootSignature(VulkanContext* context, const GfxRootSignatureDesc& desc);
         ~VulkanRootSignature();
+        void setSampler(const std::string& name, GfxSampler* sampler) override;
+        void setTexture(const std::string& name, GfxTexture* texture) override;
+        void setRWTexture(const std::string& name, GfxTexture* texture) override;
+        void setUniformBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
+        void setRWBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
         VkPipelineLayout getPipelineLayout() { return mPipelineLayout; }
         const std::vector<VkDescriptorSet>& getSets() { return mSets; };
     protected:

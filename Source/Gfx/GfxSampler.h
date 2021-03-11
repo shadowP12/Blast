@@ -3,12 +3,12 @@
 
 namespace Blast {
     struct GfxSamplerDesc {
-        FilterType  minFilter;
-        FilterType  magFilter;
-        MipmapMode  mipmapMode;
-        AddressMode addressU;
-        AddressMode addressV;
-        AddressMode addressW;
+        FilterType  minFilter = FILTER_LINEAR;
+        FilterType  magFilter = FILTER_LINEAR;
+        MipmapMode  mipmapMode = MIPMAP_MODE_LINEAR;
+        AddressMode addressU = ADDRESS_MODE_REPEAT;
+        AddressMode addressV = ADDRESS_MODE_REPEAT;
+        AddressMode addressW = ADDRESS_MODE_REPEAT;
     };
 
     class GfxSampler {

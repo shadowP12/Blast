@@ -93,12 +93,12 @@ namespace Blast {
         std::vector<VkImageView> attachmentViews;
         for (int i = 0; i < desc.numColorAttachments; i++) {
             VulkanTexture* vulkanTexture = (VulkanTexture*)desc.colors[i].target;
-            attachmentViews.push_back(vulkanTexture->getView());
+            attachmentViews.push_back(vulkanTexture->getSRV(desc.colors[i].layer, desc.colors[i].level));
         }
 
         if(desc.hasDepthStencil) {
             VulkanTexture* vulkanTexture = (VulkanTexture*)desc.depthStencil.target;
-            attachmentViews.push_back(vulkanTexture->getView());
+            attachmentViews.push_back(vulkanTexture->getSRV(desc.depthStencil.layer, desc.depthStencil.level));
         }
 
         VkFramebufferCreateInfo framebufferInfo;

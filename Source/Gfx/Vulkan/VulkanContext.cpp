@@ -506,8 +506,6 @@ namespace Blast {
         std::vector<VkSemaphore> signalSemaphores;
         std::vector<VkCommandBuffer> cmds;
 
-        VulkanFence* fence = static_cast<VulkanFence*>(info.signalFence);
-
         for(int i = 0; i < info.waitSemaphoreCount; i++) {
             waitStages.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
             VulkanSemaphore* semaphore = static_cast<VulkanSemaphore*>(info.waitSemaphores[i]);
@@ -533,7 +531,13 @@ namespace Blast {
         submitInfo.pSignalSemaphores = signalSemaphores.data();
         submitInfo.commandBufferCount = cmds.size();
         submitInfo.pCommandBuffers = cmds.data();
-        VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, fence->getHandle()));
+
+        if (info.signalFence) {
+            VulkanFence* fence = static_cast<VulkanFence*>(info.signalFence);
+            VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, fence->getHandle()));
+        } else {
+            VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, VK_NULL_HANDLE));
+        }
     }
 
     void VulkanQueue::present(const GfxPresentInfo& info) {

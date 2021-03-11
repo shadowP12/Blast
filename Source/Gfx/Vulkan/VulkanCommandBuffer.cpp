@@ -131,7 +131,7 @@ namespace Blast {
         VulkanRootSignature* internelRootSignature = static_cast<VulkanRootSignature*>(rootSignature);
         ShaderStage stages = internelRootSignature->getShaderStages();
 
-        if (SHADER_STAGE_COMP == (stages & SHADER_STAGE_VERT)) {
+        if (SHADER_STAGE_VERT == (stages & SHADER_STAGE_VERT)) {
             vkCmdBindDescriptorSets(mCommandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
                                     internelRootSignature->getPipelineLayout(),
@@ -179,16 +179,16 @@ namespace Blast {
         VulkanBuffer* internelSrcBuffer = static_cast<VulkanBuffer*>(srcBuffer);
         VulkanTexture* internelDstTexture = static_cast<VulkanTexture*>(dstTexture);
         VkBufferImageCopy copy = {};
-        copy.bufferOffset = 0;
+        copy.bufferOffset = helper.bufferOffset;
         copy.bufferRowLength = 0;
         copy.bufferImageHeight = 0;
         copy.imageSubresource.aspectMask = toVulkanAspectMask(dstTexture->getFormat());
-        copy.imageSubresource.mipLevel = helper.imgMipLevel;
-        copy.imageSubresource.baseArrayLayer = helper.imgArrayLayer;
+        copy.imageSubresource.mipLevel = helper.level;
+        copy.imageSubresource.baseArrayLayer = helper.layer;
         copy.imageSubresource.layerCount = 1;
-        copy.imageOffset.x = helper.imgOffsetX;
-        copy.imageOffset.y = helper.imgOffsetY;
-        copy.imageOffset.z = helper.imgOffsetZ;
+        copy.imageOffset.x = 0;
+        copy.imageOffset.y = 0;
+        copy.imageOffset.z = 0;
         copy.imageExtent.width = dstTexture->getWidth();
         copy.imageExtent.height = dstTexture->getHeight();
         copy.imageExtent.depth = dstTexture->getDepth();

@@ -110,7 +110,24 @@ namespace Blast {
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = mArrayLayers;
 
-        VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &mView));
+        for (int i = 0; i < mArrayLayers; ++i) {
+            viewInfo.subresourceRange.baseArrayLayer = i;
+            std::vector<VkImageView> srvs;
+            std::vector<VkImageView> uavs;
+            for (int j = 0; j < mMipLevels; ++j) {
+                viewInfo.subresourceRange.baseMipLevel = j;
+
+                VkImageView srv;
+                VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &srv));
+                srvs.push_back(srv);
+
+                VkImageView uav;
+                VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &uav));
+                uavs.push_back(uav);
+            }
+            mSRVs.push_back(srvs);
+            mUAVs.push_back(uavs);
+        }
     }
 
     VulkanTexture::VulkanTexture(VulkanContext* context, const VkImage& image, const GfxTextureDesc& desc)
@@ -165,7 +182,24 @@ namespace Blast {
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = mArrayLayers;
 
-        VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &mView));
+        for (int i = 0; i < mArrayLayers; ++i) {
+            viewInfo.subresourceRange.baseArrayLayer = i;
+            std::vector<VkImageView> srvs;
+            std::vector<VkImageView> uavs;
+            for (int j = 0; j < mMipLevels; ++j) {
+                viewInfo.subresourceRange.baseMipLevel = j;
+
+                VkImageView srv;
+                VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &srv));
+                srvs.push_back(srv);
+
+                VkImageView uav;
+                VK_ASSERT(vkCreateImageView(mContext->getDevice(), &viewInfo, nullptr, &uav));
+                uavs.push_back(uav);
+            }
+            mSRVs.push_back(srvs);
+            mUAVs.push_back(uavs);
+        }
     }
 
     VulkanTexture::~VulkanTexture() {
@@ -173,6 +207,13 @@ namespace Blast {
             vkDestroyImage(mContext->getDevice(), mImage, nullptr);
             vkFreeMemory(mContext->getDevice(), mMemory, nullptr);
         }
-        vkDestroyImageView(mContext->getDevice(), mView, nullptr);
+        for (int i = 0; i < mArrayLayers; ++i) {
+            for (int j = 0; j < mMipLevels; ++j) {
+                vkDestroyImageView(mContext->getDevice(), mSRVs[i][j], nullptr);
+                vkDestroyImageView(mContext->getDevice(), mUAVs[i][j], nullptr);
+            }
+        }
+        mSRVs.clear();
+        mUAVs.clear();
     }
 }

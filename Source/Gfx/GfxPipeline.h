@@ -5,6 +5,9 @@
 #include <vector>
 
 namespace Blast {
+    class GfxBuffer;
+    class GfxTexture;
+    class GfxSampler;
     class GfxRenderPass;
 
     struct GfxRootSignatureDesc {
@@ -21,6 +24,11 @@ namespace Blast {
     public:
         GfxRootSignature(const GfxRootSignatureDesc& desc);
         ShaderStage getShaderStages() { return mStages; }
+        virtual void setSampler(const std::string& name, GfxSampler* sampler) = 0;
+        virtual void setTexture(const std::string& name, GfxTexture* texture) = 0;
+        virtual void setRWTexture(const std::string& name, GfxTexture* texture) = 0;
+        virtual void setUniformBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+        virtual void setRWBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
     protected:
         ShaderStage mStages;
         std::vector<GfxShaderReflection> mShaderReflections;
