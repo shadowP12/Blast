@@ -8,6 +8,8 @@ namespace Blast {
     class GfxTexture;
     struct GfxSamplerDesc;
     class GfxSampler;
+    struct GfxSurfaceDesc;
+    class GfxSurface;
     struct GfxSwapchainDesc;
     class GfxSwapchain;
     struct GfxCommandBufferPoolDesc;
@@ -53,7 +55,7 @@ namespace Blast {
     class GfxQueue {
     public:
         virtual void submit(const GfxSubmitInfo& info) = 0;
-        virtual void present(const GfxPresentInfo& info) = 0;
+        virtual int present(const GfxPresentInfo& info) = 0;
         virtual void waitIdle() = 0;
     };
 
@@ -66,6 +68,7 @@ namespace Blast {
         virtual GfxBuffer* createBuffer(const GfxBufferDesc& desc) = 0;
         virtual GfxTexture* createTexture(const GfxTextureDesc& desc) = 0;
         virtual GfxSampler* createSampler(const GfxSamplerDesc& desc) = 0;
+        virtual GfxSurface* createSurface(const GfxSurfaceDesc& desc) = 0;
         virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
         virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) = 0;
         virtual GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) = 0;

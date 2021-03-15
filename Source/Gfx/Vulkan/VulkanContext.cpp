@@ -237,8 +237,9 @@ namespace Blast {
 
         std::vector<const char*> deviceRequiredExtensions;
         std::vector<const char*> deviceExtensions;
-
         deviceRequiredExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+        deviceRequiredExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
         deviceRequiredExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
         deviceRequiredExtensions.push_back(VK_KHR_MAINTENANCE2_EXTENSION_NAME);
         deviceRequiredExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
@@ -405,6 +406,10 @@ namespace Blast {
         return new VulkanSampler(this, desc);
     }
 
+    GfxSurface* VulkanContext::createSurface(const GfxSurfaceDesc& desc) {
+        return new VulkanSurface(this, desc);
+    }
+
     GfxSwapchain* VulkanContext::createSwapchain(const GfxSwapchainDesc& desc) {
         VulkanSwapchain* swapchain = new VulkanSwapchain(this, desc);
         return swapchain;
@@ -447,7 +452,11 @@ namespace Blast {
             vkFence = internelFence->getHandle();
         }
 
-        if (vkAcquireNextImageKHR(mDevice, internelSwapchain->getHandle(), UINT64_MAX, vkSemaphore, vkFence, imageIndex) == VK_ERROR_OUT_OF_DATE_KHR) {
+        VkResult result = vkAcquireNextImageKHR(mDevice, internelSwapchain->getHandle(), UINT64_MAX, vkSemaphore, vkFence, imageIndex);
+        if (result != VK_SUCCESS) {
+            if (fence) {
+                fence->reset();
+            }
             *imageIndex = -1;
         }
     }
@@ -540,7 +549,7 @@ namespace Blast {
         }
     }
 
-    void VulkanQueue::present(const GfxPresentInfo& info) {
+    int VulkanQueue::present(const GfxPresentInfo& info) {
         std::vector<VkSemaphore> waitSemaphores;
         for(int i = 0; i < info.waitSemaphoreCount; i++) {
             VulkanSemaphore* semaphore = static_cast<VulkanSemaphore*>(info.waitSemaphores[i]);
@@ -558,7 +567,11 @@ namespace Blast {
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &info.index;
 
-        VK_ASSERT(vkQueuePresentKHR(mQueue, &presentInfo));
+        VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
+        if (result != VK_SUCCESS) {
+            return -1;
+        }
+        return 0;
     }
 
     void VulkanQueue::waitIdle() {

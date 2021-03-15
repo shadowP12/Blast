@@ -4,9 +4,22 @@
 namespace Blast {
     class GfxRenderPass;
     class GfxTexture;
+    class GfxSwapchain;
+
+    struct GfxSurfaceDesc {
+        void* originSurface = nullptr;
+    };
+
+    class GfxSurface {
+    public:
+        GfxSurface(const GfxSurfaceDesc& desc);
+    protected:
+        void* mOriginSurface = nullptr;
+    };
 
     struct GfxSwapchainDesc {
-        void* windowHandle;
+        GfxSurface* surface = nullptr;
+        GfxSwapchain* oldSwapchain = nullptr;
         uint32_t width;
         uint32_t height;
     };

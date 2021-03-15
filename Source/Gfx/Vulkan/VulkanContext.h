@@ -33,7 +33,7 @@ namespace Blast {
         VulkanQueue();
         ~VulkanQueue();
         void submit(const GfxSubmitInfo& info) override;
-        void present(const GfxPresentInfo& info) override;
+        int present(const GfxPresentInfo& info) override;
         void waitIdle() override;
         VkQueue  getHandle() { return mQueue; }
         QueueType getType() { return mType; }
@@ -55,6 +55,7 @@ namespace Blast {
         GfxBuffer* createBuffer(const GfxBufferDesc& desc) override;
         GfxTexture* createTexture(const GfxTextureDesc& desc) override;
         GfxSampler* createSampler(const GfxSamplerDesc& desc) override;
+        GfxSurface* createSurface(const GfxSurfaceDesc& desc) override;
         GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
         GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
         GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) override;

@@ -7,8 +7,8 @@
 #endif
 
 namespace Blast {
-    VulkanSwapchain::VulkanSwapchain(VulkanContext* context, const GfxSwapchainDesc& desc)
-    :GfxSwapchain(desc){
+    VulkanSurface::VulkanSurface(VulkanContext* context, const GfxSurfaceDesc& desc)
+    :GfxSurface(desc) {
         mContext = context;
 #if WIN32
         VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
@@ -16,13 +16,25 @@ namespace Blast {
         surfaceInfo.pNext = nullptr;
         surfaceInfo.flags = 0;
         surfaceInfo.hinstance = ::GetModuleHandle(nullptr);
-        surfaceInfo.hwnd = (HWND)desc.windowHandle;
+        surfaceInfo.hwnd = (HWND)desc.originSurface;
         VK_ASSERT(vkCreateWin32SurfaceKHR(mContext->getInstance(), &surfaceInfo, nullptr, &mSurface));
 #endif
+    }
+
+    VulkanSurface::~VulkanSurface() {
+        vkDestroySurfaceKHR(mContext->getInstance(), mSurface, nullptr);
+    }
+
+    VulkanSwapchain::VulkanSwapchain(VulkanContext* context, const GfxSwapchainDesc& desc)
+    :GfxSwapchain(desc) {
+        mContext = context;
+
+        VulkanSurface* internelSurface = static_cast<VulkanSurface*>(desc.surface);
 
         VkBool32 supportsPresent;
         VulkanQueue* GraphicsQueue = (VulkanQueue*)mContext->getQueue(QUEUE_TYPE_GRAPHICS);
-        vkGetPhysicalDeviceSurfaceSupportKHR(mContext->getPhyDevice(), GraphicsQueue->getFamilyIndex(), mSurface, &supportsPresent);
+        uint32_t queueFamilyIndice = GraphicsQueue->getFamilyIndex();
+        vkGetPhysicalDeviceSurfaceSupportKHR(mContext->getPhyDevice(), queueFamilyIndice, internelSurface->getHandle(), &supportsPresent);
         if (!supportsPresent) {
             BLAST_LOGE("cannot find a graphics queue that also supports present operations.\n");
             return;
@@ -32,7 +44,7 @@ namespace Blast {
         swapChainExtent.width = mWidth;
         swapChainExtent.height = mHeight;
 
-        VulkanSwapchainSupportDetails swapChainSupport = querySwapChainSupport();
+        VulkanSwapchainSupportDetails swapChainSupport = querySwapChainSupport(internelSurface->getHandle());
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 
@@ -44,7 +56,7 @@ namespace Blast {
 
         VkSwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        swapchainInfo.surface = mSurface;
+        swapchainInfo.surface = internelSurface->getHandle();
         swapchainInfo.minImageCount = imageCount;
         swapchainInfo.imageFormat = surfaceFormat.format;
         swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -52,12 +64,17 @@ namespace Blast {
         swapchainInfo.imageArrayLayers = 1;
         swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        swapchainInfo.queueFamilyIndexCount = 0;
-        swapchainInfo.pQueueFamilyIndices = nullptr;
+        swapchainInfo.queueFamilyIndexCount = 1;
+        swapchainInfo.pQueueFamilyIndices = &queueFamilyIndice;
         swapchainInfo.preTransform = swapChainSupport.capabilities.currentTransform;
         swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         swapchainInfo.presentMode = presentMode;
         swapchainInfo.clipped = VK_TRUE;
+        swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+        if (desc.oldSwapchain) {
+            VulkanSwapchain* oldSwapchain = static_cast<VulkanSwapchain*>(desc.oldSwapchain);
+            swapchainInfo.oldSwapchain = oldSwapchain->mSwapchain;
+        }
 
         VK_ASSERT(vkCreateSwapchainKHR(mContext->getDevice(), &swapchainInfo, nullptr, &mSwapchain));
 
@@ -112,9 +129,7 @@ namespace Blast {
             delete mDepthStencilImages[i];
         }
         mDepthStencilImages.clear();
-
         vkDestroySwapchainKHR(mContext->getDevice(), mSwapchain, nullptr);
-        vkDestroySurfaceKHR(mContext->getInstance(), mSurface, nullptr);
     }
 
     GfxTexture* VulkanSwapchain::getColorRenderTarget(uint32_t idx) {
@@ -131,24 +146,24 @@ namespace Blast {
         return nullptr;
     }
 
-    VulkanSwapchainSupportDetails VulkanSwapchain::querySwapChainSupport() {
+    VulkanSwapchainSupportDetails VulkanSwapchain::querySwapChainSupport(VkSurfaceKHR surface) {
         VulkanSwapchainSupportDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext->getPhyDevice(), mSurface, &details.capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext->getPhyDevice(), surface, &details.capabilities);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(mContext->getPhyDevice(), mSurface, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(mContext->getPhyDevice(), surface, &formatCount, nullptr);
 
         if (formatCount != 0) {
             details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(mContext->getPhyDevice(), mSurface, &formatCount, details.formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(mContext->getPhyDevice(), surface, &formatCount, details.formats.data());
         }
 
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(mContext->getPhyDevice(), mSurface, &presentModeCount, nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(mContext->getPhyDevice(), surface, &presentModeCount, nullptr);
 
         if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(mContext->getPhyDevice(), mSurface, &presentModeCount, details.presentModes.data());
+            vkGetPhysicalDeviceSurfacePresentModesKHR(mContext->getPhyDevice(), surface, &presentModeCount, details.presentModes.data());
         }
 
         return details;
@@ -169,8 +184,10 @@ namespace Blast {
     }
 
     VkPresentModeKHR VulkanSwapchain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes) {
+        return VK_PRESENT_MODE_FIFO_KHR;
+
         for (const auto& availablePresentMode : availablePresentModes) {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+            if (availablePresentMode == VK_PRESENT_MODE_FIFO_KHR) {
                 return availablePresentMode;
             }
         }
