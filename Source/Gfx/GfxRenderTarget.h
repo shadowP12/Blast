@@ -6,13 +6,13 @@ namespace Blast {
 
     struct GfxColorAttachmentDesc {
         Format format;
-        SampleCount sampleCount;
+        SampleCount sampleCount = SAMPLE_COUNT_1;
         LoadAction loadOp = LOAD_ACTION_LOAD;
     };
 
     struct GfxDepthStencilAttachmentDesc {
         Format format;
-        SampleCount sampleCount;
+        SampleCount sampleCount = SAMPLE_COUNT_1;
         LoadAction depthLoadOp = LOAD_ACTION_LOAD;
         LoadAction stencilLoadOp = LOAD_ACTION_LOAD;
     };

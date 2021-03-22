@@ -19,9 +19,21 @@ namespace Blast {
         VulkanSurface(VulkanContext* context, const GfxSurfaceDesc& desc);
         ~VulkanSurface();
         VkSurfaceKHR getHandle() { return mSurface; }
+        VkPresentModeKHR getPresentMode() { return mPresentMode; }
+        VkSurfaceFormatKHR getSurfaceFormat() { return mSurfaceFormat; }
+        VkSurfaceCapabilitiesKHR getCapabilities() { return mCapabilities; }
+        uint32_t getImageCount() { return mImageCount; }
+    private:
+        VulkanSwapchainSupportDetails querySwapChainSupport(VkSurfaceKHR surface);
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     private:
         VulkanContext* mContext = nullptr;
         VkSurfaceKHR mSurface;
+        VkPresentModeKHR mPresentMode;
+        VkSurfaceFormatKHR mSurfaceFormat;
+        VkSurfaceCapabilitiesKHR mCapabilities;
+        uint32_t mImageCount = 0;
     };
 
     class VulkanSwapchain : public GfxSwapchain {
@@ -32,10 +44,6 @@ namespace Blast {
         uint32_t getImageCount() override;
         GfxTexture* getColorRenderTarget(uint32_t idx) override;
         GfxTexture* getDepthRenderTarget(uint32_t idx) override;
-    private:
-        VulkanSwapchainSupportDetails querySwapChainSupport(VkSurfaceKHR surface);
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     protected:
         VulkanContext* mContext = nullptr;
         VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;

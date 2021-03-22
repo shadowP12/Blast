@@ -13,8 +13,10 @@ namespace Blast {
     class GfxSurface {
     public:
         GfxSurface(const GfxSurfaceDesc& desc);
+        Format getFormat() { return mFormat; }
     protected:
         void* mOriginSurface = nullptr;
+        Format mFormat;
     };
 
     struct GfxSwapchainDesc {
