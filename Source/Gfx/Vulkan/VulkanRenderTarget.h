@@ -1,6 +1,6 @@
 #pragma once
 #include "VulkanDefine.h"
-#include "../GfxRenderPass.h"
+#include "../GfxRenderTarget.h"
 
 namespace Blast {
     class VulkanContext;
@@ -10,10 +10,18 @@ namespace Blast {
         VulkanRenderPass(VulkanContext* context, const GfxRenderPassDesc &desc);
         ~VulkanRenderPass();
         VkRenderPass getHandle() { return mRenderPass; }
-        VkFramebuffer getFramebuffer() { return mFramebuffer; }
     protected:
         VulkanContext* mContext = nullptr;
         VkRenderPass mRenderPass;
+    };
+
+    class VulkanFramebuffer : public GfxFramebuffer {
+    public:
+        VulkanFramebuffer(VulkanContext* context, const GfxFramebufferDesc &desc);
+        ~VulkanFramebuffer();
+        VkFramebuffer getHandle() { return mFramebuffer; }
+    protected:
+        VulkanContext* mContext = nullptr;
         VkFramebuffer mFramebuffer;
     };
 }

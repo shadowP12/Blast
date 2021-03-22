@@ -17,6 +17,8 @@ namespace Blast {
     class GfxCommandBuffer;
     struct GfxRenderPassDesc;
     class GfxRenderPass;
+    struct GfxFramebufferDesc;
+    class GfxFramebuffer;
     struct GfxShaderDesc;
     class GfxShader;
     struct GfxRootSignatureDesc;
@@ -72,6 +74,7 @@ namespace Blast {
         virtual GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) = 0;
         virtual GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) = 0;
         virtual GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) = 0;
+        virtual GfxFramebuffer* createFramebuffer(const GfxFramebufferDesc& desc) = 0;
         virtual GfxShader* createShader(const GfxShaderDesc& desc) = 0;
         virtual GfxRootSignature* createRootSignature(const GfxRootSignatureDesc& desc) = 0;
         virtual GfxGraphicsPipeline* createGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) = 0;

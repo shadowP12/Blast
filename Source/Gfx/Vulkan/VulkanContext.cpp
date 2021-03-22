@@ -4,7 +4,7 @@
 #include "VulkanSampler.h"
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanRenderPass.h"
+#include "VulkanRenderTarget.h"
 #include "VulkanShader.h"
 #include "VulkanPipeline.h"
 #include <vector>
@@ -422,6 +422,10 @@ namespace Blast {
 
     GfxRenderPass* VulkanContext::createRenderPass(const GfxRenderPassDesc& desc) {
         return new VulkanRenderPass(this, desc);
+    }
+
+    GfxFramebuffer* VulkanContext::createFramebuffer(const GfxFramebufferDesc& desc) {
+        return new VulkanFramebuffer(this, desc);
     }
 
     GfxShader* VulkanContext::createShader(const GfxShaderDesc& desc) {

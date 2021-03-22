@@ -1,4 +1,4 @@
-#include "VulkanRenderPass.h"
+#include "VulkanRenderTarget.h"
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include <vector>
@@ -19,8 +19,8 @@ namespace Blast {
         for (uint32_t i = 0; i < mNumColorAttachments; i++) {
             VkAttachmentDescription attachmentDesc = {};
             attachmentDesc.flags = 0;
-            attachmentDesc.format = toVulkanFormat(mColors[i].target->getFormat());
-            attachmentDesc.samples = toVulkanSampleCount(mColors[i].target->getSampleCount());
+            attachmentDesc.format = toVulkanFormat(mColors[i].format);
+            attachmentDesc.samples = toVulkanSampleCount(mColors[i].sampleCount);
             attachmentDesc.loadOp = toVulkanLoadOp(mColors[i].loadOp);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -39,8 +39,8 @@ namespace Blast {
         if (mHasDepthStencil) {
             VkAttachmentDescription attachmentDesc = {};
             attachmentDesc.flags = 0;
-            attachmentDesc.format = toVulkanFormat(mDepthStencil.target->getFormat());
-            attachmentDesc.samples = toVulkanSampleCount(mDepthStencil.target->getSampleCount());
+            attachmentDesc.format = toVulkanFormat(mDepthStencil.format);
+            attachmentDesc.samples = toVulkanSampleCount(mDepthStencil.sampleCount);
             attachmentDesc.loadOp = toVulkanLoadOp(mDepthStencil.depthLoadOp);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDesc.stencilLoadOp = toVulkanLoadOp(mDepthStencil.stencilLoadOp);
@@ -89,6 +89,17 @@ namespace Blast {
         renderPassInfo.pDependencies = NULL;
 
         VK_ASSERT(vkCreateRenderPass(mContext->getDevice(), &renderPassInfo, nullptr, &(mRenderPass)));
+    }
+
+    VulkanRenderPass::~VulkanRenderPass() {
+        vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
+    }
+
+    VulkanFramebuffer::VulkanFramebuffer(VulkanContext* context, const GfxFramebufferDesc& desc)
+    :GfxFramebuffer(desc) {
+        mContext = context;
+
+        VulkanRenderPass* internelRenderPass = static_cast<VulkanRenderPass*>(desc.renderPass);
 
         std::vector<VkImageView> attachmentViews;
         for (int i = 0; i < desc.numColorAttachments; i++) {
@@ -110,13 +121,12 @@ namespace Blast {
         framebufferInfo.width = mWidth;
         framebufferInfo.height = mHeight;
         framebufferInfo.layers = 1;
-        framebufferInfo.renderPass = mRenderPass;
+        framebufferInfo.renderPass = internelRenderPass->getHandle();
 
         VK_ASSERT(vkCreateFramebuffer(mContext->getDevice(), &framebufferInfo, nullptr, &mFramebuffer));
     }
 
-    VulkanRenderPass::~VulkanRenderPass() {
+    VulkanFramebuffer::~VulkanFramebuffer() {
         vkDestroyFramebuffer(mContext->getDevice(), mFramebuffer, nullptr);
-        vkDestroyRenderPass(mContext->getDevice(), mRenderPass, nullptr);
     }
 }

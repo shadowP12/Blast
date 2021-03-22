@@ -1,6 +1,6 @@
 #include "VulkanPipeline.h"
 #include "VulkanContext.h"
-#include "VulkanRenderPass.h"
+#include "VulkanRenderTarget.h"
 #include "VulkanShader.h"
 #include "VulkanSampler.h"
 #include "VulkanBuffer.h"

@@ -1,6 +1,6 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
-#include "VulkanRenderPass.h"
+#include "VulkanRenderTarget.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 #include "VulkanPipeline.h"
@@ -66,16 +66,17 @@ namespace Blast {
         VK_ASSERT(vkEndCommandBuffer(mCommandBuffer));
     }
 
-    void VulkanCommandBuffer::bindRenderPass(GfxRenderPass* renderPass, const GfxClearValue& clearValue) {
-        VulkanRenderPass* internelRP = (VulkanRenderPass*)renderPass;
+    void VulkanCommandBuffer::bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) {
+        VulkanRenderPass* internelRenderPass = (VulkanRenderPass*)renderPass;
+        VulkanFramebuffer* internelFramebuffer = (VulkanFramebuffer*)framebuffer;
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = internelRP->getHandle();
-        renderPassInfo.framebuffer = internelRP->getFramebuffer();
+        renderPassInfo.renderPass = internelRenderPass->getHandle();
+        renderPassInfo.framebuffer = internelFramebuffer->getHandle();
         renderPassInfo.renderArea.offset.x = 0;
         renderPassInfo.renderArea.offset.y = 0;
-        renderPassInfo.renderArea.extent.width = internelRP->getWidth();
-        renderPassInfo.renderArea.extent.height = internelRP->getHeight();
+        renderPassInfo.renderArea.extent.width = internelFramebuffer->getWidth();
+        renderPassInfo.renderArea.extent.height = internelFramebuffer->getHeight();
 
         VkClearValue clearValues[2];
         clearValues[0].color = { clearValue.color[0], clearValue.color[1], clearValue.color[2], clearValue.color[3] };
@@ -86,7 +87,7 @@ namespace Blast {
         vkCmdBeginRenderPass(mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void VulkanCommandBuffer::unbindRenderPass() {
+    void VulkanCommandBuffer::unbindRenderTarget() {
         vkCmdEndRenderPass(mCommandBuffer);
     }
 

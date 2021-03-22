@@ -24,8 +24,8 @@ namespace Blast {
         VkCommandBuffer getHandle() { return mCommandBuffer; }
         void begin() override;
         void end() override;
-        void bindRenderPass(GfxRenderPass* renderPass, const GfxClearValue& clearValue) override;
-        void unbindRenderPass() override;
+        void bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) override;
+        void unbindRenderTarget() override;
         void setViewport(float x, float y, float w, float h) override;
         void setScissor(int x, int y, int w, int h) override;
         void bindVertexBuffer(GfxBuffer* vertexBuffer, uint32_t offset) override;

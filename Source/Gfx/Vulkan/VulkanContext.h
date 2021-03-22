@@ -59,6 +59,7 @@ namespace Blast {
         GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
         GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
         GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) override;
+        GfxFramebuffer* createFramebuffer(const GfxFramebufferDesc& desc) override;
         GfxShader* createShader(const GfxShaderDesc& desc) override;
         GfxRootSignature* createRootSignature(const GfxRootSignatureDesc& desc) override;
         GfxGraphicsPipeline* createGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) override;

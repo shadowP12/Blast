@@ -11,7 +11,7 @@ target_sources(Blast PUBLIC
         Source/Gfx/GfxContext.cpp
         Source/Gfx/GfxBuffer.cpp
         Source/Gfx/GfxTexture.cpp
-        Source/Gfx/GfxRenderPass.cpp
+        Source/Gfx/GfxRenderTarget.cpp
         Source/Gfx/GfxSwapchain.cpp
         Source/Gfx/GfxCommandBuffer.cpp
         Source/Gfx/GfxPipeline.cpp
@@ -21,7 +21,7 @@ target_sources(Blast PUBLIC
         Source/Gfx/Vulkan/VulkanContext.cpp
         Source/Gfx/Vulkan/VulkanBuffer.cpp
         Source/Gfx/Vulkan/VulkanTexture.cpp
-        Source/Gfx/Vulkan/VulkanRenderPass.cpp
+        Source/Gfx/Vulkan/VulkanRenderTarget.cpp
         Source/Gfx/Vulkan/VulkanSwapchain.cpp
         Source/Gfx/Vulkan/VulkanCommandBuffer.cpp
         Source/Gfx/Vulkan/VulkanPipeline.cpp
