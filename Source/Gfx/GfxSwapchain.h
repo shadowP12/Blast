@@ -6,6 +6,11 @@ namespace Blast {
     class GfxTexture;
     class GfxSwapchain;
 
+    struct GfxSurfaceSize {
+        uint32_t width;
+        uint32_t height;
+    };
+
     struct GfxSurfaceDesc {
         void* originSurface = nullptr;
     };
@@ -13,6 +18,7 @@ namespace Blast {
     class GfxSurface {
     public:
         GfxSurface(const GfxSurfaceDesc& desc);
+        GfxSurfaceSize getSize();
         Format getFormat() { return mFormat; }
     protected:
         void* mOriginSurface = nullptr;

@@ -4,6 +4,7 @@
 #if WIN32
 #include <windows.h>
 #endif
+#include <cmath>
 
 namespace Blast {
     VulkanSurface::VulkanSurface(VulkanContext* context, const GfxSurfaceDesc& desc)
@@ -22,24 +23,23 @@ namespace Blast {
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 
-        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-            imageCount = swapChainSupport.capabilities.maxImageCount;
-        }
         mFormat = toGfxFormat(surfaceFormat.format);
-        mImageCount = imageCount;
         mPresentMode = presentMode;
         mSurfaceFormat = surfaceFormat;
-        mCapabilities = swapChainSupport.capabilities;
     }
 
     VulkanSurface::~VulkanSurface() {
         vkDestroySurfaceKHR(mContext->getInstance(), mSurface, nullptr);
     }
 
+    VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities() {
+        VkSurfaceCapabilitiesKHR capabilities;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext->getPhyDevice(), mSurface, &capabilities);
+        return capabilities;
+    }
+
     VulkanSwapchainSupportDetails VulkanSurface::querySwapChainSupport(VkSurfaceKHR surface) {
         VulkanSwapchainSupportDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext->getPhyDevice(), surface, &details.capabilities);
 
         uint32_t formatCount;
         vkGetPhysicalDeviceSurfaceFormatsKHR(mContext->getPhyDevice(), surface, &formatCount, nullptr);
@@ -99,11 +99,22 @@ namespace Blast {
             return;
         }
 
-        VkExtent2D swapChainExtent;
-        swapChainExtent.width = mWidth;
-        swapChainExtent.height = mHeight;
+        const auto caps = internelSurface->getCapabilities();
 
-        mImageCount = internelSurface->getImageCount();
+        const uint32_t maxImageCount = caps.maxImageCount;
+        const uint32_t minImageCount = caps.minImageCount;
+        uint32_t desiredImageCount = minImageCount + 1;
+        if (maxImageCount != 0 && desiredImageCount > maxImageCount) {
+            BLAST_LOGE("swap chain does not support %d images.\n", desiredImageCount);
+            desiredImageCount = minImageCount;
+        }
+        mImageCount = desiredImageCount;
+
+        VkExtent2D actualExtent;
+        actualExtent.width = mWidth;
+        actualExtent.height = mHeight;
+        actualExtent.width = max(caps.minImageExtent.width, min(caps.maxImageExtent.width, actualExtent.width));
+        actualExtent.height = max(caps.minImageExtent.height, min(caps.maxImageExtent.height, actualExtent.height));
 
         VkSwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -111,7 +122,7 @@ namespace Blast {
         swapchainInfo.minImageCount = mImageCount;
         swapchainInfo.imageFormat = internelSurface->getSurfaceFormat().format;
         swapchainInfo.imageColorSpace = internelSurface->getSurfaceFormat().colorSpace;
-        swapchainInfo.imageExtent = swapChainExtent;
+        swapchainInfo.imageExtent = actualExtent;
         swapchainInfo.imageArrayLayers = 1;
         swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -138,8 +149,8 @@ namespace Blast {
         for (int i = 0; i < mImageCount; i++) {
             GfxTextureDesc colorDesc;
             colorDesc.sampleCount = SAMPLE_COUNT_1;
-            colorDesc.width = mWidth;
-            colorDesc.height = mHeight;
+            colorDesc.width = actualExtent.width;
+            colorDesc.height = actualExtent.height;
             colorDesc.depth = 1;
             colorDesc.mipLevels = 1;
             colorDesc.arrayLayers = 1;
@@ -154,8 +165,8 @@ namespace Blast {
 
             GfxTextureDesc depthStencilDesc;
             depthStencilDesc.sampleCount = SAMPLE_COUNT_1;
-            depthStencilDesc.width = mWidth;
-            depthStencilDesc.height = mHeight;
+            depthStencilDesc.width = actualExtent.width;
+            depthStencilDesc.height = actualExtent.height;
             depthStencilDesc.depth = 1;
             depthStencilDesc.mipLevels = 1;
             depthStencilDesc.arrayLayers = 1;

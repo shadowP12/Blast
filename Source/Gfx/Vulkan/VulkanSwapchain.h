@@ -21,8 +21,7 @@ namespace Blast {
         VkSurfaceKHR getHandle() { return mSurface; }
         VkPresentModeKHR getPresentMode() { return mPresentMode; }
         VkSurfaceFormatKHR getSurfaceFormat() { return mSurfaceFormat; }
-        VkSurfaceCapabilitiesKHR getCapabilities() { return mCapabilities; }
-        uint32_t getImageCount() { return mImageCount; }
+        VkSurfaceCapabilitiesKHR getCapabilities();
     private:
         VulkanSwapchainSupportDetails querySwapChainSupport(VkSurfaceKHR surface);
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -32,8 +31,6 @@ namespace Blast {
         VkSurfaceKHR mSurface;
         VkPresentModeKHR mPresentMode;
         VkSurfaceFormatKHR mSurfaceFormat;
-        VkSurfaceCapabilitiesKHR mCapabilities;
-        uint32_t mImageCount = 0;
     };
 
     class VulkanSwapchain : public GfxSwapchain {
