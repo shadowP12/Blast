@@ -318,25 +318,25 @@ namespace Blast {
     };
 
     enum ShaderSemantic {
-        SEMANTIC_UNDEFINED = 0,
-        SEMANTIC_POSITION,
-        SEMANTIC_NORMAL,
-        SEMANTIC_COLOR,
-        SEMANTIC_TANGENT,
-        SEMANTIC_BITANGENT,
-        SEMANTIC_JOINTS,
-        SEMANTIC_WEIGHTS,
-        SEMANTIC_TEXCOORD0,
-        SEMANTIC_TEXCOORD1,
-        SEMANTIC_TEXCOORD2,
-        SEMANTIC_TEXCOORD3,
-        SEMANTIC_TEXCOORD4,
-        SEMANTIC_TEXCOORD5,
-        SEMANTIC_TEXCOORD6,
-        SEMANTIC_TEXCOORD7,
-        SEMANTIC_TEXCOORD8,
-        SEMANTIC_TEXCOORD9,
+        SEMANTIC_UNDEFINED = 1 << 0,
+        SEMANTIC_POSITION = 1 << 1,
+        SEMANTIC_NORMAL = 1 << 2,
+        SEMANTIC_COLOR = 1 << 3,
+        SEMANTIC_TANGENT = 1 << 4,
+        SEMANTIC_BITANGENT = 1 << 5,
+        SEMANTIC_JOINTS = 1 << 6,
+        SEMANTIC_WEIGHTS = 1 << 7,
+        SEMANTIC_TEXCOORD0 = 1 << 8,
+        SEMANTIC_TEXCOORD1 = 1 << 9,
+        SEMANTIC_TEXCOORD2 = 1 << 10,
+        SEMANTIC_TEXCOORD3 = 1 << 11,
+        SEMANTIC_TEXCOORD4 = 1 << 12,
+        SEMANTIC_TEXCOORD5 = 1 << 13,
+        SEMANTIC_TEXCOORD6 = 1 << 14,
+        SEMANTIC_TEXCOORD7 = 1 << 15,
+        SEMANTIC_TEXCOORD8 = 1 << 16
     };
+    MAKE_ENUM_FLAG(uint32_t, ShaderSemantic)
 
     enum FenceStatus {
         FENCE_STATUS_COMPLETE = 0,
