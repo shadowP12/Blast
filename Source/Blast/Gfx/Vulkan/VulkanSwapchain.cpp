@@ -113,8 +113,8 @@ namespace Blast {
         VkExtent2D actualExtent;
         actualExtent.width = mWidth;
         actualExtent.height = mHeight;
-        actualExtent.width = max(caps.minImageExtent.width, min(caps.maxImageExtent.width, actualExtent.width));
-        actualExtent.height = max(caps.minImageExtent.height, min(caps.maxImageExtent.height, actualExtent.height));
+        // actualExtent.width = max(caps.minImageExtent.width, min(caps.maxImageExtent.width, actualExtent.width));
+        // actualExtent.height = max(caps.minImageExtent.height, min(caps.maxImageExtent.height, actualExtent.height));
 
         VkSwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;

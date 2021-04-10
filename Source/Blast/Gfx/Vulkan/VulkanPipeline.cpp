@@ -228,29 +228,27 @@ namespace Blast {
         }
     }
 
-    static VkPipelineColorBlendStateCreateInfo toBlendDesc(const GfxBlendState* state, VkPipelineColorBlendAttachmentState* attachments) {
+    static VkPipelineColorBlendStateCreateInfo toBlendDesc(const GfxBlendState& state, VkPipelineColorBlendAttachmentState* attachments) {
         int blendDescIndex = 0;
-        for (int i = 0; i < MAX_RENDER_TARGET_ATTACHMENTS; ++i)
-        {
-            if (state->targetMask & (1 << i))
-            {
+        for (int i = 0; i < MAX_RENDER_TARGET_ATTACHMENTS; ++i) {
+            if (state.targetMask & (1 << i)) {
                 VkBool32 blendEnable =
-                        (toVulkanBlendFactor(state->srcFactors[blendDescIndex]) != VK_BLEND_FACTOR_ONE ||
-                         toVulkanBlendFactor(state->dstFactors[blendDescIndex]) != VK_BLEND_FACTOR_ZERO ||
-                         toVulkanBlendFactor(state->srcAlphaFactors[blendDescIndex]) != VK_BLEND_FACTOR_ONE ||
-                         toVulkanBlendFactor(state->dstAlphaFactors[blendDescIndex]) != VK_BLEND_FACTOR_ZERO);
+                        (toVulkanBlendFactor(state.srcFactors[blendDescIndex]) != VK_BLEND_FACTOR_ONE ||
+                         toVulkanBlendFactor(state.dstFactors[blendDescIndex]) != VK_BLEND_FACTOR_ZERO ||
+                         toVulkanBlendFactor(state.srcAlphaFactors[blendDescIndex]) != VK_BLEND_FACTOR_ONE ||
+                         toVulkanBlendFactor(state.dstAlphaFactors[blendDescIndex]) != VK_BLEND_FACTOR_ZERO);
 
                 attachments[i].blendEnable = blendEnable;
-                attachments[i].colorWriteMask = state->masks[blendDescIndex];
-                attachments[i].srcColorBlendFactor = toVulkanBlendFactor(state->srcFactors[blendDescIndex]);
-                attachments[i].dstColorBlendFactor = toVulkanBlendFactor(state->dstFactors[blendDescIndex]);
-                attachments[i].colorBlendOp = toVulkanBlendOp(state->blendOps[blendDescIndex]);
-                attachments[i].srcAlphaBlendFactor = toVulkanBlendFactor(state->srcAlphaFactors[blendDescIndex]);
-                attachments[i].dstAlphaBlendFactor = toVulkanBlendFactor(state->dstAlphaFactors[blendDescIndex]);
-                attachments[i].alphaBlendOp = toVulkanBlendOp(state->blendAlphaOps[blendDescIndex]);
+                attachments[i].colorWriteMask = state.masks[blendDescIndex];
+                attachments[i].srcColorBlendFactor = toVulkanBlendFactor(state.srcFactors[blendDescIndex]);
+                attachments[i].dstColorBlendFactor = toVulkanBlendFactor(state.dstFactors[blendDescIndex]);
+                attachments[i].colorBlendOp = toVulkanBlendOp(state.blendOps[blendDescIndex]);
+                attachments[i].srcAlphaBlendFactor = toVulkanBlendFactor(state.srcAlphaFactors[blendDescIndex]);
+                attachments[i].dstAlphaBlendFactor = toVulkanBlendFactor(state.dstAlphaFactors[blendDescIndex]);
+                attachments[i].alphaBlendOp = toVulkanBlendOp(state.blendAlphaOps[blendDescIndex]);
             }
 
-            if (state->independentBlend)
+            if (state.independentBlend)
                 ++blendDescIndex;
         }
 
@@ -269,31 +267,31 @@ namespace Blast {
         return BlendStateInfo;
     }
 
-    static VkPipelineDepthStencilStateCreateInfo toDepthDesc(const GfxDepthState* state) {
+    static VkPipelineDepthStencilStateCreateInfo toDepthDesc(const GfxDepthState& state) {
         VkPipelineDepthStencilStateCreateInfo DepthStencilStateInfo = {};
         DepthStencilStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         DepthStencilStateInfo.pNext = NULL;
         DepthStencilStateInfo.flags = 0;
-        DepthStencilStateInfo.depthTestEnable = state->depthTest ? VK_TRUE : VK_FALSE;
-        DepthStencilStateInfo.depthWriteEnable = state->depthWrite ? VK_TRUE : VK_FALSE;
-        DepthStencilStateInfo.depthCompareOp = toVulkanCompareOp(state->depthFunc);
+        DepthStencilStateInfo.depthTestEnable = state.depthTest ? VK_TRUE : VK_FALSE;
+        DepthStencilStateInfo.depthWriteEnable = state.depthWrite ? VK_TRUE : VK_FALSE;
+        DepthStencilStateInfo.depthCompareOp = toVulkanCompareOp(state.depthFunc);
         DepthStencilStateInfo.depthBoundsTestEnable = VK_FALSE;
-        DepthStencilStateInfo.stencilTestEnable = state->stencilTest ? VK_TRUE : VK_FALSE;
+        DepthStencilStateInfo.stencilTestEnable = state.stencilTest ? VK_TRUE : VK_FALSE;
 
-        DepthStencilStateInfo.front.failOp = toVulkanStencilOp(state->stencilFrontFail);
-        DepthStencilStateInfo.front.passOp = toVulkanStencilOp(state->stencilFrontPass);
-        DepthStencilStateInfo.front.depthFailOp = toVulkanStencilOp(state->depthFrontFail);
-        DepthStencilStateInfo.front.compareOp = toVulkanCompareOp(state->stencilFrontFunc);
-        DepthStencilStateInfo.front.compareMask = state->stencilReadMask;
-        DepthStencilStateInfo.front.writeMask = state->stencilWriteMask;
+        DepthStencilStateInfo.front.failOp = toVulkanStencilOp(state.stencilFrontFail);
+        DepthStencilStateInfo.front.passOp = toVulkanStencilOp(state.stencilFrontPass);
+        DepthStencilStateInfo.front.depthFailOp = toVulkanStencilOp(state.depthFrontFail);
+        DepthStencilStateInfo.front.compareOp = toVulkanCompareOp(state.stencilFrontFunc);
+        DepthStencilStateInfo.front.compareMask = state.stencilReadMask;
+        DepthStencilStateInfo.front.writeMask = state.stencilWriteMask;
         DepthStencilStateInfo.front.reference = 0;
 
-        DepthStencilStateInfo.back.failOp = toVulkanStencilOp(state->stencilBackFail);
-        DepthStencilStateInfo.back.passOp = toVulkanStencilOp(state->stencilBackPass);
-        DepthStencilStateInfo.back.depthFailOp = toVulkanStencilOp(state->depthBackFail);
-        DepthStencilStateInfo.back.compareOp = toVulkanCompareOp(state->stencilBackFunc);
-        DepthStencilStateInfo.back.compareMask = state->stencilReadMask;
-        DepthStencilStateInfo.back.writeMask = state->stencilWriteMask;
+        DepthStencilStateInfo.back.failOp = toVulkanStencilOp(state.stencilBackFail);
+        DepthStencilStateInfo.back.passOp = toVulkanStencilOp(state.stencilBackPass);
+        DepthStencilStateInfo.back.depthFailOp = toVulkanStencilOp(state.depthBackFail);
+        DepthStencilStateInfo.back.compareOp = toVulkanCompareOp(state.stencilBackFunc);
+        DepthStencilStateInfo.back.compareMask = state.stencilReadMask;
+        DepthStencilStateInfo.back.writeMask = state.stencilWriteMask;
         DepthStencilStateInfo.back.reference = 0;
 
         DepthStencilStateInfo.minDepthBounds = 0;
@@ -302,20 +300,20 @@ namespace Blast {
         return DepthStencilStateInfo;
     }
 
-    static VkPipelineRasterizationStateCreateInfo toRasterizerDesc(const GfxRasterizerState* state) {
+    static VkPipelineRasterizationStateCreateInfo toRasterizerDesc(const GfxRasterizerState& state) {
         VkPipelineRasterizationStateCreateInfo rasterizationStateInfo = {};
         rasterizationStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizationStateInfo.pNext = NULL;
         rasterizationStateInfo.flags = 0;
-        rasterizationStateInfo.depthClampEnable = state->depthClampEnable ? VK_TRUE : VK_FALSE;
+        rasterizationStateInfo.depthClampEnable = state.depthClampEnable ? VK_TRUE : VK_FALSE;
         rasterizationStateInfo.rasterizerDiscardEnable = VK_FALSE;
-        rasterizationStateInfo.polygonMode = toVulkanFillMode(state->fillMode);
-        rasterizationStateInfo.cullMode = toVulkanCullMode(state->cullMode);
-        rasterizationStateInfo.frontFace = toVulkanFrontFace(state->frontFace);
-        rasterizationStateInfo.depthBiasEnable = (state->depthBias != 0) ? VK_TRUE : VK_FALSE;
-        rasterizationStateInfo.depthBiasConstantFactor = float(state->depthBias);
+        rasterizationStateInfo.polygonMode = toVulkanFillMode(state.fillMode);
+        rasterizationStateInfo.cullMode = toVulkanCullMode(state.cullMode);
+        rasterizationStateInfo.frontFace = toVulkanFrontFace(state.frontFace);
+        rasterizationStateInfo.depthBiasEnable = (state.depthBias != 0) ? VK_TRUE : VK_FALSE;
+        rasterizationStateInfo.depthBiasConstantFactor = float(state.depthBias);
         rasterizationStateInfo.depthBiasClamp = 0.0f;
-        rasterizationStateInfo.depthBiasSlopeFactor = state->slopeScaledDepthBias;
+        rasterizationStateInfo.depthBiasSlopeFactor = state.slopeScaledDepthBias;
         rasterizationStateInfo.lineWidth = 1;
 
         return rasterizationStateInfo;
@@ -376,36 +374,34 @@ namespace Blast {
             shaderInfos.push_back(shaderInfo);
         }
 
+        // 设置当前的管线的顶点布局
         uint32_t inputBindingCount = 0;
         VkVertexInputBindingDescription inputBindings[MAX_VERTEX_BINDINGS] = { { 0 } };
         uint32_t inputAttributeCount = 0;
         VkVertexInputAttributeDescription inputAttributes[MAX_VERTEX_ATTRIBS] = { { 0 } };
-        if (desc.vertexLayout) {
-            uint32_t attribCount = desc.vertexLayout->attribCount > MAX_VERTEX_ATTRIBS ? MAX_VERTEX_ATTRIBS : desc.vertexLayout->attribCount;
-            uint32_t bindingValue = UINT32_MAX;
+        uint32_t attribCount = desc.vertexLayout.attribCount > MAX_VERTEX_ATTRIBS ? MAX_VERTEX_ATTRIBS : desc.vertexLayout.attribCount;
+        uint32_t bindingValue = UINT32_MAX;
+        for (int i = 0; i < attribCount; ++i) {
+            const GfxVertexAttrib* attrib = &(desc.vertexLayout.attribs[i]);
 
-            for (int i = 0; i < attribCount; ++i) {
-                const GfxVertexAttrib* attrib = &(desc.vertexLayout->attribs[i]);
-
-                if (bindingValue != attrib->binding) {
-                    bindingValue = attrib->binding;
-                    ++inputBindingCount;
-                }
-
-                inputBindings[inputBindingCount - 1].binding = bindingValue;
-                if (attrib->rate == VERTEX_ATTRIB_RATE_INSTANCE) {
-                    inputBindings[inputBindingCount - 1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
-                } else {
-                    inputBindings[inputBindingCount - 1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-                }
-                inputBindings[inputBindingCount - 1].stride += mContext->getFormatStride(attrib->format);
-
-                inputAttributes[inputAttributeCount].location = attrib->location;
-                inputAttributes[inputAttributeCount].binding = attrib->binding;
-                inputAttributes[inputAttributeCount].format = toVulkanFormat(attrib->format);
-                inputAttributes[inputAttributeCount].offset = attrib->offset;
-                ++inputAttributeCount;
+            if (bindingValue != attrib->binding) {
+                bindingValue = attrib->binding;
+                ++inputBindingCount;
             }
+
+            inputBindings[inputBindingCount - 1].binding = bindingValue;
+            if (attrib->rate == VERTEX_ATTRIB_RATE_INSTANCE) {
+                inputBindings[inputBindingCount - 1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+            } else {
+                inputBindings[inputBindingCount - 1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+            }
+            inputBindings[inputBindingCount - 1].stride += mContext->getFormatStride(attrib->format);
+
+            inputAttributes[inputAttributeCount].location = attrib->location;
+            inputAttributes[inputAttributeCount].binding = attrib->binding;
+            inputAttributes[inputAttributeCount].format = toVulkanFormat(attrib->format);
+            inputAttributes[inputAttributeCount].offset = attrib->offset;
+            ++inputAttributeCount;
         }
         VkPipelineVertexInputStateCreateInfo vertexInputStateInfo = {};
         vertexInputStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -416,8 +412,9 @@ namespace Blast {
         vertexInputStateInfo.vertexAttributeDescriptionCount = inputAttributeCount;
         vertexInputStateInfo.pVertexAttributeDescriptions = inputAttributes;
 
+        // 设置当前管线的图元单位
         VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        switch (desc.primitiveTopo) {
+        switch (desc.rasterizerState.primitiveTopo) {
             case PRIMITIVE_TOPO_POINT_LIST: topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST; break;
             case PRIMITIVE_TOPO_LINE_LIST: topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST; break;
             case PRIMITIVE_TOPO_LINE_STRIP: topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP; break;
@@ -432,6 +429,7 @@ namespace Blast {
         inputAssemblyStateInfo.topology = topology;
         inputAssemblyStateInfo.primitiveRestartEnable = VK_FALSE;
 
+        // 设置当前管线的viewport,目前由外部动态设置
         VkPipelineViewportStateCreateInfo viewportStateInfo = {};
         viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportStateInfo.pNext = NULL;
@@ -441,6 +439,7 @@ namespace Blast {
         viewportStateInfo.scissorCount = 1;
         viewportStateInfo.pScissors = NULL;
 
+        // 设置当前管线的多重采样
         VkPipelineMultisampleStateCreateInfo multisampleStateInfo = {};
         multisampleStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampleStateInfo.pNext = NULL;
@@ -458,6 +457,7 @@ namespace Blast {
         VkPipelineDepthStencilStateCreateInfo depthStencilStateInfo = {};
         depthStencilStateInfo = toDepthDesc(desc.depthState);
 
+        // 设置当前管线的混合状态
         VkPipelineColorBlendStateCreateInfo blendStateInfo = {};
         VkPipelineColorBlendAttachmentState blendAttachment[MAX_RENDER_TARGET_ATTACHMENTS];
         blendStateInfo = toBlendDesc(desc.blendState, blendAttachment);

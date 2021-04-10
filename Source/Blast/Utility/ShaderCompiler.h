@@ -1,6 +1,6 @@
 #pragma once
-#include "Gfx/GfxDefine.h"
-#include "Gfx/GfxShader.h"
+#include "Blast/Gfx/GfxDefine.h"
+#include "Blast/Gfx/GfxShader.h"
 #include <vector>
 #include <string>
 

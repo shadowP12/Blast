@@ -1,5 +1,5 @@
 #include "VulkanShaderCompiler.h"
-#include "Utility/Logging.h"
+#include "Blast/Utility/Logging.h"
 #include <glslang/Include/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>

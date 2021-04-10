@@ -66,7 +66,6 @@ namespace Blast {
         if (volkInitialize() != VK_SUCCESS) {
             return;
         }
-
         uint32_t instanceAvailableLayerCount;
         VK_ASSERT(vkEnumerateInstanceLayerProperties(&instanceAvailableLayerCount, nullptr));
         std::vector<VkLayerProperties> instanceSupportedLayers(instanceAvailableLayerCount);

@@ -83,6 +83,7 @@ namespace Blast {
         float slopeScaledDepthBias = 0.0; // 默认为0
         bool multiSample = 1; // 默认一像素采样
         bool depthClampEnable = false;
+        PrimitiveTopology primitiveTopo = PRIMITIVE_TOPO_TRI_STRIP;
         FillMode fillMode;
         FrontFace frontFace;
         CullMode cullMode;
@@ -96,11 +97,10 @@ namespace Blast {
         GfxShader* geometryShader = nullptr;
         GfxShader* pixelShader = nullptr;
         GfxRootSignature* rootSignature = nullptr;
-        GfxVertexLayout* vertexLayout = nullptr;
-        GfxBlendState* blendState = nullptr;
-        GfxDepthState* depthState = nullptr;
-        GfxRasterizerState* rasterizerState = nullptr;
-        PrimitiveTopology primitiveTopo;
+        GfxVertexLayout vertexLayout;
+        GfxBlendState blendState;
+        GfxDepthState depthState;
+        GfxRasterizerState rasterizerState;
     };
 
     class GfxGraphicsPipeline {

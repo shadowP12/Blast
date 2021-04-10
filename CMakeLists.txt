@@ -2,36 +2,33 @@ cmake_minimum_required(VERSION 3.13)
 project(Blast)
 set(CMAKE_CXX_STANDARD 14)
 
-if (MSVC)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-add_library(Blast SHARED)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(Blast STATIC)
 target_include_directories(Blast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_sources(Blast PUBLIC
-        Source/Gfx/GfxContext.cpp
-        Source/Gfx/GfxBuffer.cpp
-        Source/Gfx/GfxTexture.cpp
-        Source/Gfx/GfxRenderTarget.cpp
-        Source/Gfx/GfxSwapchain.cpp
-        Source/Gfx/GfxCommandBuffer.cpp
-        Source/Gfx/GfxPipeline.cpp
-        Source/Gfx/GfxShader.cpp
-        Source/Gfx/GfxSampler.cpp
-        Source/Gfx/Vulkan/VulkanDefine.cpp
-        Source/Gfx/Vulkan/VulkanContext.cpp
-        Source/Gfx/Vulkan/VulkanBuffer.cpp
-        Source/Gfx/Vulkan/VulkanTexture.cpp
-        Source/Gfx/Vulkan/VulkanRenderTarget.cpp
-        Source/Gfx/Vulkan/VulkanSwapchain.cpp
-        Source/Gfx/Vulkan/VulkanCommandBuffer.cpp
-        Source/Gfx/Vulkan/VulkanPipeline.cpp
-        Source/Gfx/Vulkan/VulkanShader.cpp
-        Source/Gfx/Vulkan/VulkanSampler.cpp
-        Source/Utility/VulkanShaderCompiler.cpp)
+        Source/Blast/Gfx/GfxContext.cpp
+        Source/Blast/Gfx/GfxBuffer.cpp
+        Source/Blast/Gfx/GfxTexture.cpp
+        Source/Blast/Gfx/GfxRenderTarget.cpp
+        Source/Blast/Gfx/GfxSwapchain.cpp
+        Source/Blast/Gfx/GfxCommandBuffer.cpp
+        Source/Blast/Gfx/GfxPipeline.cpp
+        Source/Blast/Gfx/GfxShader.cpp
+        Source/Blast/Gfx/GfxSampler.cpp
+        Source/Blast/Gfx/Vulkan/VulkanDefine.cpp
+        Source/Blast/Gfx/Vulkan/VulkanContext.cpp
+        Source/Blast/Gfx/Vulkan/VulkanBuffer.cpp
+        Source/Blast/Gfx/Vulkan/VulkanTexture.cpp
+        Source/Blast/Gfx/Vulkan/VulkanRenderTarget.cpp
+        Source/Blast/Gfx/Vulkan/VulkanSwapchain.cpp
+        Source/Blast/Gfx/Vulkan/VulkanCommandBuffer.cpp
+        Source/Blast/Gfx/Vulkan/VulkanPipeline.cpp
+        Source/Blast/Gfx/Vulkan/VulkanShader.cpp
+        Source/Blast/Gfx/Vulkan/VulkanSampler.cpp
+        Source/Blast/Utility/VulkanShaderCompiler.cpp)
 
-if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    target_compile_definitions(Blast PUBLIC VULKAN_DEBUG)
-endif()
+# 默认启动验证层
+target_compile_definitions(Blast PUBLIC VULKAN_DEBUG)
 
 # volk
 add_library(volk STATIC External/volk/volk.c External/volk/volk.h)
@@ -65,10 +62,3 @@ target_link_libraries(Blast PUBLIC spirv-cross-hlsl)
 target_link_libraries(Blast PUBLIC spirv-cross-msl)
 target_link_libraries(Blast PUBLIC spirv-cross-reflect)
 target_link_libraries(Blast PUBLIC spirv-cross-util)
-
-#if (WIN32)
-#    install(TARGETS Blast
-#            RUNTIME DESTINATION bin
-#            ARCHIVE DESTINATION lib
-#            LIBRARY DESTINATION lib)
-#endif()

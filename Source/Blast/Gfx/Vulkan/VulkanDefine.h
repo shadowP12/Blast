@@ -7,7 +7,6 @@
 #include "../GfxDefine.h"
 #include "../../Utility/Logging.h"
 
-#ifdef VULKAN_DEBUG
 #define VK_ASSERT(x)                                                    \
 	do                                                                  \
 	{                                                                   \
@@ -17,9 +16,6 @@
 			abort();                                                    \
 		}                                                               \
 	} while (0)
-#else
-#define VK_ASSERT(x) ((void)0)
-#endif
 
 namespace Blast {
     VkSampleCountFlagBits toVulkanSampleCount(SampleCount sampleCount);
