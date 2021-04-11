@@ -35,29 +35,28 @@ namespace Blast {
     };
 
     struct GfxVertexAttrib {
-        std::string name;
-        uint32_t binding;
-        uint32_t location;
-        uint32_t offset;
-        Format format;
-        ShaderSemantic semantic;
-        VertexAttribRate rate;
+        uint32_t binding = 0;
+        uint32_t location = 0;
+        uint32_t offset = 0;
+        Format format = FORMAT_UNKNOWN;
+        ShaderSemantic semantic = SEMANTIC_UNDEFINED;
+        VertexAttribRate rate = VERTEX_ATTRIB_RATE_VERTEX;
     };
 
     struct GfxVertexLayout {
-        uint32_t attribCount;
+        uint32_t attribCount = 0;
         GfxVertexAttrib attribs[MAX_VERTEX_ATTRIBS];
     };
 
     struct GfxBlendState {
-        BlendConstant srcFactors[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendConstant dstFactors[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendConstant srcAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendConstant dstAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendOp blendOps[MAX_RENDER_TARGET_ATTACHMENTS];
-        BlendOp blendAlphaOps[MAX_RENDER_TARGET_ATTACHMENTS];
+        BlendConstant srcFactors[MAX_RENDER_TARGET_ATTACHMENTS] = {};
+        BlendConstant dstFactors[MAX_RENDER_TARGET_ATTACHMENTS] = {};
+        BlendConstant srcAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS] = {};
+        BlendConstant dstAlphaFactors[MAX_RENDER_TARGET_ATTACHMENTS] = {};
+        BlendOp blendOps[MAX_RENDER_TARGET_ATTACHMENTS] = {};
+        BlendOp blendAlphaOps[MAX_RENDER_TARGET_ATTACHMENTS] = {};
         BlendStateTargets targetMask = BLEND_STATE_TARGET_ALL; // 默认当前Pass里面的所有RT都受Blend影响
-        uint32_t masks[MAX_RENDER_TARGET_ATTACHMENTS]; // 该mask用来设置最终写入RT的Color Component
+        uint32_t masks[MAX_RENDER_TARGET_ATTACHMENTS] = {}; // 该mask用来设置最终写入RT的Color Component
         bool independentBlend = false; // 默认所有RT统一使用相同设置
     };
 
@@ -83,10 +82,10 @@ namespace Blast {
         float slopeScaledDepthBias = 0.0; // 默认为0
         bool multiSample = 1; // 默认一像素采样
         bool depthClampEnable = false;
-        PrimitiveTopology primitiveTopo = PRIMITIVE_TOPO_TRI_STRIP;
-        FillMode fillMode;
-        FrontFace frontFace;
-        CullMode cullMode;
+        PrimitiveTopology primitiveTopo = PRIMITIVE_TOPO_TRI_LIST;
+        FillMode fillMode = FILL_MODE_SOLID;
+        FrontFace frontFace = FRONT_FACE_CW;
+        CullMode cullMode = CULL_MODE_NONE;
     };
 
     struct GfxGraphicsPipelineDesc {

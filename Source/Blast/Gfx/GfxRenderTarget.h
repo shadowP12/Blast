@@ -31,9 +31,9 @@ namespace Blast {
 
     struct GfxRenderPassDesc {
         uint32_t numColorAttachments = 0;
-        GfxColorAttachmentDesc colors[8];
+        GfxColorAttachmentDesc colors[MAX_RENDER_TARGET_ATTACHMENTS] = {};
         bool hasDepthStencil = false;
-        GfxDepthStencilAttachmentDesc depthStencil;
+        GfxDepthStencilAttachmentDesc depthStencil = {};
     };
 
     class GfxRenderPass {
@@ -51,7 +51,7 @@ namespace Blast {
     struct GfxFramebufferDesc {
         GfxRenderPass* renderPass = nullptr;
         uint32_t numColorAttachments = 0;
-        GfxColorAttachment colors[8];
+        GfxColorAttachment colors[MAX_RENDER_TARGET_ATTACHMENTS];
         bool hasDepthStencil = false;
         GfxDepthStencilAttachment depthStencil;
         uint32_t width;
