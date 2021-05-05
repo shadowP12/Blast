@@ -129,30 +129,16 @@ namespace Blast {
     }
 
     void VulkanCommandBuffer::bindRootSignature(GfxRootSignature* rootSignature) {
+        // TODO: 计算着色器
         VulkanRootSignature* internelRootSignature = static_cast<VulkanRootSignature*>(rootSignature);
-        ShaderStage stages = internelRootSignature->getShaderStages();
-
-        if (SHADER_STAGE_VERT == (stages & SHADER_STAGE_VERT)) {
-            vkCmdBindDescriptorSets(mCommandBuffer,
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    internelRootSignature->getPipelineLayout(),
-                                    0,
-                                    internelRootSignature->getSets().size(),
-                                    internelRootSignature->getSets().data(),
-                                    0,
-                                    nullptr);
-        }
-
-        if (SHADER_STAGE_COMP == (stages & SHADER_STAGE_COMP)) {
-            vkCmdBindDescriptorSets(mCommandBuffer,
-                                    VK_PIPELINE_BIND_POINT_COMPUTE,
-                                    internelRootSignature->getPipelineLayout(),
-                                    0,
-                                    internelRootSignature->getSets().size(),
-                                    internelRootSignature->getSets().data(),
-                                    0,
-                                    nullptr);
-        }
+        vkCmdBindDescriptorSets(mCommandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                internelRootSignature->getPipelineLayout(),
+                                0,
+                                internelRootSignature->getSets().size(),
+                                internelRootSignature->getSets().data(),
+                                0,
+                                nullptr);
     }
 
     void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {

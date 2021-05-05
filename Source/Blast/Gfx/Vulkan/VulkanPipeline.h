@@ -11,11 +11,12 @@ namespace Blast {
     public:
         VulkanRootSignature(VulkanContext* context, const GfxRootSignatureDesc& desc);
         ~VulkanRootSignature();
-        void setSampler(const std::string& name, GfxSampler* sampler) override;
-        void setTexture(const std::string& name, GfxTexture* texture) override;
-        void setRWTexture(const std::string& name, GfxTexture* texture) override;
-        void setUniformBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
-        void setRWBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
+        void setSampler(const uint8_t& set, const uint8_t& reg, GfxSampler* sampler) override;
+        void setTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) override;
+        void setCombinedSampler(const uint8_t& set, const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) override;
+        void setRWTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) override;
+        void setUniformBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
+        void setRWBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
         VkPipelineLayout getPipelineLayout() { return mPipelineLayout; }
         const std::vector<VkDescriptorSet>& getSets() { return mSets; };
     protected:

@@ -408,6 +408,8 @@ namespace Blast {
 
                 spirv_cross::SPIRType type = compiler->get_type(resource.spv_type.type_id);
                 for(uint32_t j = 0; j < (uint32_t)type.member_types.size(); ++j) {
+                    spirv_cross::SPIRType memberType = compiler->get_type(type.member_types[j]);
+
                     SpvVariable& variable = inCompiler->variables[currentVariableIndex++];
 
                     variable.spv_type_id = type.member_types[j];

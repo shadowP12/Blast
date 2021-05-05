@@ -12,65 +12,15 @@ namespace Blast {
         mContext = context;
 
         std::map<int, std::vector<VkDescriptorSetLayoutBinding>> bindingsMap;
-        if (SHADER_STAGE_VERT == (mStages & SHADER_STAGE_VERT)) {
-            for (int i = 0; i < desc.vertex.resources.size(); ++i) {
-                const GfxShaderResource& shaderResource = desc.vertex.resources[i];
-                VkDescriptorSetLayoutBinding binding = {};
-                binding.pImmutableSamplers = nullptr;
-                binding.binding = shaderResource.reg;
-                binding.descriptorCount = shaderResource.size;
-                binding.descriptorType = toVulkanDescriptorType(shaderResource.type);
-                binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                bindingsMap[shaderResource.set].push_back(binding);
-            }
-        }
-        if (SHADER_STAGE_TESC == (mStages & SHADER_STAGE_TESC)) {
-            for (int i = 0; i < desc.hull.resources.size(); ++i) {
-                const GfxShaderResource& shaderResource = desc.hull.resources[i];
-                VkDescriptorSetLayoutBinding binding = {};
-                binding.pImmutableSamplers = nullptr;
-                binding.binding = shaderResource.reg;
-                binding.descriptorCount = shaderResource.size;
-                binding.descriptorType = toVulkanDescriptorType(shaderResource.type);
-                binding.stageFlags = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-                bindingsMap[shaderResource.set].push_back(binding);
-            }
-        }
-        if (SHADER_STAGE_TESE == (mStages & SHADER_STAGE_TESE)) {
-            for (int i = 0; i < desc.domain.resources.size(); ++i) {
-                const GfxShaderResource& shaderResource = desc.domain.resources[i];
-                VkDescriptorSetLayoutBinding binding = {};
-                binding.pImmutableSamplers = nullptr;
-                binding.binding = shaderResource.reg;
-                binding.descriptorCount = shaderResource.size;
-                binding.descriptorType = toVulkanDescriptorType(shaderResource.type);
-                binding.stageFlags = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-                bindingsMap[shaderResource.set].push_back(binding);
-            }
-        }
-        if (SHADER_STAGE_GEOM == (mStages & SHADER_STAGE_GEOM)) {
-            for (int i = 0; i < desc.geometry.resources.size(); ++i) {
-                const GfxShaderResource& shaderResource = desc.geometry.resources[i];
-                VkDescriptorSetLayoutBinding binding = {};
-                binding.pImmutableSamplers = nullptr;
-                binding.binding = shaderResource.reg;
-                binding.descriptorCount = shaderResource.size;
-                binding.descriptorType = toVulkanDescriptorType(shaderResource.type);
-                binding.stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
-                bindingsMap[shaderResource.set].push_back(binding);
-            }
-        }
-        if (SHADER_STAGE_FRAG == (mStages & SHADER_STAGE_FRAG)) {
-            for (int i = 0; i < desc.pixel.resources.size(); ++i) {
-                const GfxShaderResource& shaderResource = desc.pixel.resources[i];
-                VkDescriptorSetLayoutBinding binding = {};
-                binding.pImmutableSamplers = nullptr;
-                binding.binding = shaderResource.reg;
-                binding.descriptorCount = shaderResource.size;
-                binding.descriptorType = toVulkanDescriptorType(shaderResource.type);
-                binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                bindingsMap[shaderResource.set].push_back(binding);
-            }
+        for (int i = 0; i < desc.registers.size(); ++i) {
+            const GfxRegisterInfo& registerInfo = desc.registers[i];
+            VkDescriptorSetLayoutBinding binding = {};
+            binding.pImmutableSamplers = nullptr;
+            binding.binding = registerInfo.reg;
+            binding.descriptorCount = registerInfo.size;
+            binding.descriptorType = toVulkanDescriptorType(registerInfo.type);
+            binding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+            bindingsMap[registerInfo.set].push_back(binding);
         }
 
         std::vector<VkDescriptorSetLayout> layouts;
@@ -115,117 +65,99 @@ namespace Blast {
         vkDestroyPipelineLayout(mContext->getDevice(), mPipelineLayout, nullptr);
     }
 
-    void VulkanRootSignature::setSampler(const std::string& name, GfxSampler* sampler) {
-        for (int i = 0; i < mShaderReflections.size(); ++i) {
-            GfxShaderReflection* reflection = &mShaderReflections[i];
-            for (int j = 0; j < reflection->resources.size(); ++j) {
-                if (name == reflection->resources[j].name) {
-                    VulkanSampler* internelSampler = static_cast<VulkanSampler*>(sampler);
-                    VkDescriptorImageInfo imageInfo{};
-                    imageInfo.sampler = internelSampler->getHandle();
-                    VkWriteDescriptorSet descriptorWrite = {};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = mSetMap[reflection->resources[j].set];
-                    descriptorWrite.dstBinding = reflection->resources[j].reg;
-                    descriptorWrite.pImageInfo = &imageInfo;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-                    vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
-                }
-            }
-        }
+    void VulkanRootSignature::setSampler(const uint8_t& set, const uint8_t& reg, GfxSampler* sampler) {
+        VulkanSampler* internelSampler = static_cast<VulkanSampler*>(sampler);
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.sampler = internelSampler->getHandle();
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 
-    void VulkanRootSignature::setTexture(const std::string& name, GfxTexture* texture) {
-        for (int i = 0; i < mShaderReflections.size(); ++i) {
-            GfxShaderReflection* reflection = &mShaderReflections[i];
-            for (int j = 0; j < reflection->resources.size(); ++j) {
-                if (name == reflection->resources[j].name) {
-                    VulkanTexture* internelTexture = static_cast<VulkanTexture*>(texture);
-                    VkDescriptorImageInfo imageInfo{};
-                    imageInfo.imageView = internelTexture->getSRV(0, 0);
-                    imageInfo.imageLayout = toVulkanImageLayout(internelTexture->getResourceState());
-                    VkWriteDescriptorSet descriptorWrite = {};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = mSetMap[reflection->resources[j].set];
-                    descriptorWrite.dstBinding = reflection->resources[j].reg;
-                    descriptorWrite.pImageInfo = &imageInfo;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                    vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
-                }
-            }
-        }
+    void VulkanRootSignature::setTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) {
+        VulkanTexture* internelTexture = static_cast<VulkanTexture*>(texture);
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageView = internelTexture->getSRV(0, 0);
+        imageInfo.imageLayout = toVulkanImageLayout(internelTexture->getResourceState());
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 
-    void VulkanRootSignature::setRWTexture(const std::string& name, GfxTexture* texture) {
-        for (int i = 0; i < mShaderReflections.size(); ++i) {
-            GfxShaderReflection* reflection = &mShaderReflections[i];
-            for (int j = 0; j < reflection->resources.size(); ++j) {
-                if (name == reflection->resources[j].name) {
-                    VulkanTexture* internelTexture = static_cast<VulkanTexture*>(texture);
-                    VkDescriptorImageInfo imageInfo{};
-                    imageInfo.imageView = internelTexture->getUAV(0, 0);
-                    imageInfo.imageLayout = toVulkanImageLayout(internelTexture->getResourceState());
-                    VkWriteDescriptorSet descriptorWrite = {};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = mSetMap[reflection->resources[j].set];
-                    descriptorWrite.dstBinding = reflection->resources[j].reg;
-                    descriptorWrite.pImageInfo = &imageInfo;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-                    vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
-                }
-            }
-        }
+    void VulkanRootSignature::setCombinedSampler(const uint8_t& set, const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) {
+        VulkanTexture* internelTexture = static_cast<VulkanTexture*>(texture);
+        VulkanSampler* internelSampler = static_cast<VulkanSampler*>(sampler);
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageView = internelTexture->getSRV(0, 0);
+        imageInfo.sampler = internelSampler->getHandle();
+        imageInfo.imageLayout = toVulkanImageLayout(internelTexture->getResourceState());
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 
-    void VulkanRootSignature::setUniformBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) {
-        for (int i = 0; i < mShaderReflections.size(); ++i) {
-            GfxShaderReflection* reflection = &mShaderReflections[i];
-            for (int j = 0; j < reflection->resources.size(); ++j) {
-                if (name == reflection->resources[j].name) {
-                    VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(buffer);
-                    VkDescriptorBufferInfo bufferInfo = {};
-                    bufferInfo.buffer = internelBuffer->getHandle();
-                    bufferInfo.offset = offset;
-                    bufferInfo.range = size;
-                    VkWriteDescriptorSet descriptorWrite = {};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = mSetMap[reflection->resources[j].set];
-                    descriptorWrite.dstBinding = reflection->resources[j].reg;
-                    descriptorWrite.dstArrayElement = 0;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.pBufferInfo = &bufferInfo;
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
-                }
-            }
-        }
+    void VulkanRootSignature::setRWTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) {
+        VulkanTexture* internelTexture = static_cast<VulkanTexture*>(texture);
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageView = internelTexture->getUAV(0, 0);
+        imageInfo.imageLayout = toVulkanImageLayout(internelTexture->getResourceState());
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 
-    void VulkanRootSignature::setRWBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) {
-        for (int i = 0; i < mShaderReflections.size(); ++i) {
-            GfxShaderReflection* reflection = &mShaderReflections[i];
-            for (int j = 0; j < reflection->resources.size(); ++j) {
-                if (name == reflection->resources[j].name) {
-                    VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(buffer);
-                    VkDescriptorBufferInfo bufferInfo = {};
-                    bufferInfo.buffer = internelBuffer->getHandle();
-                    bufferInfo.offset = offset;
-                    bufferInfo.range = size;
-                    VkWriteDescriptorSet descriptorWrite = {};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = mSetMap[reflection->resources[j].set];
-                    descriptorWrite.dstBinding = reflection->resources[j].reg;
-                    descriptorWrite.dstArrayElement = 0;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.pBufferInfo = &bufferInfo;
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                    vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
-                }
-            }
-        }
+    void VulkanRootSignature::setUniformBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) {
+        VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(buffer);
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = internelBuffer->getHandle();
+        bufferInfo.offset = offset;
+        bufferInfo.range = size;
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
+    }
+
+    void VulkanRootSignature::setRWBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) {
+        VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(buffer);
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = internelBuffer->getHandle();
+        bufferInfo.offset = offset;
+        bufferInfo.range = size;
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = mSetMap[set];
+        descriptorWrite.dstBinding = reg;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        vkUpdateDescriptorSets(mContext->getDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 
     static VkPipelineColorBlendStateCreateInfo toBlendDesc(const GfxBlendState& state, VkPipelineColorBlendAttachmentState* attachments) {

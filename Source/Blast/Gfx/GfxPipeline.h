@@ -10,28 +10,28 @@ namespace Blast {
     class GfxSampler;
     class GfxRenderPass;
 
+    struct GfxRegisterInfo {
+        uint16_t set;
+        uint16_t reg;
+        uint16_t size;
+        ResourceType type;
+    };
+
     struct GfxRootSignatureDesc {
-        GfxShaderReflection vertex;
-        GfxShaderReflection hull;
-        GfxShaderReflection domain;
-        GfxShaderReflection geometry;
-        GfxShaderReflection pixel;
-        GfxShaderReflection compute;
-        ShaderStage stages;
+        std::vector<GfxRegisterInfo> registers;
     };
 
     class GfxRootSignature {
     public:
         GfxRootSignature(const GfxRootSignatureDesc& desc);
-        ShaderStage getShaderStages() { return mStages; }
-        virtual void setSampler(const std::string& name, GfxSampler* sampler) = 0;
-        virtual void setTexture(const std::string& name, GfxTexture* texture) = 0;
-        virtual void setRWTexture(const std::string& name, GfxTexture* texture) = 0;
-        virtual void setUniformBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
-        virtual void setRWBuffer(const std::string& name, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+        virtual void setSampler(const uint8_t& set, const uint8_t& reg, GfxSampler* sampler) = 0;
+        virtual void setTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) = 0;
+        virtual void setCombinedSampler(const uint8_t& set, const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) = 0;
+        virtual void setRWTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) = 0;
+        virtual void setUniformBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+        virtual void setRWBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
     protected:
-        ShaderStage mStages;
-        std::vector<GfxShaderReflection> mShaderReflections;
+        std::vector<GfxRegisterInfo> mRegisters;
     };
 
     struct GfxVertexAttrib {
