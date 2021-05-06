@@ -79,6 +79,7 @@ namespace Blast {
 
     static ResourceType toGfxResourceType(SpvResourceType type);
     static TextureDimension toGfxResourceDim(SpvResourceDim dim);
+    static UniformType toUniformTypr(SpvType type);
     static void createCrossCompiler(const std::vector<uint32_t>& bytes, CrossCompiler* outCompiler);
     static void destroyCrossCompiler(CrossCompiler* inCompiler);
     static void reflectShaderResources(CrossCompiler* inCompiler);
@@ -160,7 +161,7 @@ namespace Blast {
             res.size = cc.resouces[i].size;
             res.dim = toGfxResourceDim(cc.resouces[i].dim);
             res.type = toGfxResourceType(cc.resouces[i].type);
-            result.reflection.resources.push_back(res);
+            result.resources.push_back(res);
         }
 
         for (int i = 0; i < cc.variables.size(); ++i) {
@@ -169,12 +170,15 @@ namespace Blast {
             var.parentIndex = cc.variables[i].parent_index;
             var.size = cc.variables[i].size;
             var.offset = cc.variables[i].offset;
-            result.reflection.variables.push_back(var);
-
+            result.variables.push_back(var);
         }
 
         destroyCrossCompiler(&cc);
         return result;
+    }
+
+    UniformType toUniformTypr(SpvType type) {
+        UniformType result = UniformType::UNDEFINED;
     }
 
     static ResourceType toGfxResourceType(SpvResourceType type) {
@@ -409,6 +413,9 @@ namespace Blast {
                 spirv_cross::SPIRType type = compiler->get_type(resource.spv_type.type_id);
                 for(uint32_t j = 0; j < (uint32_t)type.member_types.size(); ++j) {
                     spirv_cross::SPIRType memberType = compiler->get_type(type.member_types[j]);
+
+                    // 数组的大小
+                    int count = memberType.array[0];
 
                     SpvVariable& variable = inCompiler->variables[currentVariableIndex++];
 
