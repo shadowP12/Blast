@@ -8,9 +8,6 @@ namespace Blast {
     enum class UniformType {
         UNDEFINED,
         BOOL,
-        BOOL2,
-        BOOL3,
-        BOOL4,
         FLOAT,
         FLOAT2,
         FLOAT3,
@@ -38,9 +35,10 @@ namespace Blast {
 
     struct GfxShaderVariable {
         std::string name;
-        uint32_t parentIndex;
-        uint32_t offset;
-        uint32_t size;
+        uint16_t parentIndex;
+        uint16_t offset;
+        uint16_t size;
+        uint16_t count;
         UniformType type;
     };
 

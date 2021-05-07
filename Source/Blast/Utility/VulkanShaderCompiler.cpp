@@ -68,7 +68,9 @@ namespace Blast {
         bool is_used;
         uint32_t offset;
         uint32_t size;
+        uint32_t count;
         std::string name;
+        UniformType type;
     };
 
     struct CrossCompiler {
@@ -170,6 +172,8 @@ namespace Blast {
             var.parentIndex = cc.variables[i].parent_index;
             var.size = cc.variables[i].size;
             var.offset = cc.variables[i].offset;
+            var.count = cc.variables[i].count;
+            var.type = cc.variables[i].type;
             result.variables.push_back(var);
         }
 
@@ -177,8 +181,64 @@ namespace Blast {
         return result;
     }
 
-    UniformType toUniformTypr(SpvType type) {
-        UniformType result = UniformType::UNDEFINED;
+    UniformType toUniformTypr(spirv_cross::SPIRType type) {
+        switch (type.basetype) {
+            case spirv_cross::SPIRType::Boolean:
+                if (type.vecsize == 1 && type.columns == 1) {
+                    return UniformType::BOOL;
+                } else {
+                    return UniformType::UNDEFINED;
+                }
+                break;
+            case spirv_cross::SPIRType::Float:
+                if (type.vecsize == 1 && type.columns == 1) {
+                    return UniformType::FLOAT;
+                } else if (type.vecsize == 2 && type.columns == 1) {
+                    return UniformType::FLOAT2;
+                } else if (type.vecsize == 3 && type.columns == 1) {
+                    return UniformType::FLOAT3;
+                } else if (type.vecsize == 4 && type.columns == 1) {
+                    return UniformType::FLOAT4;
+                } else if (type.vecsize == 3 && type.columns == 3) {
+                    return UniformType::MAT3;
+                } else if (type.vecsize == 4 && type.columns == 4) {
+                    return UniformType::MAT4;
+                } else {
+                    return UniformType::UNDEFINED;
+                }
+                break;
+            case spirv_cross::SPIRType::Int:
+                if (type.vecsize == 1 && type.columns == 1) {
+                    return UniformType::INT;
+                } else if (type.vecsize == 2 && type.columns == 1) {
+                    return UniformType::INT2;
+                } else if (type.vecsize == 3 && type.columns == 1) {
+                    return UniformType::INT3;
+                } else if (type.vecsize == 4 && type.columns == 1) {
+                    return UniformType::INT4;
+                } else {
+                    return UniformType::UNDEFINED;
+                }
+                break;
+            case spirv_cross::SPIRType::UInt:
+                if (type.vecsize == 1 && type.columns == 1) {
+                    return UniformType::UINT;
+                } else if (type.vecsize == 2 && type.columns == 1) {
+                    return UniformType::UINT2;
+                } else if (type.vecsize == 3 && type.columns == 1) {
+                    return UniformType::UINT3;
+                } else if (type.vecsize == 4 && type.columns == 1) {
+                    return UniformType::UINT4;
+                } else {
+                    return UniformType::UNDEFINED;
+                }
+                break;
+            default:
+                return UniformType::UNDEFINED;
+                break;
+        }
+
+        return UniformType::UNDEFINED;
     }
 
     static ResourceType toGfxResourceType(SpvResourceType type) {
@@ -414,9 +474,6 @@ namespace Blast {
                 for(uint32_t j = 0; j < (uint32_t)type.member_types.size(); ++j) {
                     spirv_cross::SPIRType memberType = compiler->get_type(type.member_types[j]);
 
-                    // 数组的大小
-                    int count = memberType.array[0];
-
                     SpvVariable& variable = inCompiler->variables[currentVariableIndex++];
 
                     variable.spv_type_id = type.member_types[j];
@@ -428,6 +485,14 @@ namespace Blast {
 
                     variable.size = (uint32_t)compiler->get_declared_struct_member_size(type, j);
                     variable.offset = compiler->get_member_decoration(resource.spv_type.base_type_id, j, spv::DecorationOffset);
+
+                    if (memberType.array.size() > 0) {
+                        variable.count = memberType.array[0];
+                    } else {
+                        variable.count = 1;
+                    }
+
+                    variable.type = toUniformTypr(memberType);
 
                     variable.name = compiler->get_member_name(resource.spv_type.base_type_id, j);
                 }
