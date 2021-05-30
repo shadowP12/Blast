@@ -4,6 +4,7 @@
 
 namespace Blast {
     class VulkanContext;
+    class VulkanRootSignature;
     class VulkanCommandBufferPool : public GfxCommandBufferPool {
     public:
         VulkanCommandBufferPool(VulkanContext* context, const GfxCommandBufferPoolDesc& desc);
@@ -32,6 +33,7 @@ namespace Blast {
         void bindIndexBuffer(GfxBuffer* indexBuffer, uint32_t offset, IndexType type) override;
         void bindGraphicsPipeline(GfxGraphicsPipeline* pipeline) override;
         void bindRootSignature(GfxRootSignature* rootSignature) override;
+        void bindDescriptorSets(uint32_t setCount, GfxDescriptorSet** sets) override;
         void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
         void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) override;
         void copyToBuffer(GfxBuffer* srcBuffer, uint32_t srcOffset, GfxBuffer* dstBuffer, uint32_t dstOffset, uint32_t size) override;
@@ -42,5 +44,6 @@ namespace Blast {
         VulkanContext* mContext = nullptr;
         VulkanCommandBufferPool* mPool;
         VkCommandBuffer mCommandBuffer;
+        VulkanRootSignature* mCurrentRootSignature = nullptr;
     };
 }

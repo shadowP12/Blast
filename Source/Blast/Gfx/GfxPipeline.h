@@ -10,6 +10,18 @@ namespace Blast {
     class GfxSampler;
     class GfxRenderPass;
 
+    class GfxDescriptorSet {
+    public:
+        GfxDescriptorSet() = default;
+        virtual void setSampler(const uint8_t& reg, GfxSampler* sampler) = 0;
+        virtual void setTexture(const uint8_t& reg, GfxTexture* texture) = 0;
+        virtual void setCombinedSampler(const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) = 0;
+        virtual void setRWTexture(const uint8_t& reg, GfxTexture* texture) = 0;
+        virtual void setUniformBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+        virtual void setRWBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+    };
+
+    // Shader里面"寄存器"的信息
     struct GfxRegisterInfo {
         uint16_t set;
         uint16_t reg;
@@ -21,15 +33,11 @@ namespace Blast {
         std::vector<GfxRegisterInfo> registers;
     };
 
+    // Shader的参数布局模板
     class GfxRootSignature {
     public:
         GfxRootSignature(const GfxRootSignatureDesc& desc);
-        virtual void setSampler(const uint8_t& set, const uint8_t& reg, GfxSampler* sampler) = 0;
-        virtual void setTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) = 0;
-        virtual void setCombinedSampler(const uint8_t& set, const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) = 0;
-        virtual void setRWTexture(const uint8_t& set, const uint8_t& reg, GfxTexture* texture) = 0;
-        virtual void setUniformBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
-        virtual void setRWBuffer(const uint8_t& set, const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) = 0;
+        virtual GfxDescriptorSet* allocateSet(const uint8_t& set) = 0;
     protected:
         std::vector<GfxRegisterInfo> mRegisters;
     };

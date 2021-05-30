@@ -131,12 +131,21 @@ namespace Blast {
     void VulkanCommandBuffer::bindRootSignature(GfxRootSignature* rootSignature) {
         // TODO: 计算着色器
         VulkanRootSignature* internelRootSignature = static_cast<VulkanRootSignature*>(rootSignature);
+        mCurrentRootSignature = internelRootSignature;
+    }
+
+    void VulkanCommandBuffer::bindDescriptorSets(uint32_t setCount, GfxDescriptorSet** sets) {
+        std::vector<VkDescriptorSet> internelSets;
+        for (int i = 0; i < setCount; ++i) {
+            internelSets.push_back(static_cast<VulkanDescriptorSet*>(sets[i])->getHandle());
+        }
+
         vkCmdBindDescriptorSets(mCommandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                internelRootSignature->getPipelineLayout(),
+                                mCurrentRootSignature->getPipelineLayout(),
                                 0,
-                                internelRootSignature->getSets().size(),
-                                internelRootSignature->getSets().data(),
+                                internelSets.size(),
+                                internelSets.data(),
                                 0,
                                 nullptr);
     }
