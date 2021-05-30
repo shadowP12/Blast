@@ -38,7 +38,8 @@ namespace Blast {
         virtual ~GfxFence() = default;
         virtual FenceStatus getFenceStatus() = 0;
         virtual void waitForComplete() = 0;
-        virtual void reset() = 0;
+        // 不应该把状态接口暴露给外部
+        // virtual void reset() = 0;
     };
 
     struct GfxSubmitInfo {

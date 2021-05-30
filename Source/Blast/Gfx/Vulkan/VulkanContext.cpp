@@ -457,8 +457,11 @@ namespace Blast {
 
         VkResult result = vkAcquireNextImageKHR(mDevice, internelSwapchain->getHandle(), UINT64_MAX, vkSemaphore, vkFence, imageIndex);
         if (result != VK_SUCCESS) {
+            // 当获取当前Image失败后，重置fence状态
             if (fence) {
-                fence->reset();
+                VulkanFence* internelFence = static_cast<VulkanFence*>(fence);
+                internelFence->mSubmitted = false;
+                vkResetFences(getDevice(), 1, &internelFence->mFence);
             }
             *imageIndex = -1;
         }
@@ -479,9 +482,11 @@ namespace Blast {
     VulkanFence::VulkanFence(VulkanContext* context)
         :GfxFence(){
         mContext = context;
+        mSubmitted = false;
         VkFenceCreateInfo fenceInfo = {};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        // 指定创建Fence时的状态
+        fenceInfo.flags = 0;
         VK_ASSERT(vkCreateFence(mContext->getDevice(), &fenceInfo, nullptr, &mFence));
     }
 
@@ -490,26 +495,40 @@ namespace Blast {
     }
 
     FenceStatus VulkanFence::getFenceStatus() {
+        if (mSubmitted) {
+            VkResult result = vkGetFenceStatus(mContext->getDevice(), mFence);
+            if(result == VK_SUCCESS) {
+                mSubmitted = false;
+                vkResetFences(mContext->getDevice(), 1, &mFence);
+                return FENCE_STATUS_COMPLETE;
+            } else {
+                return FENCE_STATUS_INCOMPLETE;
+            }
+        }
+        return FENCE_STATUS_NOTSUBMITTED;
+
         VkResult result = vkGetFenceStatus(mContext->getDevice(), mFence);
         if(result == VK_SUCCESS) {
             return FENCE_STATUS_COMPLETE;
+        } else if (result == VK_NOT_READY) {
+            return FENCE_STATUS_NOTSUBMITTED;
         }
         return FENCE_STATUS_INCOMPLETE;
     }
 
     void VulkanFence::waitForComplete() {
+        if (!mSubmitted) {
+            return;
+        }
         vkWaitForFences(mContext->getDevice(), 1, &mFence, VK_TRUE, UINT64_MAX);
-    }
-
-    void VulkanFence::reset() {
         vkResetFences(mContext->getDevice(), 1, &mFence);
+        mSubmitted = false;
     }
 
     VulkanQueue::VulkanQueue() {
     }
 
     VulkanQueue::~VulkanQueue() {
-
     }
 
     void VulkanQueue::submit(const GfxSubmitInfo& info) {
@@ -546,6 +565,7 @@ namespace Blast {
 
         if (info.signalFence) {
             VulkanFence* fence = static_cast<VulkanFence*>(info.signalFence);
+            fence->mSubmitted = true;
             VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, fence->getHandle()));
         } else {
             VK_ASSERT(vkQueueSubmit(mQueue, 1, &submitInfo, VK_NULL_HANDLE));

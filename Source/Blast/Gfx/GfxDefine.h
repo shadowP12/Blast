@@ -328,13 +328,12 @@ namespace Blast {
         SEMANTIC_WEIGHTS = 1 << 7,
         SEMANTIC_TEXCOORD0 = 1 << 8,
         SEMANTIC_TEXCOORD1 = 1 << 9,
-        SEMANTIC_TEXCOORD2 = 1 << 10,
-        SEMANTIC_TEXCOORD3 = 1 << 11,
-        SEMANTIC_TEXCOORD4 = 1 << 12,
-        SEMANTIC_TEXCOORD5 = 1 << 13,
-        SEMANTIC_TEXCOORD6 = 1 << 14,
-        SEMANTIC_TEXCOORD7 = 1 << 15,
-        SEMANTIC_TEXCOORD8 = 1 << 16
+        SEMANTIC_CUSTOM0 = 1 << 10,
+        SEMANTIC_CUSTOM1 = 1 << 11,
+        SEMANTIC_CUSTOM2 = 1 << 12,
+        SEMANTIC_CUSTOM3 = 1 << 13,
+        SEMANTIC_CUSTOM4 = 1 << 14,
+        SEMANTIC_CUSTOM5 = 1 << 15
     };
     MAKE_ENUM_FLAG(uint32_t, ShaderSemantic)
 

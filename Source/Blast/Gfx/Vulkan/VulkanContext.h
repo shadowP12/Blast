@@ -21,11 +21,13 @@ namespace Blast {
         ~VulkanFence();
         FenceStatus getFenceStatus() override;
         void waitForComplete() override;
-        void reset() override;
         VkFence getHandle() { return mFence; }
     private:
+        friend class VulkanContext;
+        friend class VulkanQueue;
         VulkanContext* mContext = nullptr;
         VkFence mFence = VK_NULL_HANDLE;
+        bool mSubmitted = false;
     };
 
     class VulkanQueue : public GfxQueue {
