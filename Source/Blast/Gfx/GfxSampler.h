@@ -14,6 +14,7 @@ namespace Blast {
     class GfxSampler {
     public:
         GfxSampler(const GfxSamplerDesc &desc);
+        virtual ~GfxSampler() = default;
         FilterType  getMinFilter() { mMinFilter; }
         FilterType  getMagFilter() { mMagFilter; }
         MipmapMode  getMipmapMode() { mMipmapMode; }

@@ -13,6 +13,7 @@ namespace Blast {
     class GfxDescriptorSet {
     public:
         GfxDescriptorSet() = default;
+        virtual ~GfxDescriptorSet() = default;
         virtual void setSampler(const uint8_t& reg, GfxSampler* sampler) = 0;
         virtual void setTexture(const uint8_t& reg, GfxTexture* texture) = 0;
         virtual void setCombinedSampler(const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) = 0;
@@ -37,6 +38,7 @@ namespace Blast {
     class GfxRootSignature {
     public:
         GfxRootSignature(const GfxRootSignatureDesc& desc);
+        virtual ~GfxRootSignature() = default;
         virtual GfxDescriptorSet* allocateSet(const uint8_t& set) = 0;
     protected:
         std::vector<GfxRegisterInfo> mRegisters;
@@ -113,6 +115,7 @@ namespace Blast {
     class GfxGraphicsPipeline {
     public:
         GfxGraphicsPipeline(const GfxGraphicsPipelineDesc& desc);
+        virtual ~GfxGraphicsPipeline() = default;
     protected:
     };
 }

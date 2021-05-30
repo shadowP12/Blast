@@ -20,7 +20,11 @@ namespace Blast {
     class GfxCommandBufferPool {
     public:
         GfxCommandBufferPool(const GfxCommandBufferPoolDesc& desc);
+
+        virtual ~GfxCommandBufferPool() = default;
+
         virtual GfxCommandBuffer* allocBuf(bool secondary) = 0;
+
     protected:
     };
 
@@ -54,6 +58,7 @@ namespace Blast {
     class GfxCommandBuffer {
     public:
         GfxCommandBuffer(const GfxCommandBufferDesc& desc);
+        virtual ~GfxCommandBuffer() = default;
         virtual void begin() = 0;
         virtual void end() = 0;
         virtual void bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) = 0;

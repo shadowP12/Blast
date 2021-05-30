@@ -28,10 +28,14 @@ namespace Blast {
 
     class GfxSemaphore {
     public:
+        GfxSemaphore() = default;
+        virtual ~GfxSemaphore() = default;
     };
 
     class GfxFence {
     public:
+        GfxFence() = default;
+        virtual ~GfxFence() = default;
         virtual FenceStatus getFenceStatus() = 0;
         virtual void waitForComplete() = 0;
         virtual void reset() = 0;
@@ -56,6 +60,8 @@ namespace Blast {
 
     class GfxQueue {
     public:
+        GfxQueue() = default;
+        virtual ~GfxQueue() = default;
         virtual void submit(const GfxSubmitInfo& info) = 0;
         virtual int present(const GfxPresentInfo& info) = 0;
         virtual void waitIdle() = 0;
@@ -63,6 +69,8 @@ namespace Blast {
 
     class GfxContext {
     public:
+        GfxContext() = default;
+        virtual ~GfxContext() = default;
         uint32_t getFormatStride(Format format);
         virtual GfxQueue* getQueue(QueueType type) = 0;
         virtual GfxSemaphore* createSemaphore() = 0;

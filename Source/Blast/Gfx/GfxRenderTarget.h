@@ -39,6 +39,7 @@ namespace Blast {
     class GfxRenderPass {
     public:
         GfxRenderPass(const GfxRenderPassDesc &desc);
+        virtual ~GfxRenderPass() = default;
         uint32_t getColorAttachmentCount() { return mNumColorAttachments; }
         bool hasDepthStencilAttachment() { return mHasDepthStencil; }
     protected:
@@ -61,6 +62,7 @@ namespace Blast {
     class GfxFramebuffer {
     public:
         GfxFramebuffer(const GfxFramebufferDesc &desc);
+        virtual ~GfxFramebuffer() = default;
         uint32_t getWidth() { return mWidth;}
         uint32_t getHeight() { return mHeight; }
     protected:

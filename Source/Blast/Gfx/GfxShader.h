@@ -12,6 +12,7 @@ namespace Blast {
     class GfxShader {
     public:
         GfxShader(const GfxShaderDesc& desc);
+        virtual ~GfxShader() = default;
     protected:
         ShaderStage mStage;
     };

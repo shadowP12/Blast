@@ -18,6 +18,7 @@ namespace Blast {
     class GfxSurface {
     public:
         GfxSurface(const GfxSurfaceDesc& desc);
+        virtual ~GfxSurface() = default;
         GfxSurfaceSize getSize();
         Format getFormat() { return mFormat; }
     protected:
@@ -35,6 +36,7 @@ namespace Blast {
     class GfxSwapchain {
     public:
         GfxSwapchain(const GfxSwapchainDesc& desc);
+        virtual ~GfxSwapchain() = default;
         virtual uint32_t getImageCount() = 0;
         virtual GfxTexture* getColorRenderTarget(uint32_t idx) = 0;
         virtual GfxTexture* getDepthRenderTarget(uint32_t idx) = 0;
