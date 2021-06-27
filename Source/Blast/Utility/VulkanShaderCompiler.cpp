@@ -97,6 +97,7 @@ namespace Blast {
 
     ShaderCompileResult VulkanShaderCompiler::compile(const ShaderCompileDesc& desc) {
         ShaderCompileResult result;
+        result.success = true;
 
         EShLanguage glslType;
         switch (desc.stage) {
@@ -130,6 +131,7 @@ namespace Blast {
         EShMessages messages = (EShMessages)((int)EShMsgSpvRules | (int)EShMsgVulkanRules);
         if (!shader.parse(&resources, 450, false, messages, includer)) {
             BLAST_LOGE("%s\n", shader.getInfoLog());
+            result.success = false;
             return result;
         }
 
@@ -138,6 +140,7 @@ namespace Blast {
 
         if (!program.link(messages)) {
             BLAST_LOGE("%s\n", program.getInfoLog());
+            result.success = false;
             return result;
         }
 

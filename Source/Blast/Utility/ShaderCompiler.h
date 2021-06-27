@@ -50,6 +50,7 @@ namespace Blast {
     };
 
     struct ShaderCompileResult {
+        bool success;
         std::vector<uint32_t> bytes;
         std::vector<GfxShaderResource> resources;
         std::vector<GfxShaderVariable> variables;

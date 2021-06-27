@@ -48,6 +48,7 @@ namespace Blast {
         uint32_t binding = 0;
         uint32_t location = 0;
         uint32_t offset = 0;
+        uint32_t size = 0;
         Format format = FORMAT_UNKNOWN;
         ShaderSemantic semantic = SEMANTIC_UNDEFINED;
         VertexAttribRate rate = VERTEX_ATTRIB_RATE_VERTEX;
