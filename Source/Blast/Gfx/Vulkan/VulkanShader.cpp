@@ -1,21 +1,21 @@
 #include "VulkanShader.h"
 #include "VulkanContext.h"
 
-namespace Blast {
+namespace blast {
     VulkanShader::VulkanShader(VulkanContext *context, const GfxShaderDesc &desc)
     :GfxShader(desc) {
-        mContext = context;
-        VkShaderModuleCreateInfo shaderInfo;
-        shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        shaderInfo.pNext = nullptr;
-        shaderInfo.flags = 0;
-        shaderInfo.codeSize = desc.bytes.size() * sizeof(uint32_t);
-        shaderInfo.pCode = desc.bytes.data();
+        _context = context;
+        VkShaderModuleCreateInfo smci{};
+        smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        smci.pNext = nullptr;
+        smci.flags = 0;
+        smci.codeSize = desc.bytes.size() * sizeof(uint32_t);
+        smci.pCode = desc.bytes.data();
 
-        VK_ASSERT(vkCreateShaderModule(mContext->getDevice(), &shaderInfo, nullptr, &mShader));
+        VK_ASSERT(vkCreateShaderModule(_context->GetDevice(), &smci, nullptr, &_shader));
     }
 
     VulkanShader::~VulkanShader() {
-        vkDestroyShaderModule(mContext->getDevice(), mShader, nullptr);
+        vkDestroyShaderModule(_context->GetDevice(), _shader, nullptr);
     }
 }

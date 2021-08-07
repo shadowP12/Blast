@@ -1,6 +1,6 @@
 #include "GfxCommandBuffer.h"
 
-namespace Blast {
+namespace blast {
     GfxCommandBufferPool::GfxCommandBufferPool(const GfxCommandBufferPoolDesc& desc) {
     }
 

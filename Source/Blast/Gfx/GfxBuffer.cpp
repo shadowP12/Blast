@@ -1,10 +1,10 @@
 #include "GfxBuffer.h"
 
-namespace Blast {
+namespace blast {
     GfxBuffer::GfxBuffer(const GfxBufferDesc &desc) {
-        mSize = desc.size;
-        mUsage = desc.usage;
-        mType = desc.type;
-        mState = RESOURCE_STATE_UNDEFINED;
+        _size = desc.size;
+        _usage = desc.usage;
+        _type = desc.type;
+        _state = RESOURCE_STATE_UNDEFINED;
     }
 }

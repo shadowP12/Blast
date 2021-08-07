@@ -1,16 +1,21 @@
 #include "GfxTexture.h"
 
-namespace Blast {
+namespace blast {
     GfxTexture::GfxTexture(const GfxTextureDesc &desc) {
-        mWidth = desc.width;
-        mHeight = desc.height;
-        mDepth = desc.depth;
-        mMipLevels = desc.mipLevels;
-        mArrayLayers = desc.arrayLayers;
-        mFormat = desc.format;
-        mSampleCount = desc.sampleCount;
-        mUsage = desc.usage;
-        mType = desc.type;
-        mState = RESOURCE_STATE_UNDEFINED;
+        _width = desc.width;
+        _height = desc.height;
+        _depth = desc.depth;
+        _num_mips = desc.num_mips;
+        _num_layers = desc.num_layers;
+        _format = desc.format;
+        _sample_count = desc.sample_count;
+        _usage = desc.usage;
+        _type = desc.type;
+        _state = RESOURCE_STATE_UNDEFINED;
+    }
+
+    GfxTextureView::GfxTextureView(const GfxTextureViewDesc& desc) {
+        _level = desc.level;
+        _layer = desc.layer;
     }
 }

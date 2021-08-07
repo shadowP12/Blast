@@ -1,7 +1,7 @@
 #include "GfxShader.h"
 
-namespace Blast {
+namespace blast {
     GfxShader::GfxShader(const GfxShaderDesc &desc) {
-        mStage = desc.stage;
+        _stage = desc.stage;
     }
 }

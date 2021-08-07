@@ -1,12 +1,12 @@
 #include "GfxSampler.h"
 
-namespace Blast {
+namespace blast {
     GfxSampler::GfxSampler(const GfxSamplerDesc &desc) {
-        mMinFilter = desc.minFilter;
-        mMagFilter = desc.magFilter;
-        mMipmapMode = desc.mipmapMode;
-        mAddressU = desc.addressU;
-        mAddressV = desc.addressV;
-        mAddressW = desc.addressW;
+        _min_filter = desc.min_filter;
+        _mag_filter = desc.mag_filter;
+        _mipmap_mode = desc.mipmap_mode;
+        _address_u = desc.address_u;
+        _address_v = desc.address_v;
+        _address_w = desc.address_w;
     }
 }

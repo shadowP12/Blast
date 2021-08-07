@@ -1,9 +1,9 @@
 #include "VulkanDefine.h"
 
-namespace Blast {
-    VkSampleCountFlagBits toVulkanSampleCount(SampleCount sampleCount) {
+namespace blast {
+    VkSampleCountFlagBits ToVulkanSampleCount(SampleCount sample_count) {
         VkSampleCountFlagBits result = VK_SAMPLE_COUNT_1_BIT;
-        switch (sampleCount) {
+        switch (sample_count) {
             case SAMPLE_COUNT_1:
                 result = VK_SAMPLE_COUNT_1_BIT;
                 break;
@@ -23,7 +23,7 @@ namespace Blast {
         return result;
     }
 
-    VkFormat toVulkanFormat(Format format) {
+    VkFormat ToVulkanFormat(Format format) {
         switch (format) {
             case FORMAT_UNKNOWN:
                 return VK_FORMAT_UNDEFINED;
@@ -245,7 +245,7 @@ namespace Blast {
         return VK_FORMAT_UNDEFINED;
     }
 
-    Format toGfxFormat(VkFormat format) {
+    Format ToGfxFormat(VkFormat format) {
         switch (format) {
             case VK_FORMAT_UNDEFINED:
                 return FORMAT_UNKNOWN;
@@ -452,7 +452,7 @@ namespace Blast {
         return FORMAT_UNKNOWN;
     }
 
-    VkImageAspectFlags toVulkanAspectMask(Format format) {
+    VkImageAspectFlags ToVulkanAspectMask(Format format) {
         VkImageAspectFlags result = 0;
         switch (format) {
             case FORMAT_D16_UNORM:
@@ -476,7 +476,7 @@ namespace Blast {
         return result;
     }
 
-    VkBufferUsageFlags toVulkanBufferUsage(ResourceType type) {
+    VkBufferUsageFlags ToVulkanBufferUsage(ResourceType type) {
         VkBufferUsageFlags result = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
         if (type & RESOURCE_TYPE_RW_BUFFER) {
@@ -502,7 +502,7 @@ namespace Blast {
         return result;
     }
 
-    VkImageUsageFlags toVulkanImageUsage(ResourceType type) {
+    VkImageUsageFlags ToVulkanImageUsage(ResourceType type) {
         VkImageUsageFlags result = 0;
         if (RESOURCE_TYPE_TEXTURE == (type & RESOURCE_TYPE_TEXTURE))
             result |= VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -511,7 +511,26 @@ namespace Blast {
         return result;
     }
 
-    VkAttachmentLoadOp toVulkanLoadOp(LoadAction op) {
+    VkImageUsageFlags ToVulkanImageUsage(Format format) {
+        VkImageUsageFlags result = 0;
+        switch (format) {
+            case FORMAT_D16_UNORM:
+            case FORMAT_X8_D24_UNORM_PACK32:
+            case FORMAT_D32_FLOAT:
+            case FORMAT_S8_UINT:
+            case FORMAT_D16_UNORM_S8_UINT:
+            case FORMAT_D24_UNORM_S8_UINT:
+            case FORMAT_D32_FLOAT_S8_UINT:
+                result = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+                break;
+            default:
+                result = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+                break;
+        }
+        return result;
+    }
+
+    VkAttachmentLoadOp ToVulkanLoadOp(LoadAction op) {
         VkAttachmentLoadOp result = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         switch (op) {
             case LOAD_ACTION_DONTCARE:
@@ -527,7 +546,7 @@ namespace Blast {
         return result;
     }
 
-    VkBlendOp toVulkanBlendOp(BlendOp op) {
+    VkBlendOp ToVulkanBlendOp(BlendOp op) {
         VkBlendOp result;
         switch (op) {
             case BLEND_OP_ADD:
@@ -549,7 +568,7 @@ namespace Blast {
         return result;
     }
 
-    VkBlendFactor toVulkanBlendFactor(BlendConstant factor) {
+    VkBlendFactor ToVulkanBlendFactor(BlendConstant factor) {
         VkBlendFactor result;
         switch (factor) {
             case BLEND_ZERO:
@@ -595,7 +614,7 @@ namespace Blast {
         return result;
     }
 
-    VkStencilOp toVulkanStencilOp(StencilOp op) {
+    VkStencilOp ToVulkanStencilOp(StencilOp op) {
         VkStencilOp result;
         switch (op) {
             case STENCIL_OP_KEEP:
@@ -626,7 +645,7 @@ namespace Blast {
         return result;
     }
 
-    VkCompareOp toVulkanCompareOp(CompareMode op) {
+    VkCompareOp ToVulkanCompareOp(CompareMode op) {
         VkCompareOp result;
         switch (op) {
             case COMPARE_NEVER:
@@ -657,7 +676,7 @@ namespace Blast {
         return result;
     }
 
-    VkPolygonMode toVulkanFillMode(FillMode mode) {
+    VkPolygonMode ToVulkanFillMode(FillMode mode) {
         VkPolygonMode result;
         switch (mode) {
             case FILL_MODE_SOLID:
@@ -670,7 +689,7 @@ namespace Blast {
         return result;
     }
 
-    VkCullModeFlagBits toVulkanCullMode(CullMode mode) {
+    VkCullModeFlagBits ToVulkanCullMode(CullMode mode) {
         VkCullModeFlagBits result;
         switch (mode) {
             case CULL_MODE_NONE:
@@ -686,7 +705,7 @@ namespace Blast {
         return result;
     }
 
-    VkFrontFace toVulkanFrontFace(FrontFace frontFace) {
+    VkFrontFace ToVulkanFrontFace(FrontFace frontFace) {
         VkFrontFace result;
         switch (frontFace) {
             case FRONT_FACE_CCW:
@@ -699,7 +718,7 @@ namespace Blast {
         return result;
     }
 
-    VkFilter toVulkanFilter(FilterType filter) {
+    VkFilter ToVulkanFilter(FilterType filter) {
         VkFilter result;
         switch (filter) {
             case FILTER_NEAREST:
@@ -712,7 +731,7 @@ namespace Blast {
         return result;
     }
 
-    VkSamplerMipmapMode toVulkanMipmapMode(MipmapMode mode) {
+    VkSamplerMipmapMode ToVulkanMipmapMode(MipmapMode mode) {
         VkSamplerMipmapMode result;
         switch (mode) {
             case MIPMAP_MODE_NEAREST:
@@ -725,7 +744,7 @@ namespace Blast {
         return result;
     }
 
-    VkSamplerAddressMode toVulkanAddressMode(AddressMode mode) {
+    VkSamplerAddressMode ToVulkanAddressMode(AddressMode mode) {
         VkSamplerAddressMode result;
         switch (mode) {
             case ADDRESS_MODE_MIRROR:
@@ -744,7 +763,7 @@ namespace Blast {
         return result;
     }
 
-    VkShaderStageFlags toVulkanShaderStages(ShaderStage stages) {
+    VkShaderStageFlags ToVulkanShaderStages(ShaderStage stages) {
         VkShaderStageFlags result = 0;
         if (SHADER_STAGE_ALL_GRAPHICS == (stages & SHADER_STAGE_ALL_GRAPHICS)) {
             result = VK_SHADER_STAGE_ALL_GRAPHICS;
@@ -772,7 +791,7 @@ namespace Blast {
         return result;
     }
 
-    VkDescriptorType toVulkanDescriptorType(ResourceType type) {
+    VkDescriptorType ToVulkanDescriptorType(ResourceType type) {
         switch (type) {
             case RESOURCE_TYPE_UNDEFINED:
                 return VK_DESCRIPTOR_TYPE_MAX_ENUM;
@@ -794,7 +813,7 @@ namespace Blast {
         }
     }
 
-    VkIndexType toVulkanIndexType(IndexType type) {
+    VkIndexType ToVulkanIndexType(IndexType type) {
         if (type == INDEX_TYPE_UINT16) {
             return VK_INDEX_TYPE_UINT16;
         }
@@ -806,7 +825,7 @@ namespace Blast {
         return VK_INDEX_TYPE_UINT32;
     }
 
-    VkAccessFlags toVulkanAccessFlags(ResourceState state) {
+    VkAccessFlags ToVulkanAccessFlags(ResourceState state) {
         // note: 通过当前资源的使用状态来决定access flags
         VkAccessFlags ret = 0;
         if (state & RESOURCE_STATE_COPY_SOURCE) {
@@ -843,7 +862,7 @@ namespace Blast {
         return ret;
     }
 
-    VkImageLayout toVulkanImageLayout(ResourceState state) {
+    VkImageLayout ToVulkanImageLayout(ResourceState state) {
         // note: 通过当前资源的使用状态来决定image layout
         if (state & RESOURCE_STATE_COPY_SOURCE)
             return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
@@ -872,7 +891,7 @@ namespace Blast {
         return VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
-    VkPipelineStageFlags toPipelineStageFlags(VkAccessFlags accessFlags, QueueType queueType) {
+    VkPipelineStageFlags ToPipelineStageFlags(VkAccessFlags accessFlags, QueueType queueType) {
         VkPipelineStageFlags flags = 0;
 
         switch (queueType) {

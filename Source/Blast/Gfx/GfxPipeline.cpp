@@ -1,8 +1,8 @@
 #include "GfxPipeline.h"
 
-namespace Blast {
+namespace blast {
     GfxRootSignature::GfxRootSignature(const GfxRootSignatureDesc& desc) {
-        mRegisters = desc.registers;
+        _registers = desc.registers;
     }
 
     GfxGraphicsPipeline::GfxGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) {

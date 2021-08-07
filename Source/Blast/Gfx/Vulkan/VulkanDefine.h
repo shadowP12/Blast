@@ -5,7 +5,6 @@
 #include <volk.h>
 #include <stdlib.h>
 #include "../GfxDefine.h"
-#include "../../Utility/Logging.h"
 
 #define VK_ASSERT(x)                                                    \
 	do                                                                  \
@@ -17,51 +16,53 @@
 		}                                                               \
 	} while (0)
 
-namespace Blast {
-    VkSampleCountFlagBits toVulkanSampleCount(SampleCount sampleCount);
+namespace blast {
+    VkSampleCountFlagBits ToVulkanSampleCount(SampleCount sample_count);
 
-    VkFormat toVulkanFormat(Format format);
+    VkFormat ToVulkanFormat(Format format);
 
-    Format toGfxFormat(VkFormat format);
+    Format ToGfxFormat(VkFormat format);
 
-    VkImageAspectFlags toVulkanAspectMask(Format format);
+    VkImageAspectFlags ToVulkanAspectMask(Format format);
 
-    VkBufferUsageFlags toVulkanBufferUsage(ResourceType type);
+    VkBufferUsageFlags ToVulkanBufferUsage(ResourceType type);
 
-    VkImageUsageFlags toVulkanImageUsage(ResourceType type);
+    VkImageUsageFlags ToVulkanImageUsage(ResourceType type);
 
-    VkAttachmentLoadOp toVulkanLoadOp(LoadAction op);
+    VkImageUsageFlags ToVulkanImageUsage(Format format);
 
-    VkBlendOp toVulkanBlendOp(BlendOp op);
+    VkAttachmentLoadOp ToVulkanLoadOp(LoadAction op);
 
-    VkBlendFactor toVulkanBlendFactor(BlendConstant factor);
+    VkBlendOp ToVulkanBlendOp(BlendOp op);
 
-    VkStencilOp toVulkanStencilOp(StencilOp op);
+    VkBlendFactor ToVulkanBlendFactor(BlendConstant factor);
 
-    VkCompareOp toVulkanCompareOp(CompareMode op);
+    VkStencilOp ToVulkanStencilOp(StencilOp op);
 
-    VkPolygonMode toVulkanFillMode(FillMode mode);
+    VkCompareOp ToVulkanCompareOp(CompareMode op);
 
-    VkCullModeFlagBits toVulkanCullMode(CullMode mode);
+    VkPolygonMode ToVulkanFillMode(FillMode mode);
 
-    VkFrontFace toVulkanFrontFace(FrontFace frontFace);
+    VkCullModeFlagBits ToVulkanCullMode(CullMode mode);
 
-    VkFilter toVulkanFilter(FilterType filter);
+    VkFrontFace ToVulkanFrontFace(FrontFace frontFace);
 
-    VkSamplerMipmapMode toVulkanMipmapMode(MipmapMode mode);
+    VkFilter ToVulkanFilter(FilterType filter);
 
-    VkSamplerAddressMode toVulkanAddressMode(AddressMode mode);
+    VkSamplerMipmapMode ToVulkanMipmapMode(MipmapMode mode);
 
-    VkShaderStageFlags toVulkanShaderStages(ShaderStage stages);
+    VkSamplerAddressMode ToVulkanAddressMode(AddressMode mode);
 
-    VkDescriptorType toVulkanDescriptorType(ResourceType type);
+    VkShaderStageFlags ToVulkanShaderStages(ShaderStage stages);
 
-    VkIndexType toVulkanIndexType(IndexType type);
+    VkDescriptorType ToVulkanDescriptorType(ResourceType type);
 
-    VkAccessFlags toVulkanAccessFlags(ResourceState state);
+    VkIndexType ToVulkanIndexType(IndexType type);
 
-    VkImageLayout toVulkanImageLayout(ResourceState state);
+    VkAccessFlags ToVulkanAccessFlags(ResourceState state);
 
-    VkPipelineStageFlags toPipelineStageFlags(VkAccessFlags accessFlags, QueueType queueType);
+    VkImageLayout ToVulkanImageLayout(ResourceState state);
+
+    VkPipelineStageFlags ToPipelineStageFlags(VkAccessFlags access_flags, QueueType queue_type);
 }
 

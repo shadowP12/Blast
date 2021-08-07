@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-namespace Blast {
+namespace blast {
     enum class UniformType {
         UNDEFINED,
         BOOL,
@@ -35,7 +35,7 @@ namespace Blast {
 
     struct GfxShaderVariable {
         std::string name;
-        uint16_t parentIndex;
+        uint16_t parent_index;
         uint16_t offset;
         uint16_t size;
         uint16_t count;
@@ -45,7 +45,7 @@ namespace Blast {
     struct ShaderCompileDesc {
         std::string code;
         std::string preamble;
-        std::vector<std::string> includeDirs;
+        std::vector<std::string> include_dirs;
         ShaderStage stage;
     };
 
@@ -58,6 +58,6 @@ namespace Blast {
 
     class ShaderCompiler {
     public:
-        virtual ShaderCompileResult compile(const ShaderCompileDesc& desc) = 0;
+        virtual ShaderCompileResult Compile(const ShaderCompileDesc& desc) = 0;
     };
 }

@@ -1,5 +1,4 @@
 #include "VulkanShaderCompiler.h"
-#include "Blast/Utility/Logging.h"
 #include <glslang/Include/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
@@ -10,7 +9,7 @@
 #include <spirv_reflect.hpp>
 #include <unordered_set>
 
-namespace Blast {
+namespace blast {
 
     struct SpvType {
         uint32_t id;
@@ -95,7 +94,7 @@ namespace Blast {
         glslang::FinalizeProcess();
     }
 
-    ShaderCompileResult VulkanShaderCompiler::compile(const ShaderCompileDesc& desc) {
+    ShaderCompileResult VulkanShaderCompiler::Compile(const ShaderCompileDesc& desc) {
         ShaderCompileResult result;
         result.success = true;
 
@@ -123,8 +122,8 @@ namespace Blast {
         shader.setPreamble(desc.preamble.c_str());
 
         DirStackFileIncluder includer;
-        for (int i = 0; i < desc.includeDirs.size(); ++i) {
-            includer.pushExternalLocalDirectory(desc.includeDirs[i]);
+        for (int i = 0; i < desc.include_dirs.size(); ++i) {
+            includer.pushExternalLocalDirectory(desc.include_dirs[i]);
         }
 
         TBuiltInResource resources = glslang::DefaultTBuiltInResource;
@@ -172,7 +171,7 @@ namespace Blast {
         for (int i = 0; i < cc.variables.size(); ++i) {
             GfxShaderVariable var;
             var.name = cc.variables[i].name;
-            var.parentIndex = cc.variables[i].parent_index;
+            var.parent_index = cc.variables[i].parent_index;
             var.size = cc.variables[i].size;
             var.offset = cc.variables[i].offset;
             var.count = cc.variables[i].count;

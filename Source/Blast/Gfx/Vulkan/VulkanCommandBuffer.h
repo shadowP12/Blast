@@ -2,48 +2,72 @@
 #include "VulkanDefine.h"
 #include "../GfxCommandBuffer.h"
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
     class VulkanRootSignature;
     class VulkanCommandBufferPool : public GfxCommandBufferPool {
     public:
         VulkanCommandBufferPool(VulkanContext* context, const GfxCommandBufferPoolDesc& desc);
+
         ~VulkanCommandBufferPool();
-        GfxCommandBuffer* allocBuf(bool secondary) override;
-        QueueType getQueueType() { return mQueueType; }
-        VkCommandPool getHandle() { return mPool; }
+
+        GfxCommandBuffer* AllocBuffer(bool secondary) override;
+
+        void DeleteBuffer(GfxCommandBuffer* buffer) override;
+
+        QueueType GetQueueType() { return _queue_type; }
+
+        VkCommandPool GetHandle() { return _pool; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkCommandPool mPool;
-        QueueType mQueueType;
+        VulkanContext* _context = nullptr;
+        VkCommandPool _pool;
+        QueueType _queue_type;
     };
 
     class VulkanCommandBuffer : public GfxCommandBuffer {
     public:
         VulkanCommandBuffer(VulkanContext* context, const GfxCommandBufferDesc& desc);
+
         ~VulkanCommandBuffer();
-        VkCommandBuffer getHandle() { return mCommandBuffer; }
-        void begin() override;
-        void end() override;
-        void bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) override;
-        void unbindRenderTarget() override;
-        void setViewport(float x, float y, float w, float h) override;
-        void setScissor(int x, int y, int w, int h) override;
-        void bindVertexBuffer(GfxBuffer* vertexBuffer, uint32_t offset) override;
-        void bindIndexBuffer(GfxBuffer* indexBuffer, uint32_t offset, IndexType type) override;
-        void bindGraphicsPipeline(GfxGraphicsPipeline* pipeline) override;
-        void bindRootSignature(GfxRootSignature* rootSignature) override;
-        void bindDescriptorSets(uint32_t setCount, GfxDescriptorSet** sets) override;
-        void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
-        void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) override;
-        void copyToBuffer(GfxBuffer* srcBuffer, uint32_t srcOffset, GfxBuffer* dstBuffer, uint32_t dstOffset, uint32_t size) override;
-        void copyToImage(GfxBuffer* srcBuffer, GfxTexture* dstTexture, const GfxCopyToImageHelper& helper) override;
-        void setBarrier(uint32_t inBufferBarrierCount, GfxBufferBarrier* inBufferBarriers,
-                        uint32_t inTextureBarrierCount, GfxTextureBarrier* inTextureBarriers) override;
+
+        VkCommandBuffer GetHandle() { return _command_buffer; }
+
+        void Begin() override;
+
+        void End() override;
+
+        void BindFramebuffer(GfxFramebuffer* framebuffer) override;
+
+        void UnbindFramebuffer() override;
+
+        void ClearFramebuffer(GfxFramebuffer* framebuffer, const GfxClearValue& clear_value) override;
+
+        void SetViewport(float x, float y, float w, float h) override;
+
+        void SetScissor(int x, int y, int w, int h) override;
+
+        void BindVertexBuffer(GfxBuffer* vertex_buffer, uint32_t offset) override;
+
+        void BindIndexBuffer(GfxBuffer* index_buffer, uint32_t offset, IndexType type) override;
+
+        void BindGraphicsPipeline(GfxGraphicsPipeline* pipeline) override;
+
+        void BindDescriptorSets(GfxRootSignature* root_signature, uint32_t num_sets, GfxDescriptorSet** sets) override;
+
+        void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance) override;
+
+        void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) override;
+
+        void CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) override;
+
+        void CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) override;
+
+        void SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
+                                uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) override;
     protected:
-        VulkanContext* mContext = nullptr;
-        VulkanCommandBufferPool* mPool;
-        VkCommandBuffer mCommandBuffer;
-        VulkanRootSignature* mCurrentRootSignature = nullptr;
+        VulkanContext* _context = nullptr;
+        VulkanCommandBufferPool* _pool;
+        VkCommandBuffer _command_buffer;
     };
 }

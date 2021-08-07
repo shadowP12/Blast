@@ -1,32 +1,40 @@
 #pragma once
 #include "GfxDefine.h"
 
-namespace Blast {
+namespace blast {
     struct GfxSamplerDesc {
-        FilterType  minFilter = FILTER_LINEAR;
-        FilterType  magFilter = FILTER_LINEAR;
-        MipmapMode  mipmapMode = MIPMAP_MODE_LINEAR;
-        AddressMode addressU = ADDRESS_MODE_REPEAT;
-        AddressMode addressV = ADDRESS_MODE_REPEAT;
-        AddressMode addressW = ADDRESS_MODE_REPEAT;
+        FilterType  min_filter = FILTER_LINEAR;
+        FilterType  mag_filter = FILTER_LINEAR;
+        MipmapMode  mipmap_mode = MIPMAP_MODE_LINEAR;
+        AddressMode address_u = ADDRESS_MODE_REPEAT;
+        AddressMode address_v = ADDRESS_MODE_REPEAT;
+        AddressMode address_w = ADDRESS_MODE_REPEAT;
     };
 
     class GfxSampler {
     public:
         GfxSampler(const GfxSamplerDesc &desc);
+
         virtual ~GfxSampler() = default;
-        FilterType  getMinFilter() { mMinFilter; }
-        FilterType  getMagFilter() { mMagFilter; }
-        MipmapMode  getMipmapMode() { mMipmapMode; }
-        AddressMode getAddressU() { mAddressU; }
-        AddressMode getAddressV() { mAddressV; }
-        AddressMode getAddressW() { mAddressW; }
+
+        FilterType  GetMinFilter() { _min_filter; }
+
+        FilterType  GetMagFilter() { _mag_filter; }
+
+        MipmapMode  GetMipmapMode() { _mipmap_mode; }
+
+        AddressMode GetAddressU() { _address_u; }
+
+        AddressMode GetAddressV() { _address_v; }
+
+        AddressMode GetAddressW() { _address_w; }
+
     protected:
-        FilterType  mMinFilter;
-        FilterType  mMagFilter;
-        MipmapMode  mMipmapMode;
-        AddressMode mAddressU;
-        AddressMode mAddressV;
-        AddressMode mAddressW;
+        FilterType  _min_filter;
+        FilterType  _mag_filter;
+        MipmapMode  _mipmap_mode;
+        AddressMode _address_u;
+        AddressMode _address_v;
+        AddressMode _address_w;
     };
 }

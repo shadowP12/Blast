@@ -2,31 +2,31 @@
 #include "../GfxContext.h"
 #include "VulkanContext.h"
 
-namespace Blast {
+namespace blast {
     VulkanSampler::VulkanSampler(VulkanContext* context, const GfxSamplerDesc& desc)
     : GfxSampler(desc) {
-        mContext = context;
+        _context = context;
 
         // todo: 扩展sampler功能
-        VkSamplerCreateInfo samplerInfo = {};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = toVulkanFilter(mMagFilter);
-        samplerInfo.minFilter = toVulkanFilter(mMinFilter);
-        samplerInfo.mipmapMode = toVulkanMipmapMode(mMipmapMode);
-        samplerInfo.addressModeU = toVulkanAddressMode(mAddressU);
-        samplerInfo.addressModeV = toVulkanAddressMode(mAddressV);
-        samplerInfo.addressModeW = toVulkanAddressMode(mAddressW);
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.anisotropyEnable = VK_FALSE;
-        samplerInfo.maxAnisotropy = 0.0f;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+        VkSamplerCreateInfo sci = {};
+        sci.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        sci.magFilter = ToVulkanFilter(_mag_filter);
+        sci.minFilter = ToVulkanFilter(_min_filter);
+        sci.mipmapMode = ToVulkanMipmapMode(_mipmap_mode);
+        sci.addressModeU = ToVulkanAddressMode(_address_u);
+        sci.addressModeV = ToVulkanAddressMode(_address_v);
+        sci.addressModeW = ToVulkanAddressMode(_address_w);
+        sci.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        sci.anisotropyEnable = VK_FALSE;
+        sci.maxAnisotropy = 0.0f;
+        sci.unnormalizedCoordinates = VK_FALSE;
+        sci.compareEnable = VK_FALSE;
+        sci.compareOp = VK_COMPARE_OP_ALWAYS;
 
-        VK_ASSERT(vkCreateSampler(mContext->getDevice(), &samplerInfo, nullptr, &mSampler));
+        VK_ASSERT(vkCreateSampler(_context->GetDevice(), &sci, nullptr, &_sampler));
     }
 
     VulkanSampler::~VulkanSampler() {
-        vkDestroySampler(mContext->getDevice(), mSampler, nullptr);
+        vkDestroySampler(_context->GetDevice(), _sampler, nullptr);
     }
 }

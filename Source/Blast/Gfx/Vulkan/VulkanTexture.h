@@ -3,23 +3,40 @@
 #include "../GfxTexture.h"
 #include <vector>
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
 
     class VulkanTexture : public GfxTexture {
     public:
         VulkanTexture(VulkanContext* context, const GfxTextureDesc& desc);
-        VulkanTexture(VulkanContext* context, const VkImage& image, const GfxTextureDesc& desc);
+
+        VulkanTexture(VulkanContext* context, const GfxTextureDesc& desc, const VkImage& image);
+
         ~VulkanTexture();
-        VkImage getImage() { return mImage; }
-        VkImageView getSRV(uint32_t layer, uint32_t level) { return mSRVs[layer][level]; }
-        VkImageView getUAV(uint32_t layer, uint32_t level) { return mUAVs[layer][level]; }
+
+        VkImage GetHandle() { return _image; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkImage mImage;
-        std::vector<std::vector<VkImageView>> mSRVs;
-        std::vector<std::vector<VkImageView>> mUAVs;
-        VkDeviceMemory mMemory;
-        bool mOwnsImage = false;
+        friend class VulkanTextureView;
+        VulkanContext* _context = nullptr;
+        VkImage _image;
+        VkDeviceMemory _memory;
+        bool _own_image;
+    };
+
+    class VulkanTextureView : public GfxTextureView {
+    public:
+        VulkanTextureView(VulkanContext* context, const GfxTextureViewDesc& desc);
+
+        ~VulkanTextureView();
+
+        VkImageView GetHandle() { return _view; }
+
+        VulkanTexture* GetTexture() { return _texture; }
+
+    protected:
+        VulkanContext* _context = nullptr;
+        VulkanTexture* _texture = nullptr;
+        VkImageView _view;
     };
 }

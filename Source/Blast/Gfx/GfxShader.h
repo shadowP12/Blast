@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace Blast {
+namespace blast {
     struct GfxShaderDesc {
         std::vector<uint32_t> bytes;
         ShaderStage stage;
@@ -12,8 +12,10 @@ namespace Blast {
     class GfxShader {
     public:
         GfxShader(const GfxShaderDesc& desc);
+
         virtual ~GfxShader() = default;
+
     protected:
-        ShaderStage mStage;
+        ShaderStage _stage;
     };
 }

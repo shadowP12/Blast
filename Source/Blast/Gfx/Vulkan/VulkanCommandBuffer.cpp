@@ -1,97 +1,143 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
-#include "VulkanRenderTarget.h"
+#include "VulkanFramebuffer.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 #include "VulkanPipeline.h"
 
-namespace Blast {
+namespace blast {
     VulkanCommandBufferPool::VulkanCommandBufferPool(VulkanContext* context, const GfxCommandBufferPoolDesc& desc)
         :GfxCommandBufferPool(desc) {
-        mContext = context;
-        VulkanQueue* queue = static_cast<VulkanQueue*>(desc.queue);
-        mQueueType = queue->getType();
-        VkCommandPoolCreateInfo poolInfo = {};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.queueFamilyIndex = queue->getFamilyIndex();
+        _context = context;
+        VulkanQueue* internel_queue = static_cast<VulkanQueue*>(desc.queue);
+        _queue_type = internel_queue->GetType();
+        
+        VkCommandPoolCreateInfo cpci = {};
+        cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        cpci.queueFamilyIndex = internel_queue->GetFamilyIndex();
         if (!desc.transient)
-            poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+            cpci.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         else
-            poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+            cpci.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
-        VK_ASSERT(vkCreateCommandPool(mContext->getDevice(), &poolInfo, nullptr, &mPool));
+        VK_ASSERT(vkCreateCommandPool(_context->GetDevice(), &cpci, nullptr, &_pool));
     }
 
     VulkanCommandBufferPool::~VulkanCommandBufferPool() {
-        vkDestroyCommandPool(mContext->getDevice(), mPool, nullptr);
+        vkDestroyCommandPool(_context->GetDevice(), _pool, nullptr);
     }
 
-    GfxCommandBuffer * VulkanCommandBufferPool::allocBuf(bool secondary) {
-        GfxCommandBufferDesc desc;
-        desc.pool = this;
-        desc.secondary = secondary;
-        VulkanCommandBuffer* cmd = new VulkanCommandBuffer(mContext, desc);
-        return cmd;
+    GfxCommandBuffer* VulkanCommandBufferPool::AllocBuffer(bool secondary) {
+        GfxCommandBufferDesc cmd_buf_desc;
+        cmd_buf_desc.pool = this;
+        cmd_buf_desc.secondary = secondary;
+        return new VulkanCommandBuffer(_context, cmd_buf_desc);
+    }
+    
+    void VulkanCommandBufferPool::DeleteBuffer(GfxCommandBuffer* buffer) {
+        BLAST_SAFE_DELETE(buffer);
     }
 
     VulkanCommandBuffer::VulkanCommandBuffer(VulkanContext* context, const GfxCommandBufferDesc& desc)
         :GfxCommandBuffer(desc) {
-        mContext = context;
-        mPool = static_cast<VulkanCommandBufferPool*>(desc.pool);
+        _context = context;
+        _pool = static_cast<VulkanCommandBufferPool*>(desc.pool);
 
-        VkCommandBufferAllocateInfo allocateInfo = {};
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocateInfo.commandPool = mPool->getHandle();
-        allocateInfo.commandBufferCount = 1;
+        VkCommandBufferAllocateInfo cbai = {};
+        cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        cbai.commandPool = _pool->GetHandle();
+        cbai.commandBufferCount = 1;
         if (!desc.secondary)
-            allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         else
-            allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+            cbai.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 
-        VK_ASSERT(vkAllocateCommandBuffers(mContext->getDevice(), &allocateInfo, &mCommandBuffer));
+        VK_ASSERT(vkAllocateCommandBuffers(_context->GetDevice(), &cbai, &_command_buffer));
     }
 
     VulkanCommandBuffer::~VulkanCommandBuffer() {
-        vkFreeCommandBuffers(mContext->getDevice(), mPool->getHandle(), 1, &mCommandBuffer);
+        vkFreeCommandBuffers(_context->GetDevice(), _pool->GetHandle(), 1, &_command_buffer);
     }
 
-    void VulkanCommandBuffer::begin() {
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        VK_ASSERT(vkBeginCommandBuffer(mCommandBuffer, &beginInfo));
+    void VulkanCommandBuffer::Begin() {
+        VkCommandBufferBeginInfo cbbi = {};
+        cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        cbbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        VK_ASSERT(vkBeginCommandBuffer(_command_buffer, &cbbi));
     }
 
-    void VulkanCommandBuffer::end() {
-        VK_ASSERT(vkEndCommandBuffer(mCommandBuffer));
+    void VulkanCommandBuffer::End() {
+        VK_ASSERT(vkEndCommandBuffer(_command_buffer));
     }
 
-    void VulkanCommandBuffer::bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) {
-        VulkanRenderPass* internelRenderPass = (VulkanRenderPass*)renderPass;
-        VulkanFramebuffer* internelFramebuffer = (VulkanFramebuffer*)framebuffer;
-        VkRenderPassBeginInfo renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = internelRenderPass->getHandle();
-        renderPassInfo.framebuffer = internelFramebuffer->getHandle();
-        renderPassInfo.renderArea.offset.x = 0;
-        renderPassInfo.renderArea.offset.y = 0;
-        renderPassInfo.renderArea.extent.width = internelFramebuffer->getWidth();
-        renderPassInfo.renderArea.extent.height = internelFramebuffer->getHeight();
+    void VulkanCommandBuffer::BindFramebuffer(GfxFramebuffer* framebuffer) {
+        VulkanFramebuffer* internel_framebuffer = (VulkanFramebuffer*)framebuffer;
+        VkRenderPassBeginInfo rpbi = {};
+        rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        rpbi.renderPass = internel_framebuffer->GetRenderPass();
+        rpbi.framebuffer = internel_framebuffer->GetHandle();
+        rpbi.renderArea.offset.x = 0;
+        rpbi.renderArea.offset.y = 0;
+        rpbi.renderArea.extent.width = internel_framebuffer->GetWidth();
+        rpbi.renderArea.extent.height = internel_framebuffer->GetHeight();
+        rpbi.clearValueCount = 0;
+        rpbi.pClearValues = nullptr;
 
-        VkClearValue clearValues[2];
-        clearValues[0].color = { clearValue.color[0], clearValue.color[1], clearValue.color[2], clearValue.color[3] };
-        clearValues[1].depthStencil = { clearValue.depth, clearValue.stencil };
-        renderPassInfo.clearValueCount = 2;
-        renderPassInfo.pClearValues = clearValues;
-
-        vkCmdBeginRenderPass(mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(_command_buffer, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void VulkanCommandBuffer::unbindRenderTarget() {
-        vkCmdEndRenderPass(mCommandBuffer);
+    void VulkanCommandBuffer::UnbindFramebuffer() {
+        vkCmdEndRenderPass(_command_buffer);
     }
 
-    void VulkanCommandBuffer::setViewport(float x, float y, float w, float h) {
+    void VulkanCommandBuffer::ClearFramebuffer(GfxFramebuffer* framebuffer, const GfxClearValue& clear_value) {
+        if (clear_value.flags == CLEAR_NONE) {
+            return;
+        }
+
+        VulkanFramebuffer* internel_framebuffer = (VulkanFramebuffer*)framebuffer;
+        VkClearRect rect[1];
+        rect[0].rect.offset.x = 0.0;
+        rect[0].rect.offset.y = 0.0;
+        rect[0].rect.extent.width = framebuffer->GetWidth();
+        rect[0].rect.extent.height = framebuffer->GetHeight();
+        rect[0].baseArrayLayer = 0;
+        rect[0].layerCount     = 1;
+
+        uint32_t num_attachments = 0;
+        VkClearAttachment attachments[MAX_RENDER_TARGET_ATTACHMENTS + 1];
+        if (clear_value.flags & CLEAR_COLOR) {
+            for (uint32_t i = 0; i < internel_framebuffer->GetColorAttachmentCount(); ++i) {
+                attachments[num_attachments].colorAttachment = num_attachments;
+                attachments[num_attachments].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                attachments[num_attachments].clearValue.color.float32[0] = clear_value.color[0];
+                attachments[num_attachments].clearValue.color.float32[1] = clear_value.color[1];
+                attachments[num_attachments].clearValue.color.float32[2] = clear_value.color[2];
+                attachments[num_attachments].clearValue.color.float32[3] = clear_value.color[3];
+                ++num_attachments;
+            }
+        }
+
+        if ((clear_value.flags & CLEAR_DEPTH) || (clear_value.flags & CLEAR_STENCIL)) {
+            VkImageAspectFlags depth_aspect_mask = 0;
+            if (clear_value.flags & CLEAR_DEPTH) {
+                depth_aspect_mask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+            }
+            if (clear_value.flags & CLEAR_STENCIL) {
+                depth_aspect_mask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+            }
+            attachments[num_attachments].aspectMask = depth_aspect_mask;
+            attachments[num_attachments].clearValue.depthStencil.depth   = clear_value.depth;
+            attachments[num_attachments].clearValue.depthStencil.stencil = clear_value.stencil;
+            ++num_attachments;
+        }
+
+        if (num_attachments > 0) {
+            vkCmdClearAttachments(_command_buffer, num_attachments, attachments, 1, rect);
+        }
+    }
+
+    void VulkanCommandBuffer::SetViewport(float x, float y, float w, float h) {
         VkViewport viewport = {};
         viewport.x = x;
         viewport.y = y;
@@ -99,190 +145,183 @@ namespace Blast {
         viewport.height = h;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(mCommandBuffer, 0, 1, &viewport);
+        vkCmdSetViewport(_command_buffer, 0, 1, &viewport);
     }
 
-    void VulkanCommandBuffer::setScissor(int x, int y, int w, int h) {
+    void VulkanCommandBuffer::SetScissor(int x, int y, int w, int h) {
         VkRect2D scissor = {};
         scissor.offset.x = x;
         scissor.offset.y = y;
         scissor.extent.width = w;
         scissor.extent.height = h;
-        vkCmdSetScissor(mCommandBuffer, 0, 1, &scissor);
+        vkCmdSetScissor(_command_buffer, 0, 1, &scissor);
     }
 
-    void VulkanCommandBuffer::bindVertexBuffer(GfxBuffer* vertexBuffer, uint32_t offset) {
-        VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(vertexBuffer);
-        VkBuffer vertexBuffers[] = { internelBuffer->getHandle() };
+    void VulkanCommandBuffer::BindVertexBuffer(GfxBuffer* vertex_buffer, uint32_t offset) {
+        VulkanBuffer* internel_buffer = static_cast<VulkanBuffer*>(vertex_buffer);
+        VkBuffer vertexBuffers[] = { internel_buffer->GetHandle() };
         VkDeviceSize offsets[] = { offset };
-        vkCmdBindVertexBuffers(mCommandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindVertexBuffers(_command_buffer, 0, 1, vertexBuffers, offsets);
     }
 
-    void VulkanCommandBuffer::bindIndexBuffer(GfxBuffer* indexBuffer, uint32_t offset, IndexType type) {
-        VulkanBuffer* internelBuffer = static_cast<VulkanBuffer*>(indexBuffer);
-        vkCmdBindIndexBuffer(mCommandBuffer, internelBuffer->getHandle(), offset, toVulkanIndexType(type));
+    void VulkanCommandBuffer::BindIndexBuffer(GfxBuffer* index_buffer, uint32_t offset, IndexType type) {
+        VulkanBuffer* internel_buffer = static_cast<VulkanBuffer*>(index_buffer);
+        vkCmdBindIndexBuffer(_command_buffer, internel_buffer->GetHandle(), offset, ToVulkanIndexType(type));
     }
 
-    void VulkanCommandBuffer::bindGraphicsPipeline(GfxGraphicsPipeline* pipeline) {
-        VulkanGraphicsPipeline* internelPipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
-        vkCmdBindPipeline(mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, internelPipeline->getHandle());
+    void VulkanCommandBuffer::BindGraphicsPipeline(GfxGraphicsPipeline* pipeline) {
+        VulkanGraphicsPipeline* internel_pipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
+        vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, internel_pipeline->GetHandle());
     }
 
-    void VulkanCommandBuffer::bindRootSignature(GfxRootSignature* rootSignature) {
-        // TODO: 计算着色器
-        VulkanRootSignature* internelRootSignature = static_cast<VulkanRootSignature*>(rootSignature);
-        mCurrentRootSignature = internelRootSignature;
-    }
+    void VulkanCommandBuffer::BindDescriptorSets(GfxRootSignature* root_signature, uint32_t num_sets, GfxDescriptorSet** sets) {
+        VulkanRootSignature* internel_root_signature = (VulkanRootSignature*)root_signature;
 
-    void VulkanCommandBuffer::bindDescriptorSets(uint32_t setCount, GfxDescriptorSet** sets) {
-        std::vector<VkDescriptorSet> internelSets;
-        for (int i = 0; i < setCount; ++i) {
-            internelSets.push_back(static_cast<VulkanDescriptorSet*>(sets[i])->getHandle());
+        std::vector<VkDescriptorSet> internel_sets;
+        for (uint32_t i = 0; i < num_sets; ++i) {
+            internel_sets.push_back(static_cast<VulkanDescriptorSet*>(sets[i])->GetHandle());
         }
 
-        vkCmdBindDescriptorSets(mCommandBuffer,
+        vkCmdBindDescriptorSets(_command_buffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                mCurrentRootSignature->getPipelineLayout(),
+                                internel_root_signature->GetPipelineLayout(),
                                 0,
-                                internelSets.size(),
-                                internelSets.data(),
+                                internel_sets.size(),
+                                internel_sets.data(),
                                 0,
                                 nullptr);
     }
 
-    void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {
-        vkCmdDraw(mCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+    void VulkanCommandBuffer::Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance) {
+        vkCmdDraw(_command_buffer, num_vertices, num_instances, first_vertex, first_instance);
     }
 
-    void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex,
-                                           uint32_t vertexOffset, uint32_t firstInstance) {
-        vkCmdDrawIndexed(mCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    void VulkanCommandBuffer::DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) {
+        vkCmdDrawIndexed(_command_buffer, num_indices, num_instances, first_index, vertex_offset, first_instance);
     }
 
-    void VulkanCommandBuffer::copyToBuffer(GfxBuffer* srcBuffer, uint32_t srcOffset, GfxBuffer* dstBuffer,
-                                           uint32_t dstOffset, uint32_t size) {
-        VulkanBuffer* internelSrcBuffer = static_cast<VulkanBuffer*>(srcBuffer);
-        VulkanBuffer* internelDstBuffer = static_cast<VulkanBuffer*>(dstBuffer);
+    void VulkanCommandBuffer::CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) {
+        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(src_buffer);
+        VulkanBuffer* internel_dst_buffer = static_cast<VulkanBuffer*>(dst_buffer);
         VkBufferCopy copy = {};
-        copy.srcOffset = srcOffset;
-        copy.dstOffset = dstOffset;
-        copy.size = size;
-        vkCmdCopyBuffer(mCommandBuffer, internelSrcBuffer->getHandle(), internelDstBuffer->getHandle(), 1, &copy);
+        copy.srcOffset = range.src_offset;
+        copy.dstOffset = range.dst_offset;
+        copy.size = range.size;
+        vkCmdCopyBuffer(_command_buffer, internel_src_buffer->GetHandle(), internel_dst_buffer->GetHandle(), 1, &copy);
     }
 
-    void VulkanCommandBuffer::copyToImage(GfxBuffer* srcBuffer, GfxTexture* dstTexture,
-                                          const GfxCopyToImageHelper& helper) {
-        VulkanBuffer* internelSrcBuffer = static_cast<VulkanBuffer*>(srcBuffer);
-        VulkanTexture* internelDstTexture = static_cast<VulkanTexture*>(dstTexture);
+    void VulkanCommandBuffer::CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) {
+        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(src_buffer);
+        VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(dst_texture);
         VkBufferImageCopy copy = {};
-        copy.bufferOffset = helper.bufferOffset;
+        copy.bufferOffset = range.buffer_offset;
         copy.bufferRowLength = 0;
         copy.bufferImageHeight = 0;
-        copy.imageSubresource.aspectMask = toVulkanAspectMask(dstTexture->getFormat());
-        copy.imageSubresource.mipLevel = helper.level;
-        copy.imageSubresource.baseArrayLayer = helper.layer;
+        copy.imageSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->GetFormat());
+        copy.imageSubresource.mipLevel = range.level;
+        copy.imageSubresource.baseArrayLayer = range.layer;
         copy.imageSubresource.layerCount = 1;
         copy.imageOffset.x = 0;
         copy.imageOffset.y = 0;
         copy.imageOffset.z = 0;
-        copy.imageExtent.width = dstTexture->getWidth();
-        copy.imageExtent.height = dstTexture->getHeight();
-        copy.imageExtent.depth = dstTexture->getDepth();
+        copy.imageExtent.width = internel_dst_texture->GetWidth();
+        copy.imageExtent.height = internel_dst_texture->GetHeight();
+        copy.imageExtent.depth = internel_dst_texture->GetDepth();
 
-        vkCmdCopyBufferToImage(mCommandBuffer, internelSrcBuffer->getHandle(), internelDstTexture->getImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+        vkCmdCopyBufferToImage(_command_buffer, internel_src_buffer->GetHandle(), internel_dst_texture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
     }
 
-    void VulkanCommandBuffer::setBarrier(uint32_t inBufferBarrierCount, GfxBufferBarrier* inBufferBarriers,
-                                         uint32_t inTextureBarrierCount, GfxTextureBarrier* inTextureBarriers) {
-        std::vector<VkImageMemoryBarrier> imageBarriers;
-        std::vector<VkBufferMemoryBarrier> bufferBarriers;
+    void VulkanCommandBuffer::SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
+                                         uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) {
+        std::vector<VkImageMemoryBarrier> internel_image_barriers;
+        std::vector<VkBufferMemoryBarrier> internel_buffer_barriers;
 
-        VkAccessFlags srcAccessFlags = 0;
-        VkAccessFlags dstAccessFlags = 0;
+        VkAccessFlags src_access_flags = 0;
+        VkAccessFlags dst_access_flags = 0;
 
-        for (uint32_t i = 0; i < inBufferBarrierCount; ++i) {
-            GfxBufferBarrier* trans = &inBufferBarriers[i];
+        for (uint32_t i = 0; i < num_buffer_barriers; ++i) {
+            GfxBufferBarrier* trans = &buffer_barriers[i];
             VulkanBuffer* buffer = static_cast<VulkanBuffer*>(trans->buffer);
             bool flag = false;
-            VkBufferMemoryBarrier bufferBarrier = {};
-            if (!(trans->newState & buffer->getResourceState())) {
+            VkBufferMemoryBarrier buffer_barrier = {};
+            if (!(trans->new_state & buffer->GetResourceState())) {
                 flag = true;
-                bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-                bufferBarrier.pNext = NULL;
-                bufferBarrier.srcAccessMask = toVulkanAccessFlags(buffer->getResourceState());
-                bufferBarrier.dstAccessMask = toVulkanAccessFlags(trans->newState);
+                buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+                buffer_barrier.pNext = NULL;
+                buffer_barrier.srcAccessMask = ToVulkanAccessFlags(buffer->GetResourceState());
+                buffer_barrier.dstAccessMask = ToVulkanAccessFlags(trans->new_state);
 
-                buffer->setResourceState(trans->newState);
+                buffer->SetResourceState(trans->new_state);
             }
-            else if(trans->newState == RESOURCE_STATE_UNORDERED_ACCESS) {
+            else if(trans->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
                 flag = true;
-                bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-                bufferBarrier.pNext = NULL;
-                bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+                buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+                buffer_barrier.pNext = NULL;
+                buffer_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                buffer_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
             }
 
             if(flag) {
-                bufferBarrier.buffer = buffer->getHandle();
-                bufferBarrier.size = VK_WHOLE_SIZE;
-                bufferBarrier.offset = 0;
-                bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                buffer_barrier.buffer = buffer->GetHandle();
+                buffer_barrier.size = VK_WHOLE_SIZE;
+                buffer_barrier.offset = 0;
+                buffer_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                buffer_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-                srcAccessFlags |= bufferBarrier.srcAccessMask;
-                dstAccessFlags |= bufferBarrier.dstAccessMask;
-                bufferBarriers.push_back(bufferBarrier);
+                src_access_flags |= buffer_barrier.srcAccessMask;
+                dst_access_flags |= buffer_barrier.dstAccessMask;
+                internel_buffer_barriers.push_back(buffer_barrier);
             }
         }
 
-        for (uint32_t i = 0; i < inTextureBarrierCount; ++i) {
-            GfxTextureBarrier* trans = &inTextureBarriers[i];
+        for (uint32_t i = 0; i < num_texture_barriers; ++i) {
+            GfxTextureBarrier* trans = &texture_barriers[i];
             VulkanTexture* texture = static_cast<VulkanTexture*>(trans->texture);
             bool flag = false;
-            VkImageMemoryBarrier imageBarrier = {};
-            if (!(trans->newState & texture->getResourceState())) {
+            VkImageMemoryBarrier image_barrier = {};
+            if (!(trans->new_state & texture->GetResourceState())) {
                 flag = true;
-                imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                imageBarrier.pNext = NULL;
-                imageBarrier.srcAccessMask = toVulkanAccessFlags(texture->getResourceState());
-                imageBarrier.dstAccessMask = toVulkanAccessFlags(trans->newState);
-                imageBarrier.oldLayout = toVulkanImageLayout(texture->getResourceState());
-                imageBarrier.newLayout = toVulkanImageLayout(trans->newState);
+                image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                image_barrier.pNext = NULL;
+                image_barrier.srcAccessMask = ToVulkanAccessFlags(texture->GetResourceState());
+                image_barrier.dstAccessMask = ToVulkanAccessFlags(trans->new_state);
+                image_barrier.oldLayout = ToVulkanImageLayout(texture->GetResourceState());
+                image_barrier.newLayout = ToVulkanImageLayout(trans->new_state);
 
-                texture->setResourceState(trans->newState);
+                texture->SetResourceState(trans->new_state);
             }
-            else if(trans->newState == RESOURCE_STATE_UNORDERED_ACCESS) {
+            else if(trans->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
                 flag = true;
-                imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                imageBarrier.pNext = NULL;
-                imageBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                imageBarrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-                imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-                imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                image_barrier.pNext = NULL;
+                image_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                image_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+                image_barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                image_barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
             }
 
             if(flag) {
-                imageBarrier.image = texture->getImage();
-                imageBarrier.subresourceRange.aspectMask = toVulkanAspectMask(texture->getFormat());
-                imageBarrier.subresourceRange.baseMipLevel = 0;
-                imageBarrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-                imageBarrier.subresourceRange.baseArrayLayer = 0;
-                imageBarrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-                imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                srcAccessFlags |= imageBarrier.srcAccessMask;
-                dstAccessFlags |= imageBarrier.dstAccessMask;
-                imageBarriers.push_back(imageBarrier);
+                image_barrier.image = texture->GetHandle();
+                image_barrier.subresourceRange.aspectMask = ToVulkanAspectMask(texture->GetFormat());
+                image_barrier.subresourceRange.baseMipLevel = 0;
+                image_barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+                image_barrier.subresourceRange.baseArrayLayer = 0;
+                image_barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+                image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                src_access_flags |= image_barrier.srcAccessMask;
+                dst_access_flags |= image_barrier.dstAccessMask;
+                internel_image_barriers.push_back(image_barrier);
             }
         }
 
-        VkPipelineStageFlags srcStageMask = toPipelineStageFlags(srcAccessFlags, mPool->getQueueType());
-        VkPipelineStageFlags dstStageMask = toPipelineStageFlags(dstAccessFlags, mPool->getQueueType());
+        VkPipelineStageFlags src_stage_mask = ToPipelineStageFlags(src_access_flags, _pool->GetQueueType());
+        VkPipelineStageFlags dst_stage_mask = ToPipelineStageFlags(dst_access_flags, _pool->GetQueueType());
 
-        if (imageBarriers.size() || bufferBarriers.size()) {
-            vkCmdPipelineBarrier(mCommandBuffer, srcStageMask, dstStageMask, 0, 0, NULL,
-                                 bufferBarriers.size(), bufferBarriers.data(),
-                                 imageBarriers.size(), imageBarriers.data());
+        if (internel_image_barriers.size() || internel_buffer_barriers.size()) {
+            vkCmdPipelineBarrier(_command_buffer, src_stage_mask, dst_stage_mask, 0, 0, NULL,
+                                 internel_buffer_barriers.size(), internel_buffer_barriers.data(),
+                                 internel_image_barriers.size(), internel_image_barriers.data());
         }
     }
 }

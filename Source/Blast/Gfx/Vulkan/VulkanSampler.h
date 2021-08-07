@@ -2,16 +2,19 @@
 #include "VulkanDefine.h"
 #include "../GfxSampler.h"
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
 
     class VulkanSampler : public GfxSampler {
     public:
         VulkanSampler(VulkanContext* context, const GfxSamplerDesc& desc);
+
         ~VulkanSampler();
-        VkSampler getHandle() { return mSampler; }
+
+        VkSampler GetHandle() { return _sampler; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkSampler mSampler;
+        VulkanContext* _context = nullptr;
+        VkSampler _sampler;
     };
 }

@@ -2,19 +2,24 @@
 #include "VulkanDefine.h"
 #include "../GfxBuffer.h"
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
 
     class VulkanBuffer : public GfxBuffer {
     public:
         VulkanBuffer(VulkanContext* context, const GfxBufferDesc& desc);
+
         ~VulkanBuffer();
-        void readData(uint32_t offset, uint32_t size, void* dest) override;
-        void writeData(uint32_t offset, uint32_t size, void* source) override;
-        VkBuffer getHandle() { return mBuffer; }
+
+        void ReadData(uint32_t offset, uint32_t size, void* dest) override;
+
+        void WriteData(uint32_t offset, uint32_t size, void* source) override;
+
+        VkBuffer GetHandle() { return _buffer; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkBuffer mBuffer;
-        VkDeviceMemory mMemory;
+        VulkanContext* _context = nullptr;
+        VkBuffer _buffer;
+        VkDeviceMemory _memory;
     };
 }

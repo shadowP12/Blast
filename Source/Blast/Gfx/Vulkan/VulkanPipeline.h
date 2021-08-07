@@ -4,34 +4,34 @@
 #include <map>
 #include <vector>
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
     class VulkanRootSignature;
 
     class VulkanDescriptorSet : public GfxDescriptorSet {
     public:
-        VulkanDescriptorSet(VulkanContext* context, VulkanRootSignature* rootSignature, const uint8_t& set);
+        VulkanDescriptorSet(VulkanContext* context, VulkanRootSignature* root_signature, const uint8_t& set);
 
         ~VulkanDescriptorSet();
 
-        VkDescriptorSet getHandle() { return mSet; }
+        VkDescriptorSet GetHandle() { return _set; }
 
-        void setSampler(const uint8_t& reg, GfxSampler* sampler) override;
+        void SetSampler(const uint8_t& reg, GfxSampler* sampler) override;
 
-        void setTexture(const uint8_t& reg, GfxTexture* texture) override;
+        void SetTexture(const uint8_t& reg, GfxTextureView* texture_view) override;
 
-        void setCombinedSampler(const uint8_t& reg, GfxTexture* texture, GfxSampler* sampler) override;
+        void SetStorgeTexture(const uint8_t& reg, GfxTextureView* texture_view) override;
 
-        void setRWTexture(const uint8_t& reg, GfxTexture* texture) override;
+        void SetCombinedSampler(const uint8_t& reg, GfxTextureView* texture_view, GfxSampler* sampler) override;
 
-        void setUniformBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
+        void SetUniformBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
 
-        void setRWBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
+        void SetStorgeBuffer(const uint8_t& reg, GfxBuffer* buffer, uint32_t size, uint32_t offset) override;
 
     protected:
-        VulkanContext* mContext = nullptr;
-        VulkanRootSignature* mRootSignature = nullptr;
-        VkDescriptorSet mSet = VK_NULL_HANDLE;
+        VulkanContext* _context = nullptr;
+        VulkanRootSignature* _root_signature = nullptr;
+        VkDescriptorSet _set = VK_NULL_HANDLE;
     };
 
     class VulkanRootSignature : public GfxRootSignature {
@@ -40,25 +40,30 @@ namespace Blast {
 
         ~VulkanRootSignature();
 
-        GfxDescriptorSet* allocateSet(const uint8_t& set) override;
+        GfxDescriptorSet* AllocateSet(const uint8_t& set) override;
 
-        VkPipelineLayout getPipelineLayout() { return mPipelineLayout; }
+        void DeleteSet(GfxDescriptorSet* set) override;
+
+        VkPipelineLayout GetPipelineLayout() { return _pipeline_layout; }
 
     protected:
         friend class VulkanDescriptorSet;
-        VulkanContext* mContext = nullptr;
-        std::map<int, VkDescriptorSetLayout> mSetLayoutMap;
-        VkPipelineLayout mPipelineLayout;
+        VulkanContext* _context = nullptr;
+        std::map<uint32_t, VkDescriptorSetLayout> _set_layout_map;
+        VkPipelineLayout _pipeline_layout;
     };
 
     class VulkanGraphicsPipeline : public GfxGraphicsPipeline {
     public:
         VulkanGraphicsPipeline(VulkanContext* context, const GfxGraphicsPipelineDesc& desc);
+
         ~VulkanGraphicsPipeline();
-        VkPipeline getHandle() { return mPipeline; }
+
+        VkPipeline GetHandle() { return _pipeline; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkPipeline mPipeline;
+        VulkanContext* _context = nullptr;
+        VkPipeline _pipeline;
     };
 }
 

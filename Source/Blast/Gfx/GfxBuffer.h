@@ -1,7 +1,7 @@
 #pragma once
 #include "GfxDefine.h"
 
-namespace Blast {
+namespace blast {
     struct GfxBufferDesc {
         uint32_t size;
         ResourceUsage usage;
@@ -11,16 +11,23 @@ namespace Blast {
     class GfxBuffer {
     public:
         GfxBuffer(const GfxBufferDesc &desc);
+
         virtual ~GfxBuffer() = default;
-        virtual void readData(uint32_t offset, uint32_t size, void * dest) = 0;
-        virtual void writeData(uint32_t offset, uint32_t size, void * dest) = 0;
-        ResourceType getResourceType() { return mType; }
-        ResourceState getResourceState() { return mState; }
-        void setResourceState(ResourceState state) { mState = state; }
+
+        virtual void ReadData(uint32_t offset, uint32_t size, void* dest) = 0;
+
+        virtual void WriteData(uint32_t offset, uint32_t size, void* dest) = 0;
+
+        ResourceType GetResourceType() { return _type; }
+
+        ResourceState GetResourceState() { return _state; }
+
+        void SetResourceState(ResourceState state) { _state = state; }
+
     protected:
-        uint32_t mSize;
-        ResourceUsage mUsage;
-        ResourceType mType;
-        ResourceState mState;
+        uint32_t _size;
+        ResourceUsage _usage;
+        ResourceType _type;
+        ResourceState _state;
     };
 }

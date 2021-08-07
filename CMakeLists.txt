@@ -6,10 +6,11 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(Blast STATIC)
 target_include_directories(Blast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_sources(Blast PUBLIC
+        Source/Blast/Gfx/GfxDefine.cpp
         Source/Blast/Gfx/GfxContext.cpp
         Source/Blast/Gfx/GfxBuffer.cpp
         Source/Blast/Gfx/GfxTexture.cpp
-        Source/Blast/Gfx/GfxRenderTarget.cpp
+        Source/Blast/Gfx/GfxFramebuffer.cpp
         Source/Blast/Gfx/GfxSwapchain.cpp
         Source/Blast/Gfx/GfxCommandBuffer.cpp
         Source/Blast/Gfx/GfxPipeline.cpp
@@ -19,7 +20,7 @@ target_sources(Blast PUBLIC
         Source/Blast/Gfx/Vulkan/VulkanContext.cpp
         Source/Blast/Gfx/Vulkan/VulkanBuffer.cpp
         Source/Blast/Gfx/Vulkan/VulkanTexture.cpp
-        Source/Blast/Gfx/Vulkan/VulkanRenderTarget.cpp
+        Source/Blast/Gfx/Vulkan/VulkanFramebuffer.cpp
         Source/Blast/Gfx/Vulkan/VulkanSwapchain.cpp
         Source/Blast/Gfx/Vulkan/VulkanCommandBuffer.cpp
         Source/Blast/Gfx/Vulkan/VulkanPipeline.cpp

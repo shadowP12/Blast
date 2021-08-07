@@ -2,87 +2,151 @@
 #include "../GfxContext.h"
 #include "VulkanDefine.h"
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
 
     class VulkanSemaphore : public GfxSemaphore {
     public:
         VulkanSemaphore(VulkanContext* context);
+
         ~VulkanSemaphore();
-        VkSemaphore  getHandle() { return mSemaphore; }
+
+        VkSemaphore  GetHandle() { return _semaphore; }
+
     private:
-        VulkanContext* mContext = nullptr;
-        VkSemaphore  mSemaphore;
+        VulkanContext* _context = nullptr;
+        VkSemaphore  _semaphore;
     };
 
     class VulkanFence : public GfxFence {
     public:
         VulkanFence(VulkanContext* context);
+
         ~VulkanFence();
-        FenceStatus getFenceStatus() override;
-        void waitForComplete() override;
-        VkFence getHandle() { return mFence; }
+
+        FenceStatus GetFenceStatus() override;
+
+        void WaitForComplete() override;
+
+        VkFence GetHandle() { return _fence; }
+
     private:
         friend class VulkanContext;
         friend class VulkanQueue;
-        VulkanContext* mContext = nullptr;
-        VkFence mFence = VK_NULL_HANDLE;
-        bool mSubmitted = false;
+        VulkanContext* _context = nullptr;
+        VkFence _fence;
+        bool _submitted = false;
     };
 
     class VulkanQueue : public GfxQueue {
     public:
         VulkanQueue();
+
         ~VulkanQueue();
-        void submit(const GfxSubmitInfo& info) override;
-        int present(const GfxPresentInfo& info) override;
-        void waitIdle() override;
-        VkQueue  getHandle() { return mQueue; }
-        QueueType getType() { return mType; }
-        uint32_t getFamilyIndex() { return mFamilyIndex; }
+
+        void Submit(const GfxSubmitInfo& info) override;
+
+        int Present(const GfxPresentInfo& info) override;
+
+        void WaitIdle() override;
+
+        VkQueue GetHandle() { return _queue; }
+
+        QueueType GetType() { return _type; }
+
+        uint32_t GetFamilyIndex() { return _family_index; }
+
     private:
         friend class VulkanContext;
-        VkQueue  mQueue;
-        QueueType mType;
-        uint32_t mFamilyIndex;
+        VkQueue _queue;
+        QueueType _type;
+        uint32_t _family_index;
     };
 
     class VulkanContext : public GfxContext {
     public:
         VulkanContext();
+
         ~VulkanContext();
-        GfxQueue* getQueue(QueueType type) override;
-        GfxSemaphore* createSemaphore() override;
-        GfxFence* createFence() override;
-        GfxBuffer* createBuffer(const GfxBufferDesc& desc) override;
-        GfxTexture* createTexture(const GfxTextureDesc& desc) override;
-        GfxSampler* createSampler(const GfxSamplerDesc& desc) override;
-        GfxSurface* createSurface(const GfxSurfaceDesc& desc) override;
-        GfxSwapchain* createSwapchain(const GfxSwapchainDesc& desc) override;
-        GfxCommandBufferPool* createCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
-        GfxRenderPass* createRenderPass(const GfxRenderPassDesc& desc) override;
-        GfxFramebuffer* createFramebuffer(const GfxFramebufferDesc& desc) override;
-        GfxShader* createShader(const GfxShaderDesc& desc) override;
-        GfxRootSignature* createRootSignature(const GfxRootSignatureDesc& desc) override;
-        GfxGraphicsPipeline* createGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) override;
-        void acquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signalSemaphore, GfxFence* fence, uint32_t* imageIndex) override;
-        VkDevice getDevice() { return mDevice; }
-        VkPhysicalDevice getPhyDevice() { return mPhyDevice; }
-        VkInstance getInstance() { return mInstance; }
-        VkDescriptorPool getDescriptorPool() { return mDescriptorPool; }
-        int findMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
+
+        GfxQueue* GetQueue(QueueType type) override;
+
+        GfxSemaphore* CreateSemaphore() override;
+
+        void DestroySemaphore(GfxSemaphore*) override;
+
+        GfxFence* CreateFence() override;
+
+        void DestroyFence(GfxFence*) override;
+
+        GfxBuffer* CreateBuffer(const GfxBufferDesc& desc) override;
+
+        void DestroyBuffer(GfxBuffer*) override;
+
+        GfxTexture* CreateTexture(const GfxTextureDesc& desc) override;
+
+        void DestroyTexture(GfxTexture*) override;
+
+        GfxTextureView* CreateTextureView(const GfxTextureViewDesc& desc) override;
+
+        void DestroyTextureView(GfxTextureView*) override;
+
+        GfxSampler* CreateSampler(const GfxSamplerDesc& desc) override;
+
+        void DestroySampler(GfxSampler*) override;
+
+        GfxSurface* CreateSurface(const GfxSurfaceDesc& desc) override;
+
+        void DestroySurface(GfxSurface*) override;
+
+        GfxSwapchain* CreateSwapchain(const GfxSwapchainDesc& desc) override;
+
+        void DestroySwapchain(GfxSwapchain*) override;
+
+        GfxCommandBufferPool* CreateCommandBufferPool(const GfxCommandBufferPoolDesc& desc) override;
+
+        void DestroyCommandBufferPool(GfxCommandBufferPool*) override;
+
+        GfxFramebuffer* CreateFramebuffer(const GfxFramebufferDesc& desc) override;
+
+        void DestroyFramebuffer(GfxFramebuffer*) override;
+
+        GfxShader* CreateShader(const GfxShaderDesc& desc) override;
+
+        void DestroyShader(GfxShader*) override;
+
+        GfxRootSignature* CreateRootSignature(const GfxRootSignatureDesc& desc) override;
+
+        void DestroyRootSignature(GfxRootSignature*) override;
+
+        GfxGraphicsPipeline* CreateGraphicsPipeline(const GfxGraphicsPipelineDesc& desc) override;
+
+        void DestroyGraphicsPipeline(GfxGraphicsPipeline*) override;
+
+        void AcquireNextImage(GfxSwapchain* swapchain, GfxSemaphore* signal_semaphore, GfxFence* fence, uint32_t* image_index) override;
+
+        VkDevice GetDevice() { return _device; }
+
+        VkPhysicalDevice GetPhyDevice() { return _phy_device; }
+
+        VkInstance GetInstance() { return _instance; }
+
+        VkDescriptorPool GetDescriptorPool() { return _descriptor_pool; }
+
+        uint32_t FindMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
+
     private:
-        VkInstance mInstance = VK_NULL_HANDLE;
-        VkDebugUtilsMessengerEXT mDebugMessenger = VK_NULL_HANDLE;
-        VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
-        VkPhysicalDevice mPhyDevice = VK_NULL_HANDLE;
-        VkPhysicalDeviceProperties mPhyDeviceProperties;
-        VkPhysicalDeviceFeatures mPhyDeviceFeatures;
-        VkPhysicalDeviceMemoryProperties mPhyDeviceMemoryProperties;
-        VkDevice mDevice = VK_NULL_HANDLE;
-        VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
-        VulkanQueue* mGraphicsQueue = nullptr;
-        VulkanQueue* mComputeQueue = nullptr;
-        VulkanQueue* mTransferQueue = nullptr;
+        VkInstance _instance = VK_NULL_HANDLE;
+        VkDebugUtilsMessengerEXT _debug_messenger = VK_NULL_HANDLE;
+        VkDebugReportCallbackEXT _debug_report_callback = VK_NULL_HANDLE;
+        VkPhysicalDevice _phy_device = VK_NULL_HANDLE;
+        VkPhysicalDeviceProperties _phy_device_properties;
+        VkPhysicalDeviceFeatures _phy_device_features;
+        VkPhysicalDeviceMemoryProperties _phy_device_memory_properties;
+        VkDevice _device = VK_NULL_HANDLE;
+        VkDescriptorPool _descriptor_pool = VK_NULL_HANDLE;
+        VulkanQueue* _graphics_queue = nullptr;
+        VulkanQueue* _compute_queue = nullptr;
+        VulkanQueue* _transfer_queue = nullptr;
     };
 }

@@ -1,12 +1,60 @@
 #pragma once
 #include <stdint.h>
-#include "../Utility/Flag.h"
+#include <string.h>
+#include <stdarg.h>
+
+#define BLAST_SAFE_DELETE(x)    \
+    {                           \
+        if(x) {                 \
+            delete x;           \
+            x = nullptr;        \
+        }                       \
+    }
+
+#define BLAST_SAFE_DELETE_ARRAY(x) \
+    { \
+        delete[] x; \
+        x = nullptr; \
+    }
+
+#define BLAST_LOGE(...)                           \
+	do                                            \
+	{                                             \
+		fprintf(stderr, "[BLAST_ERROR]: " __VA_ARGS__); \
+		fflush(stderr);                           \
+	} while (false)
+
+#define BLAST_LOGW(...)                          \
+	do                                           \
+	{                                            \
+		fprintf(stderr, "[BLAST_WARN]: " __VA_ARGS__); \
+		fflush(stderr);                          \
+	} while (false)
+
+#define BLAST_LOGI(...)                          \
+	do                                           \
+	{                                            \
+		fprintf(stderr, "[BLAST_INFO]: " __VA_ARGS__); \
+		fflush(stderr);                          \
+	} while (false)
+
+#ifdef __cplusplus
+#ifndef BLAST_MAKE_ENUM_FLAG
+#define BLAST_MAKE_ENUM_FLAG(TYPE, ENUM_TYPE)                                                                   \
+	static inline ENUM_TYPE operator|(ENUM_TYPE a, ENUM_TYPE b) { return (ENUM_TYPE)((TYPE)(a) | (TYPE)(b)); }  \
+	static inline ENUM_TYPE operator&(ENUM_TYPE a, ENUM_TYPE b) { return (ENUM_TYPE)((TYPE)(a) & (TYPE)(b)); }  \
+	static inline ENUM_TYPE operator|=(ENUM_TYPE& a, ENUM_TYPE b) { return a = (a | b); }                       \
+	static inline ENUM_TYPE operator&=(ENUM_TYPE& a, ENUM_TYPE b) { return a = (a & b); }
+#endif
+#else
+#define MAKE_ENUM_FLAG(TYPE, ENUM_TYPE)
+#endif
 
 #define MAX_VERTEX_BINDINGS 15
 #define MAX_VERTEX_ATTRIBS 15
 #define MAX_RENDER_TARGET_ATTACHMENTS 4
 
-namespace Blast {
+namespace blast {
 
     enum BlendOp {
         BLEND_OP_ADD,
@@ -113,7 +161,7 @@ namespace Blast {
         BLEND_STATE_TARGET_7 = 0x80,
         BLEND_STATE_TARGET_ALL = 0xFF,
     };
-    MAKE_ENUM_FLAG(uint32_t, BlendStateTargets)
+    BLAST_MAKE_ENUM_FLAG(uint32_t, BlendStateTargets)
 
     enum SampleCount {
         SAMPLE_COUNT_1 = 1,
@@ -235,7 +283,7 @@ namespace Blast {
         RESOURCE_STATE_COMMON = 0x2000,
         RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE = 0x4000,
     };
-    MAKE_ENUM_FLAG(uint32_t, ResourceState)
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ResourceState)
 
     enum ResourceType {
         RESOURCE_TYPE_UNDEFINED = 0,
@@ -250,7 +298,7 @@ namespace Blast {
         RESOURCE_TYPE_TEXTURE_CUBE = (RESOURCE_TYPE_TEXTURE | (RESOURCE_TYPE_INDIRECT_BUFFER << 1)),
         RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = (RESOURCE_TYPE_TEXTURE_CUBE << 1),
     };
-    MAKE_ENUM_FLAG(uint32_t, ResourceType)
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ResourceType)
 
     enum LoadAction {
         LOAD_ACTION_DONTCARE,
@@ -280,7 +328,7 @@ namespace Blast {
         SHADER_STAGE_DOMN = SHADER_STAGE_TESE,
         SHADER_STAGE_COUNT = 7,
     };
-    MAKE_ENUM_FLAG(uint32_t, ShaderStage)
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ShaderStage)
 
     enum TextureDimension {
         TEXTURE_DIM_1D,
@@ -335,7 +383,7 @@ namespace Blast {
         SEMANTIC_CUSTOM4 = 1 << 14,
         SEMANTIC_CUSTOM5 = 1 << 15
     };
-    MAKE_ENUM_FLAG(uint32_t, ShaderSemantic)
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ShaderSemantic)
 
     enum FenceStatus {
         FENCE_STATUS_COMPLETE = 0,
@@ -348,4 +396,24 @@ namespace Blast {
         PIPELINE_TYPE_COMPUTE,
         MAX_PIPELINE_TYPE
     };
+
+    enum ClearFlag {
+        CLEAR_NONE = 0,
+        CLEAR_COLOR = 0X00000001,
+        CLEAR_DEPTH = 0X00000002,
+        CLEAR_STENCIL = 0X00000004,
+        CLEAR_ALL = ((uint32_t)CLEAR_NONE | (uint32_t)CLEAR_DEPTH | (uint32_t)CLEAR_STENCIL)
+    };
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ClearFlag)
+
+    enum ColorComponentFlag {
+        COLOR_COMPONENT_R = 0x00000001,
+        COLOR_COMPONENT_G = 0x00000002,
+        COLOR_COMPONENT_B = 0x00000004,
+        COLOR_COMPONENT_A = 0x00000008,
+        COLOR_COMPONENT_ALL = ((uint32_t)COLOR_COMPONENT_R | (uint32_t)COLOR_COMPONENT_G | (uint32_t)COLOR_COMPONENT_B) | (uint32_t)COLOR_COMPONENT_A
+    };
+    BLAST_MAKE_ENUM_FLAG(uint32_t, ColorComponentFlag)
+
+    uint32_t GetFormatStride(Format format);
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "GfxDefine.h"
 
-namespace Blast {
+namespace blast {
     class GfxBuffer;
     class GfxTexture;
     class GfxQueue;
@@ -23,7 +23,9 @@ namespace Blast {
 
         virtual ~GfxCommandBufferPool() = default;
 
-        virtual GfxCommandBuffer* allocBuf(bool secondary) = 0;
+        virtual GfxCommandBuffer* AllocBuffer(bool secondary) = 0;
+
+        virtual void DeleteBuffer(GfxCommandBuffer* buffer) = 0;
 
     protected:
     };
@@ -34,47 +36,71 @@ namespace Blast {
     };
 
     struct GfxClearValue {
+        uint32_t flags = CLEAR_NONE;
         float color[4];
         float depth;
         uint32_t stencil;
     };
 
-    struct GfxCopyToImageHelper {
-        uint32_t bufferOffset = 0;
+    struct GfxCopyToBufferRange {
+        uint32_t src_offset;
+        uint32_t dst_offset;
+        uint32_t size;
+    };
+
+    struct GfxCopyToImageRange {
+        uint32_t buffer_offset = 0;
         uint32_t level = 0;
         uint32_t layer = 0;
     };
 
     struct GfxBufferBarrier {
         GfxBuffer* buffer;
-        ResourceState newState;
+        ResourceState new_state;
     };
 
     struct GfxTextureBarrier {
         GfxTexture* texture;
-        ResourceState newState;
+        ResourceState new_state;
     };
 
     class GfxCommandBuffer {
     public:
         GfxCommandBuffer(const GfxCommandBufferDesc& desc);
+
         virtual ~GfxCommandBuffer() = default;
-        virtual void begin() = 0;
-        virtual void end() = 0;
-        virtual void bindRenderTarget(GfxRenderPass* renderPass, GfxFramebuffer* framebuffer, const GfxClearValue& clearValue) = 0;
-        virtual void unbindRenderTarget() = 0;
-        virtual void setViewport(float x, float y, float w, float h) = 0;
-        virtual void setScissor(int x, int y, int w, int h) = 0;
-        virtual void bindVertexBuffer(GfxBuffer* vertexBuffer, uint32_t offset) = 0;
-        virtual void bindIndexBuffer(GfxBuffer* indexBuffer, uint32_t offset, IndexType type) = 0;
-        virtual void bindGraphicsPipeline(GfxGraphicsPipeline* pipeline) = 0;
-        virtual void bindRootSignature(GfxRootSignature* rootSignature) = 0;
-        virtual void bindDescriptorSets(uint32_t setCount, GfxDescriptorSet** sets) = 0;
-        virtual void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
-        virtual void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) = 0;
-        virtual void copyToBuffer(GfxBuffer* srcBuffer, uint32_t srcOffset, GfxBuffer* dstBuffer, uint32_t dstOffset, uint32_t size) = 0;
-        virtual void copyToImage(GfxBuffer* srcBuffer, GfxTexture* dstTexture, const GfxCopyToImageHelper& helper) = 0;
-        virtual void setBarrier(uint32_t inBufferBarrierCount, GfxBufferBarrier* inBufferBarriers,
-                                uint32_t inTextureBarrierCount, GfxTextureBarrier* inTextureBarriers) = 0;
+
+        virtual void Begin() = 0;
+
+        virtual void End() = 0;
+
+        virtual void BindFramebuffer(GfxFramebuffer* framebuffer) = 0;
+
+        virtual void UnbindFramebuffer() = 0;
+
+        virtual void ClearFramebuffer(GfxFramebuffer* framebuffer, const GfxClearValue& clear_value) = 0;
+
+        virtual void SetViewport(float x, float y, float w, float h) = 0;
+
+        virtual void SetScissor(int x, int y, int w, int h) = 0;
+
+        virtual void BindVertexBuffer(GfxBuffer* vertex_buffer, uint32_t offset) = 0;
+
+        virtual void BindIndexBuffer(GfxBuffer* index_buffer, uint32_t offset, IndexType type) = 0;
+
+        virtual void BindGraphicsPipeline(GfxGraphicsPipeline* pipeline) = 0;
+
+        virtual void BindDescriptorSets(GfxRootSignature* root_signature, uint32_t num_sets, GfxDescriptorSet** sets) = 0;
+
+        virtual void Draw(uint32_t num_vertices, uint32_t num_instances, uint32_t first_vertex, uint32_t first_instance) = 0;
+
+        virtual void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) = 0;
+
+        virtual void CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) = 0;
+
+        virtual void CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) = 0;
+
+        virtual void SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
+                                uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) = 0;
     };
 }

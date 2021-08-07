@@ -2,16 +2,19 @@
 #include "VulkanDefine.h"
 #include "../GfxShader.h"
 
-namespace Blast {
+namespace blast {
     class VulkanContext;
 
     class VulkanShader : public GfxShader {
     public:
         VulkanShader(VulkanContext* context, const GfxShaderDesc& desc);
+
         ~VulkanShader();
-        VkShaderModule getHandle() { return mShader; }
+
+        VkShaderModule GetHandle() { return _shader; }
+
     protected:
-        VulkanContext* mContext = nullptr;
-        VkShaderModule mShader;
+        VulkanContext* _context = nullptr;
+        VkShaderModule _shader;
     };
 }

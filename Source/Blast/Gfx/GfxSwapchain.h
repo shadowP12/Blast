@@ -1,7 +1,7 @@
 #pragma once
 #include "GfxDefine.h"
 
-namespace Blast {
+namespace blast {
     class GfxRenderPass;
     class GfxTexture;
     class GfxSwapchain;
@@ -12,23 +12,22 @@ namespace Blast {
     };
 
     struct GfxSurfaceDesc {
-        void* originSurface = nullptr;
+        void* origin_surface = nullptr;
     };
 
     class GfxSurface {
     public:
         GfxSurface(const GfxSurfaceDesc& desc);
+
         virtual ~GfxSurface() = default;
-        GfxSurfaceSize getSize();
-        Format getFormat() { return mFormat; }
+
     protected:
-        void* mOriginSurface = nullptr;
-        Format mFormat;
+        void* _origin_surface = nullptr;
     };
 
     struct GfxSwapchainDesc {
         GfxSurface* surface = nullptr;
-        GfxSwapchain* oldSwapchain = nullptr;
+        GfxSwapchain* old_swapchain = nullptr;
         uint32_t width;
         uint32_t height;
     };
@@ -36,13 +35,18 @@ namespace Blast {
     class GfxSwapchain {
     public:
         GfxSwapchain(const GfxSwapchainDesc& desc);
+
         virtual ~GfxSwapchain() = default;
-        virtual uint32_t getImageCount() = 0;
-        virtual GfxTexture* getColorRenderTarget(uint32_t idx) = 0;
-        virtual GfxTexture* getDepthRenderTarget(uint32_t idx) = 0;
+
+        virtual uint32_t GetImageCount() = 0;
+
+        virtual GfxTexture* GetColorRenderTarget(uint32_t idx) = 0;
+
+        virtual GfxTexture* GetDepthRenderTarget(uint32_t idx) = 0;
+
     protected:
-        uint32_t mWidth;
-        uint32_t mHeight;
+        uint32_t _width;
+        uint32_t _height;
     };
 
 }

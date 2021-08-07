@@ -1,12 +1,14 @@
 #pragma once
 #include "ShaderCompiler.h"
 
-namespace Blast {
+namespace blast {
     class VulkanShaderCompiler : public ShaderCompiler {
     public:
         VulkanShaderCompiler();
+
         ~VulkanShaderCompiler();
-        ShaderCompileResult compile(const ShaderCompileDesc& desc) override;
+
+        ShaderCompileResult Compile(const ShaderCompileDesc& desc) override;
     };
 
 }
