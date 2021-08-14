@@ -344,6 +344,24 @@ namespace blast {
         TEXTURE_DIM_UNDEFINED,
     };
 
+    enum UniformType {
+        UNIFORM_UNDEFINED,
+        UNIFORM_BOOL,
+        UNIFORM_FLOAT,
+        UNIFORM_FLOAT2,
+        UNIFORM_FLOAT3,
+        UNIFORM_FLOAT4,
+        UNIFORM_INT,
+        UNIFORM_INT2,
+        UNIFORM_INT3,
+        UNIFORM_INT4,
+        UNIFORM_UINT,
+        UNIFORM_UINT2,
+        UNIFORM_UINT3,
+        UNIFORM_UINT4,
+        UNIFORM_MAT4
+    };
+
     enum VertexAttribRate {
         VERTEX_ATTRIB_RATE_VERTEX = 0,
         VERTEX_ATTRIB_RATE_INSTANCE = 1,

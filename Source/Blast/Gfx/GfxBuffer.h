@@ -18,6 +18,8 @@ namespace blast {
 
         virtual void WriteData(uint32_t offset, uint32_t size, void* dest) = 0;
 
+        uint32_t GetSize() { return _size; }
+
         ResourceType GetResourceType() { return _type; }
 
         ResourceState GetResourceState() { return _state; }

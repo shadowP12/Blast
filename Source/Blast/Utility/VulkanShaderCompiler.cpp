@@ -187,60 +187,58 @@ namespace blast {
         switch (type.basetype) {
             case spirv_cross::SPIRType::Boolean:
                 if (type.vecsize == 1 && type.columns == 1) {
-                    return UniformType::BOOL;
+                    return UNIFORM_BOOL;
                 } else {
-                    return UniformType::UNDEFINED;
+                    return UNIFORM_UNDEFINED;
                 }
                 break;
             case spirv_cross::SPIRType::Float:
                 if (type.vecsize == 1 && type.columns == 1) {
-                    return UniformType::FLOAT;
+                    return UNIFORM_FLOAT;
                 } else if (type.vecsize == 2 && type.columns == 1) {
-                    return UniformType::FLOAT2;
+                    return UNIFORM_FLOAT2;
                 } else if (type.vecsize == 3 && type.columns == 1) {
-                    return UniformType::FLOAT3;
+                    return UNIFORM_FLOAT3;
                 } else if (type.vecsize == 4 && type.columns == 1) {
-                    return UniformType::FLOAT4;
-                } else if (type.vecsize == 3 && type.columns == 3) {
-                    return UniformType::MAT3;
+                    return UNIFORM_FLOAT4;
                 } else if (type.vecsize == 4 && type.columns == 4) {
-                    return UniformType::MAT4;
+                    return UNIFORM_MAT4;
                 } else {
-                    return UniformType::UNDEFINED;
+                    return UNIFORM_UNDEFINED;
                 }
                 break;
             case spirv_cross::SPIRType::Int:
                 if (type.vecsize == 1 && type.columns == 1) {
-                    return UniformType::INT;
+                    return UNIFORM_INT;
                 } else if (type.vecsize == 2 && type.columns == 1) {
-                    return UniformType::INT2;
+                    return UNIFORM_INT2;
                 } else if (type.vecsize == 3 && type.columns == 1) {
-                    return UniformType::INT3;
+                    return UNIFORM_INT3;
                 } else if (type.vecsize == 4 && type.columns == 1) {
-                    return UniformType::INT4;
+                    return UNIFORM_INT4;
                 } else {
-                    return UniformType::UNDEFINED;
+                    return UNIFORM_UNDEFINED;
                 }
                 break;
             case spirv_cross::SPIRType::UInt:
                 if (type.vecsize == 1 && type.columns == 1) {
-                    return UniformType::UINT;
+                    return UNIFORM_UINT;
                 } else if (type.vecsize == 2 && type.columns == 1) {
-                    return UniformType::UINT2;
+                    return UNIFORM_UINT2;
                 } else if (type.vecsize == 3 && type.columns == 1) {
-                    return UniformType::UINT3;
+                    return UNIFORM_UINT3;
                 } else if (type.vecsize == 4 && type.columns == 1) {
-                    return UniformType::UINT4;
+                    return UNIFORM_UINT4;
                 } else {
-                    return UniformType::UNDEFINED;
+                    return UNIFORM_UNDEFINED;
                 }
                 break;
             default:
-                return UniformType::UNDEFINED;
+                return UNIFORM_UNDEFINED;
                 break;
         }
 
-        return UniformType::UNDEFINED;
+        return UNIFORM_UNDEFINED;
     }
 
     static ResourceType toGfxResourceType(SpvResourceType type) {

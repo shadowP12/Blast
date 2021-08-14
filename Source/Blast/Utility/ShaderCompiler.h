@@ -5,24 +5,6 @@
 #include <string>
 
 namespace blast {
-    enum class UniformType {
-        UNDEFINED,
-        BOOL,
-        FLOAT,
-        FLOAT2,
-        FLOAT3,
-        FLOAT4,
-        INT,
-        INT2,
-        INT3,
-        INT4,
-        UINT,
-        UINT2,
-        UINT3,
-        UINT4,
-        MAT3,
-        MAT4
-    };
 
     struct GfxShaderResource {
         std::string name;
