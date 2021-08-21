@@ -420,7 +420,7 @@ namespace blast {
         CLEAR_COLOR = 0X00000001,
         CLEAR_DEPTH = 0X00000002,
         CLEAR_STENCIL = 0X00000004,
-        CLEAR_ALL = ((uint32_t)CLEAR_NONE | (uint32_t)CLEAR_DEPTH | (uint32_t)CLEAR_STENCIL)
+        CLEAR_ALL = ((uint32_t)CLEAR_COLOR | (uint32_t)CLEAR_DEPTH | (uint32_t)CLEAR_STENCIL)
     };
     BLAST_MAKE_ENUM_FLAG(uint32_t, ClearFlag)
 

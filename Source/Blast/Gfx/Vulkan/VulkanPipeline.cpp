@@ -107,7 +107,7 @@ namespace blast {
         wds.dstArrayElement = 0;
         wds.descriptorCount = 1;
         wds.pBufferInfo = &dbi;
-        wds.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        wds.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         vkUpdateDescriptorSets(_context->GetDevice(), 1, &wds, 0, nullptr);
     }
 
