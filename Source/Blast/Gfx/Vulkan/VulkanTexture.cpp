@@ -119,12 +119,17 @@ namespace blast {
                 break;
         }
 
+        VkImageAspectFlags aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
+        if (ToVulkanAspectMask(internel_texture->_format) & VK_IMAGE_ASPECT_DEPTH_BIT) {
+            aspect_mask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        }
+
         VkImageViewCreateInfo ivci = {};
         ivci.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         ivci.image = internel_texture->_image;
         ivci.viewType = view_type;
         ivci.format = ToVulkanFormat(internel_texture->_format);
-        ivci.subresourceRange.aspectMask = ToVulkanAspectMask(internel_texture->_format);
+        ivci.subresourceRange.aspectMask = aspect_mask;
         ivci.subresourceRange.baseMipLevel = _level;
         ivci.subresourceRange.levelCount = internel_texture->_num_mips;
         ivci.subresourceRange.baseArrayLayer = _layer;
