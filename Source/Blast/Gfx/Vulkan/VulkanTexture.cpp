@@ -131,9 +131,9 @@ namespace blast {
         ivci.format = ToVulkanFormat(internel_texture->_format);
         ivci.subresourceRange.aspectMask = aspect_mask;
         ivci.subresourceRange.baseMipLevel = _level;
-        ivci.subresourceRange.levelCount = internel_texture->_num_mips;
+        ivci.subresourceRange.levelCount = _num_levels;
         ivci.subresourceRange.baseArrayLayer = _layer;
-        ivci.subresourceRange.layerCount = internel_texture->_num_layers;
+        ivci.subresourceRange.layerCount = _numd_layers;
         VK_ASSERT(vkCreateImageView(_context->GetDevice(), &ivci, nullptr, &_view));
     }
 

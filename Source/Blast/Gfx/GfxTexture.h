@@ -55,7 +55,9 @@ namespace blast {
     // TextureView决定Texture的呈现形式
     struct GfxTextureViewDesc {
         uint32_t level = 0;
+        uint32_t num_levels = 1;
         uint32_t layer = 0;
+        uint32_t num_layers = 1;
         GfxTexture* texture = nullptr;
     };
 
@@ -71,7 +73,9 @@ namespace blast {
 
     protected:
         uint32_t _level;
+        uint32_t _num_levels;
         uint32_t _layer;
+        uint32_t _numd_layers;
     };
 
 }
