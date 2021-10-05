@@ -67,11 +67,14 @@ namespace blast {
 
         virtual ~GfxTextureView() = default;
 
+        GfxTexture* GetTexture() { return _texture; }
+
         uint32_t GetLevel() { return _level; }
 
         uint32_t GetLayer() { return _layer; }
 
     protected:
+        GfxTexture* _texture = nullptr;
         uint32_t _level;
         uint32_t _num_levels;
         uint32_t _layer;

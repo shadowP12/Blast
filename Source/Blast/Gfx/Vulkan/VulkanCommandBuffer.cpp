@@ -200,9 +200,9 @@ namespace blast {
         vkCmdDrawIndexed(_command_buffer, num_indices, num_instances, first_index, vertex_offset, first_instance);
     }
 
-    void VulkanCommandBuffer::CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) {
-        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(src_buffer);
-        VulkanBuffer* internel_dst_buffer = static_cast<VulkanBuffer*>(dst_buffer);
+    void VulkanCommandBuffer::CopyToBuffer(const GfxCopyToBufferRange& range) {
+        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(range.src_buffer);
+        VulkanBuffer* internel_dst_buffer = static_cast<VulkanBuffer*>(range.dst_buffer);
         VkBufferCopy copy = {};
         copy.srcOffset = range.src_offset;
         copy.dstOffset = range.dst_offset;
@@ -210,9 +210,9 @@ namespace blast {
         vkCmdCopyBuffer(_command_buffer, internel_src_buffer->GetHandle(), internel_dst_buffer->GetHandle(), 1, &copy);
     }
 
-    void VulkanCommandBuffer::CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) {
-        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(src_buffer);
-        VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(dst_texture);
+    void VulkanCommandBuffer::CopyToImage(const GfxCopyToImageRange& range) {
+        VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(range.src_buffer);
+        VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(range.dst_texture);
         VkBufferImageCopy copy = {};
         copy.bufferOffset = range.buffer_offset;
         copy.bufferRowLength = 0;

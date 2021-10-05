@@ -46,12 +46,16 @@ namespace blast {
         uint32_t src_offset;
         uint32_t dst_offset;
         uint32_t size;
+        GfxBuffer* src_buffer;
+        GfxBuffer* dst_buffer;
     };
 
     struct GfxCopyToImageRange {
         uint32_t buffer_offset = 0;
         uint32_t level = 0;
         uint32_t layer = 0;
+        GfxBuffer* src_buffer;
+        GfxTexture* dst_texture;
     };
 
     struct GfxBufferBarrier {
@@ -96,9 +100,9 @@ namespace blast {
 
         virtual void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) = 0;
 
-        virtual void CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) = 0;
+        virtual void CopyToBuffer(const GfxCopyToBufferRange& range) = 0;
 
-        virtual void CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) = 0;
+        virtual void CopyToImage(const GfxCopyToImageRange& range) = 0;
 
         virtual void SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
                                 uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) = 0;

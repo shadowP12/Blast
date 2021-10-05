@@ -15,6 +15,7 @@ namespace blast {
     }
 
     GfxTextureView::GfxTextureView(const GfxTextureViewDesc& desc) {
+        _texture = desc.texture;
         _level = desc.level;
         _num_levels = desc.num_levels;
         _layer = desc.layer;

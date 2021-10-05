@@ -27,7 +27,11 @@ namespace blast {
 
         uint32_t GetColorAttachmentCount() { return _num_colors; }
 
+        GfxTextureView* GetColor(uint32_t index);
+
         bool HasDepthStencilAttachment() { return _has_depth_stencil; }
+
+        GfxTextureView* GetDepthStencil();
 
         SampleCount GetSampleCount() { return _sample_count; }
 
@@ -37,5 +41,7 @@ namespace blast {
         uint32_t _num_colors;
         bool _has_depth_stencil;
         SampleCount _sample_count;
+        GfxTextureView* _colors[MAX_RENDER_TARGET_ATTACHMENTS];
+        GfxTextureView* _depth_stencil;
     };
 }

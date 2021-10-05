@@ -59,9 +59,9 @@ namespace blast {
 
         void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) override;
 
-        void CopyToBuffer(GfxBuffer* src_buffer, GfxBuffer* dst_buffer, const GfxCopyToBufferRange& range) override;
+        void CopyToBuffer(const GfxCopyToBufferRange& range) override;
 
-        void CopyToImage(GfxBuffer* src_buffer, GfxTexture* dst_texture, const GfxCopyToImageRange& range) override;
+        void CopyToImage(const GfxCopyToImageRange& range) override;
 
         void SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
                                 uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) override;
