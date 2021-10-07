@@ -42,7 +42,7 @@ namespace blast {
         uint32_t stencil;
     };
 
-    struct GfxCopyToBufferRange {
+    struct GfxBufferCopyToBufferRange {
         uint32_t src_offset;
         uint32_t dst_offset;
         uint32_t size;
@@ -50,7 +50,19 @@ namespace blast {
         GfxBuffer* dst_buffer;
     };
 
-    struct GfxCopyToImageRange {
+    struct GfxImageCopyToImageRange {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t depth = 0;
+        uint32_t src_level = 0;
+        uint32_t src_layer = 0;
+        uint32_t dst_level = 0;
+        uint32_t dst_layer = 0;
+        GfxTexture* src_texture;
+        GfxTexture* dst_texture;
+    };
+
+    struct GfxBufferCopyToImageRange {
         uint32_t buffer_offset = 0;
         uint32_t level = 0;
         uint32_t layer = 0;
@@ -100,9 +112,11 @@ namespace blast {
 
         virtual void DrawIndexed(uint32_t num_indices, uint32_t num_instances, uint32_t first_index, uint32_t vertex_offset, uint32_t first_instance) = 0;
 
-        virtual void CopyToBuffer(const GfxCopyToBufferRange& range) = 0;
+        virtual void BufferCopyToBuffer(const GfxBufferCopyToBufferRange& range) = 0;
 
-        virtual void CopyToImage(const GfxCopyToImageRange& range) = 0;
+        virtual void ImageCopyToImage(const GfxImageCopyToImageRange& range) = 0;
+
+        virtual void BufferCopyToImage(const GfxBufferCopyToImageRange& range) = 0;
 
         virtual void SetBarrier(uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
                                 uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) = 0;

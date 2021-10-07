@@ -200,7 +200,7 @@ namespace blast {
         vkCmdDrawIndexed(_command_buffer, num_indices, num_instances, first_index, vertex_offset, first_instance);
     }
 
-    void VulkanCommandBuffer::CopyToBuffer(const GfxCopyToBufferRange& range) {
+    void VulkanCommandBuffer::BufferCopyToBuffer(const GfxBufferCopyToBufferRange& range) {
         VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(range.src_buffer);
         VulkanBuffer* internel_dst_buffer = static_cast<VulkanBuffer*>(range.dst_buffer);
         VkBufferCopy copy = {};
@@ -210,7 +210,30 @@ namespace blast {
         vkCmdCopyBuffer(_command_buffer, internel_src_buffer->GetHandle(), internel_dst_buffer->GetHandle(), 1, &copy);
     }
 
-    void VulkanCommandBuffer::CopyToImage(const GfxCopyToImageRange& range) {
+    void VulkanCommandBuffer::ImageCopyToImage(const GfxImageCopyToImageRange& range) {
+        VulkanTexture* internel_src_texture = static_cast<VulkanTexture*>(range.src_texture);
+        VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(range.dst_texture);
+        VkImageCopy copy = {};
+        copy.extent.width = range.width;
+        copy.extent.height = range.height;
+        copy.extent.depth = range.depth;
+
+        copy.srcSubresource.aspectMask = ToVulkanAspectMask(internel_src_texture->GetFormat());;
+        copy.srcSubresource.baseArrayLayer = range.src_layer;
+        copy.srcSubresource.mipLevel = range.src_level;
+        copy.srcSubresource.layerCount = 1;
+        copy.srcOffset = { 0, 0, 0 };
+
+        copy.dstSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->GetFormat());;
+        copy.dstSubresource.baseArrayLayer = range.dst_layer;
+        copy.dstSubresource.mipLevel = range.dst_level;
+        copy.dstSubresource.layerCount = 1;
+        copy.dstOffset = { 0, 0, 0 };
+
+        vkCmdCopyImage(_command_buffer, internel_src_texture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, internel_dst_texture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+    }
+
+    void VulkanCommandBuffer::BufferCopyToImage(const GfxBufferCopyToImageRange& range) {
         VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(range.src_buffer);
         VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(range.dst_texture);
         VkBufferImageCopy copy = {};
