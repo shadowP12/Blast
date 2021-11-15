@@ -90,4 +90,16 @@ namespace blast {
 
         return 0;
     }
+
+    bool IsFormatStencilSupport(Format format) {
+        switch (format) {
+            case FORMAT_R32G8X24_TYPELESS:
+            case FORMAT_D32_FLOAT_S8X24_UINT:
+            case FORMAT_R24G8_TYPELESS:
+            case FORMAT_D24_UNORM_S8_UINT:
+                return true;
+        }
+
+        return false;
+    }
 }

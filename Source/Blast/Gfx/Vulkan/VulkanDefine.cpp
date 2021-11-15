@@ -476,70 +476,16 @@ namespace blast {
         return result;
     }
 
-    VkBufferUsageFlags ToVulkanBufferUsage(ResourceType type) {
-        VkBufferUsageFlags result = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-        if (type & RESOURCE_TYPE_RW_BUFFER) {
-            result |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        }
-
-        if (type & RESOURCE_TYPE_UNIFORM_BUFFER) {
-            result |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-        }
-
-        if (type & RESOURCE_TYPE_VERTEX_BUFFER) {
-            result |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        }
-
-        if (type & RESOURCE_TYPE_INDEX_BUFFER) {
-            result |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        }
-
-        if (type & RESOURCE_TYPE_INDIRECT_BUFFER) {
-            result |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-        }
-
-        return result;
-    }
-
-    VkImageUsageFlags ToVulkanImageUsage(ResourceType type) {
-        VkImageUsageFlags result = 0;
-        if (RESOURCE_TYPE_TEXTURE == (type & RESOURCE_TYPE_TEXTURE))
-            result |= VK_IMAGE_USAGE_SAMPLED_BIT;
-        if (RESOURCE_TYPE_RW_TEXTURE == (type & RESOURCE_TYPE_RW_TEXTURE))
-            result |= VK_IMAGE_USAGE_STORAGE_BIT;
-        return result;
-    }
-
-    VkImageUsageFlags ToVulkanImageUsage(Format format) {
-        VkImageUsageFlags result = 0;
-        switch (format) {
-            case FORMAT_D16_UNORM:
-            case FORMAT_X8_D24_UNORM_PACK32:
-            case FORMAT_D32_FLOAT:
-            case FORMAT_S8_UINT:
-            case FORMAT_D16_UNORM_S8_UINT:
-            case FORMAT_D24_UNORM_S8_UINT:
-            case FORMAT_D32_FLOAT_S8_UINT:
-                result = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-                break;
-            default:
-                result = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-                break;
-        }
-        return result;
-    }
-
     VkAttachmentLoadOp ToVulkanLoadOp(LoadAction op) {
         VkAttachmentLoadOp result = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         switch (op) {
-            case LOAD_ACTION_DONTCARE:
+            case LOAD_DONTCARE:
                 result = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
                 break;
-            case LOAD_ACTION_LOAD:
+            case LOAD_LOAD:
                 result = VK_ATTACHMENT_LOAD_OP_LOAD;
                 break;
-            case LOAD_ACTION_CLEAR:
+            case LOAD_CLEAR:
                 result = VK_ATTACHMENT_LOAD_OP_CLEAR;
                 break;
         }
@@ -679,10 +625,10 @@ namespace blast {
     VkPolygonMode ToVulkanFillMode(FillMode mode) {
         VkPolygonMode result;
         switch (mode) {
-            case FILL_MODE_SOLID:
+            case FILL_SOLID:
                 result = VK_POLYGON_MODE_FILL;
                 break;
-            case FILL_MODE_WIREFRAME:
+            case FILL_WIREFRAME:
                 result = VK_POLYGON_MODE_LINE;
                 break;
         }
@@ -692,13 +638,13 @@ namespace blast {
     VkCullModeFlagBits ToVulkanCullMode(CullMode mode) {
         VkCullModeFlagBits result;
         switch (mode) {
-            case CULL_MODE_NONE:
+            case CULL_NONE:
                 result = VK_CULL_MODE_NONE;
                 break;
-            case CULL_MODE_BACK:
+            case CULL_BACK:
                 result = VK_CULL_MODE_BACK_BIT;
                 break;
-            case CULL_MODE_FRONT:
+            case CULL_FRONT:
                 result = VK_CULL_MODE_FRONT_BIT;
                 break;
         }
@@ -791,28 +737,6 @@ namespace blast {
         return result;
     }
 
-    VkDescriptorType ToVulkanDescriptorType(ResourceType type) {
-        switch (type) {
-            case RESOURCE_TYPE_UNDEFINED:
-                return VK_DESCRIPTOR_TYPE_MAX_ENUM;
-            case RESOURCE_TYPE_SAMPLER:
-                return VK_DESCRIPTOR_TYPE_SAMPLER;
-            case RESOURCE_TYPE_TEXTURE:
-                return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-            case RESOURCE_TYPE_UNIFORM_BUFFER:
-                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            case RESOURCE_TYPE_RW_TEXTURE:
-                return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            case RESOURCE_TYPE_RW_BUFFER:
-                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            case RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER:
-                return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            default:
-                return VK_DESCRIPTOR_TYPE_MAX_ENUM;
-                break;
-        }
-    }
-
     VkIndexType ToVulkanIndexType(IndexType type) {
         if (type == INDEX_TYPE_UINT16) {
             return VK_INDEX_TYPE_UINT16;
@@ -846,7 +770,7 @@ namespace blast {
         if (state & RESOURCE_STATE_INDIRECT_ARGUMENT) {
             ret |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
         }
-        if (state & RESOURCE_STATE_RENDER_TARGET) {
+        if (state & RESOURCE_STATE_RENDERTARGET) {
             ret |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         }
         if (state & RESOURCE_STATE_DEPTH_WRITE) {
@@ -870,7 +794,7 @@ namespace blast {
         if (state & RESOURCE_STATE_COPY_DEST)
             return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
-        if (state & RESOURCE_STATE_RENDER_TARGET)
+        if (state & RESOURCE_STATE_RENDERTARGET)
             return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         if (state & RESOURCE_STATE_DEPTH_WRITE)
@@ -895,7 +819,7 @@ namespace blast {
         VkPipelineStageFlags flags = 0;
 
         switch (queueType) {
-            case QUEUE_TYPE_GRAPHICS: {
+            case QUEUE_GRAPHICS: {
                 if ((accessFlags & (VK_ACCESS_INDEX_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)) != 0)
                     flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
 
@@ -918,7 +842,7 @@ namespace blast {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
                 break;
             }
-            case QUEUE_TYPE_COMPUTE: {
+            case QUEUE_COMPUTE: {
                 if ((accessFlags & (VK_ACCESS_INDEX_READ_BIT | VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT)) != 0 ||
                     (accessFlags & VK_ACCESS_INPUT_ATTACHMENT_READ_BIT) != 0 ||
                     (accessFlags & (VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)) != 0 ||
@@ -930,10 +854,8 @@ namespace blast {
 
                 break;
             }
-            case QUEUE_TYPE_TRANSFER:
-                return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
             default:
-                break;
+                return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
         }
 
         if ((accessFlags & VK_ACCESS_INDIRECT_COMMAND_READ_BIT) != 0)

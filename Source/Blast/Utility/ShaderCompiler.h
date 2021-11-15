@@ -1,10 +1,22 @@
 #pragma once
 #include "Blast/Gfx/GfxDefine.h"
-#include "Blast/Gfx/GfxShader.h"
 #include <vector>
 #include <string>
 
 namespace blast {
+    enum ResourceType {
+        RESOURCE_TYPE_UNDEFINED = 0,
+        RESOURCE_TYPE_SAMPLER = 0x01,
+        RESOURCE_TYPE_TEXTURE = (RESOURCE_TYPE_SAMPLER << 1),
+        RESOURCE_TYPE_RW_TEXTURE = (RESOURCE_TYPE_TEXTURE << 1),
+        RESOURCE_TYPE_RW_BUFFER = (RESOURCE_TYPE_RW_TEXTURE << 1),
+        RESOURCE_TYPE_UNIFORM_BUFFER = (RESOURCE_TYPE_RW_BUFFER << 1),
+        RESOURCE_TYPE_VERTEX_BUFFER = (RESOURCE_TYPE_UNIFORM_BUFFER << 1),
+        RESOURCE_TYPE_INDEX_BUFFER = (RESOURCE_TYPE_VERTEX_BUFFER << 1),
+        RESOURCE_TYPE_INDIRECT_BUFFER = (RESOURCE_TYPE_INDEX_BUFFER << 1),
+        RESOURCE_TYPE_TEXTURE_CUBE = (RESOURCE_TYPE_TEXTURE | (RESOURCE_TYPE_INDIRECT_BUFFER << 1)),
+        RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = (RESOURCE_TYPE_TEXTURE_CUBE << 1),
+    };
 
     struct GfxShaderResource {
         std::string name;
