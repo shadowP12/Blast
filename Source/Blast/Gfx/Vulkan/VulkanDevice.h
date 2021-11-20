@@ -179,7 +179,7 @@ namespace blast {
                 uint32_t pool_size = 256;
             } descriptor_pools[BLAST_CMD_COUNT];
 
-            StageBuffer stage_buffers[BLAST_CMD_COUNT];
+            StageBuffer* stage_buffers[BLAST_CMD_COUNT];
             VkFence fence[BLAST_QUEUE_COUNT] = {};
             VkCommandPool command_pools[BLAST_CMD_COUNT][BLAST_QUEUE_COUNT] = {};
             VkCommandBuffer command_buffers[BLAST_CMD_COUNT][BLAST_QUEUE_COUNT] = {};
@@ -224,7 +224,7 @@ namespace blast {
                 VkCommandBuffer command_buffer = VK_NULL_HANDLE;
                 uint32_t id = 0;
                 uint64_t target = 0;
-                StageBuffer stage_buffer;
+                StageBuffer* stage_buffer = nullptr;
             };
 
             VulkanDevice* device = nullptr;

@@ -66,14 +66,15 @@ namespace blast {
 
         const uint64_t free_space = size - offset;
         if (data_size > free_space || buffer == nullptr) {
-            offset = 0;
-
             if (buffer) {
                 device->DestroyBuffer(buffer);
             }
 
+            size = AlignTo((size + data_size) * 2, 8);
+            offset = 0;
+
             GfxBufferDesc desc;
-            desc.size = AlignTo((size + data_size) * 2, 8);
+            desc.size = size;
             desc.mem_usage = MEMORY_USAGE_CPU_TO_GPU;
             desc.res_usage = RESOURCE_USAGE_RW_BUFFER;
             buffer = device->CreateBuffer(desc);
@@ -457,7 +458,11 @@ namespace blast {
     void VulkanDevice::CopyCommandBufferPool::Destroy() {
         vkQueueWaitIdle(device->copy_queue);
         for (auto& x : total_cmds) {
-            x.second.stage_buffer.Destroy();
+            if (x.second.stage_buffer) {
+                x.second.stage_buffer->Destroy();
+                BLAST_SAFE_DELETE(x.second.stage_buffer);
+            }
+
             vkDestroyCommandPool(device->device, x.second.command_pool, nullptr);
         }
         vkDestroySemaphore(device->device, semaphore, nullptr);
@@ -467,7 +472,10 @@ namespace blast {
         if (freelist.empty()) {
             CopyCommandBuffer cmd;
             cmd.id = next_id++;
-            cmd.stage_buffer.Init(device);
+
+            cmd.stage_buffer = new StageBuffer();
+            cmd.stage_buffer->Init(device);
+
             VkCommandPoolCreateInfo pool_info = {};
             pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
             pool_info.queueFamilyIndex = device->copy_family;
@@ -744,6 +752,7 @@ namespace blast {
                 break;
             }
         }
+
         destroy_locker.unlock();
     }
 
@@ -979,38 +988,39 @@ namespace blast {
             sci.flags = 0;
 
             VK_ASSERT(vkCreateSemaphore(device, &sci, nullptr, &queues[QUEUE_GRAPHICS].semaphore));
-            VK_ASSERT(vkCreateSemaphore(device, &sci, nullptr, &queues[QUEUE_GRAPHICS].semaphore));
+            VK_ASSERT(vkCreateSemaphore(device, &sci, nullptr, &queues[QUEUE_COMPUTE].semaphore));
         }
 
         // frames
         for (uint32_t i = 0; i < BLAST_BUFFER_COUNT; ++i) {
+            for (uint32_t j = 0; j < BLAST_CMD_COUNT; ++j) {
+                frames[i].stage_buffers[j] = nullptr;
+            }
+
             for (uint32_t j = 0; j < BLAST_QUEUE_COUNT; ++j) {
                 VkFenceCreateInfo fci = {};
                 fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
                 VK_ASSERT(vkCreateFence(device, &fci, nullptr, &frames[i].fence[j]));
-
-                {
-                    VkCommandPoolCreateInfo cpci = {};
-                    cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-                    cpci.queueFamilyIndex = graphics_family;
-                    cpci.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-                    VK_ASSERT(vkCreateCommandPool(device, &cpci, nullptr, &frames[i].init_command_pool));
-
-                    VkCommandBufferAllocateInfo cbai = {};
-                    cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-                    cbai.commandBufferCount = 1;
-                    cbai.commandPool = frames[i].init_command_pool;
-                    cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-                    VK_ASSERT(vkAllocateCommandBuffers(device, &cbai, &frames[i].init_command_buffer));
-
-                    VkCommandBufferBeginInfo cbi = {};
-                    cbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-                    cbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-                    cbi.pInheritanceInfo = nullptr;
-
-                    VK_ASSERT(vkBeginCommandBuffer(frames[i].init_command_buffer, &cbi));
-                }
             }
+            VkCommandPoolCreateInfo cpci = {};
+            cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            cpci.queueFamilyIndex = graphics_family;
+            cpci.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+            VK_ASSERT(vkCreateCommandPool(device, &cpci, nullptr, &frames[i].init_command_pool));
+
+            VkCommandBufferAllocateInfo cbai = {};
+            cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            cbai.commandBufferCount = 1;
+            cbai.commandPool = frames[i].init_command_pool;
+            cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            VK_ASSERT(vkAllocateCommandBuffers(device, &cbai, &frames[i].init_command_buffer));
+
+            VkCommandBufferBeginInfo cbi = {};
+            cbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            cbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+            cbi.pInheritanceInfo = nullptr;
+
+            VK_ASSERT(vkBeginCommandBuffer(frames[i].init_command_buffer, &cbi));
         }
 
         // CopyPool
@@ -1030,7 +1040,11 @@ namespace blast {
                 vkDestroyFence(device, frame.fence[queue], nullptr);
                 for (int cmd = 0; cmd < BLAST_CMD_COUNT; ++cmd) {
                     vkDestroyCommandPool(device, frame.command_pools[cmd][queue], nullptr);
-                    frame.stage_buffers[cmd].Destroy();
+
+                    if (frame.stage_buffers[cmd]) {
+                        frame.stage_buffers[cmd]->Destroy();
+                        BLAST_SAFE_DELETE(frame.stage_buffers[cmd]);
+                    }
                 }
             }
             vkDestroyCommandPool(device, frame.init_command_pool, nullptr);
@@ -1619,7 +1633,7 @@ namespace blast {
             rpci.dependencyCount = 1;
             rpci.pDependencies = &dependency;
             if (internal_swapchain->renderpass != VK_NULL_HANDLE) {
-                vkDestroyRenderPass(device, internal_swapchain->renderpass, nullptr);
+                resource_manager.destroyer_renderpasses.push_back(std::make_pair(internal_swapchain->renderpass, resource_manager.frame_count));
             }
 
             VK_ASSERT(vkCreateRenderPass(device, &rpci, nullptr, &internal_swapchain->renderpass));
@@ -1649,7 +1663,7 @@ namespace blast {
             ivci.subresourceRange.layerCount = 1;
 
             if (internal_swapchain->swapchain_image_views[i] != VK_NULL_HANDLE) {
-                vkDestroyImageView(device, internal_swapchain->swapchain_image_views[i], nullptr);
+                resource_manager.destroyer_imageviews.push_back(std::make_pair(internal_swapchain->swapchain_image_views[i], resource_manager.frame_count));
             }
             VK_ASSERT(vkCreateImageView(device, &ivci, nullptr, &internal_swapchain->swapchain_image_views[i]));
 
@@ -1665,7 +1679,7 @@ namespace blast {
             fci.layers = 1;
 
             if (internal_swapchain->swapchain_framebuffers[i] != VK_NULL_HANDLE) {
-                vkDestroyFramebuffer(device, internal_swapchain->swapchain_framebuffers[i], nullptr);
+                resource_manager.destroyer_framebuffers.push_back(std::make_pair(internal_swapchain->swapchain_framebuffers[i], resource_manager.frame_count));
             }
             VK_ASSERT(vkCreateFramebuffer(device, &fci, nullptr, &internal_swapchain->swapchain_framebuffers[i]));
         }
@@ -1686,12 +1700,14 @@ namespace blast {
     }
 
     void VulkanDevice::DestroySwapChain(GfxSwapChain* swapchain) {
+        vkDeviceWaitIdle(device);
         VulkanSwapChain* internal_swapchain = (VulkanSwapChain*)swapchain;
         for (size_t i = 0; i < internal_swapchain->swapchain_images.size(); ++i) {
             vkDestroyFramebuffer(device, internal_swapchain->swapchain_framebuffers[i], nullptr);
             vkDestroyImageView(device, internal_swapchain->swapchain_image_views[i], nullptr);
         }
         vkDestroyRenderPass(device, internal_swapchain->renderpass, nullptr);
+
         vkDestroySwapchainKHR(device, internal_swapchain->swapchain, nullptr);
         vkDestroySurfaceKHR(instance, internal_swapchain->surface, nullptr);
         vkDestroySemaphore(device, internal_swapchain->swapchain_acquire_semaphore, nullptr);
@@ -2489,7 +2505,9 @@ namespace blast {
                 VK_ASSERT(vkAllocateCommandBuffers(device, &cmd_info, &frame.command_buffers[cmd][type]));
 
                 frame.descriptor_pools[cmd].Init(this);
-                frame.stage_buffers[cmd].Init(this);
+
+                frame.stage_buffers[cmd] = new StageBuffer();
+                frame.stage_buffers[cmd]->Init(this);
             }
 
             binders[cmd].Init(this);
@@ -2988,9 +3006,9 @@ namespace blast {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
         StageBuffer::Allocation allocation = {};
         if (((VulkanCommandBuffer*)cmd)->is_copy) {
-            allocation = GetCopyCommandBuffer(internal_cmd).stage_buffer.Allocate(size);
+            allocation = GetCopyCommandBuffer(internal_cmd).stage_buffer->Allocate(size);
         } else {
-            allocation = GetFrameResources().stage_buffers[internal_cmd].Allocate(size);
+            allocation = GetFrameResources().stage_buffers[internal_cmd]->Allocate(size);
         }
 
         {
@@ -3035,9 +3053,9 @@ namespace blast {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
         StageBuffer::Allocation allocation = {};
         if (((VulkanCommandBuffer*)cmd)->is_copy) {
-            allocation = GetCopyCommandBuffer(internal_cmd).stage_buffer.Allocate(total_image_size);
+            allocation = GetCopyCommandBuffer(internal_cmd).stage_buffer->Allocate(total_image_size);
         } else {
-            allocation = GetFrameResources().stage_buffers[internal_cmd].Allocate(total_image_size);
+            allocation = GetFrameResources().stage_buffers[internal_cmd]->Allocate(total_image_size);
         }
 
         {
