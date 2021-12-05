@@ -43,7 +43,7 @@ namespace blast {
 
         GfxRenderPass* CreateRenderPass(const GfxRenderPassDesc& desc) override;
 
-        void DestroyRenderPass(GfxRenderPassDesc*) override;
+        void DestroyRenderPass(GfxRenderPass*) override;
 
         GfxShader* CreateShader(const GfxShaderDesc& desc) override;
 

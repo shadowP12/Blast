@@ -461,7 +461,7 @@ namespace blast {
         DSV
     };
 
-    union ClearValue {
+    struct ClearValue {
         float color[4];
         struct ClearDepthStencil {
             float depth;
@@ -572,61 +572,41 @@ namespace blast {
         LoadAction loadop = LOAD_LOAD;
         StoreAction storeop = STORE_STORE;
 
-        ResourceState initial_layout = RESOURCE_STATE_UNDEFINED;	// layout before the render pass
-        ResourceState subpass_layout = RESOURCE_STATE_UNDEFINED;	// layout within the render pass
-        ResourceState final_layout = RESOURCE_STATE_UNDEFINED;		// layout after the render pass
-
         const GfxTexture* texture = nullptr;
         int32_t subresource = -1;
 
         static RenderPassAttachment RenderTarget(
                 const GfxTexture* resource = nullptr,
                 LoadAction load_op = LOAD_LOAD,
-                StoreAction store_op = STORE_STORE,
-                ResourceState initial_layout = RESOURCE_STATE_SHADER_RESOURCE,
-                ResourceState subpass_layout = RESOURCE_STATE_RENDERTARGET,
-                ResourceState final_layout = RESOURCE_STATE_SHADER_RESOURCE
+                StoreAction store_op = STORE_STORE
         ) {
             RenderPassAttachment attachment;
             attachment.type = RENDERTARGET;
             attachment.texture = resource;
             attachment.loadop = load_op;
             attachment.storeop = store_op;
-            attachment.initial_layout = initial_layout;
-            attachment.subpass_layout = subpass_layout;
-            attachment.final_layout = final_layout;
             return attachment;
         }
 
         static RenderPassAttachment DepthStencil(
                 const GfxTexture* resource = nullptr,
                 LoadAction load_op = LOAD_LOAD,
-                StoreAction store_op = STORE_STORE,
-                ResourceState initial_layout = RESOURCE_STATE_DEPTH_WRITE,
-                ResourceState subpass_layout = RESOURCE_STATE_DEPTH_WRITE,
-                ResourceState final_layout = RESOURCE_STATE_DEPTH_WRITE
+                StoreAction store_op = STORE_STORE
         ) {
             RenderPassAttachment attachment;
             attachment.type = DEPTH_STENCIL;
             attachment.texture = resource;
             attachment.loadop = load_op;
             attachment.storeop = store_op;
-            attachment.initial_layout = initial_layout;
-            attachment.subpass_layout = subpass_layout;
-            attachment.final_layout = final_layout;
             return attachment;
         }
 
         static RenderPassAttachment Resolve(
-                const GfxTexture* resource = nullptr,
-                ResourceState initial_layout = RESOURCE_STATE_SHADER_RESOURCE,
-                ResourceState final_layout = RESOURCE_STATE_SHADER_RESOURCE
+                const GfxTexture* resource = nullptr
         ) {
             RenderPassAttachment attachment;
             attachment.type = RESOLVE;
             attachment.texture = resource;
-            attachment.initial_layout = initial_layout;
-            attachment.final_layout = final_layout;
             return attachment;
         }
     };
@@ -742,9 +722,8 @@ namespace blast {
         // 默认为0
         float slope_scaled_depth_bias = 0.0;
         FillMode fill_mode = FILL_SOLID;
-        FrontFace front_face = FRONT_FACE_CW;
+        FrontFace front_face = FRONT_FACE_CCW;
         CullMode cull_mode = CULL_NONE;
-        SampleCount sample_count = SAMPLE_COUNT_1;
     };
 
     struct GfxPipelineDesc {
@@ -759,8 +738,9 @@ namespace blast {
         GfxInputLayout*	il = nullptr;
         GfxRenderPass* rp = nullptr;
         GfxSwapChain* sc = nullptr;
-        PrimitiveTopology primitive_topo = PRIMITIVE_TOPO_TRI_LIST;
         uint32_t patch_control_points = 3;
+        SampleCount sample_count = SAMPLE_COUNT_1;
+        PrimitiveTopology primitive_topo = PRIMITIVE_TOPO_TRI_LIST;
     };
 
     class GfxPipeline {

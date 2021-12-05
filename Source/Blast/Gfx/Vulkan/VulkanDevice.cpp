@@ -1340,22 +1340,18 @@ namespace blast {
 
         switch (type) {
             case SRV: {
-                switch (texture->desc.format) {
-                    case FORMAT_R16_TYPELESS:
-                        ivci.format = VK_FORMAT_D16_UNORM;
+                switch (ivci.format) {
+                    case VK_FORMAT_D16_UNORM:
                         ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                         break;
-                    case FORMAT_R32_TYPELESS:
-                        ivci.format = VK_FORMAT_D32_SFLOAT;
+                    case VK_FORMAT_D32_SFLOAT:
                         ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                         break;
-                    case FORMAT_R24G8_TYPELESS:
-                        ivci.format = VK_FORMAT_D24_UNORM_S8_UINT;
-                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                    case VK_FORMAT_D24_UNORM_S8_UINT:
+                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
                         break;
-                    case FORMAT_R32G8X24_TYPELESS:
-                        ivci.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                    case VK_FORMAT_D32_SFLOAT_S8_UINT:
+                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
                         break;
                 }
 
@@ -1404,18 +1400,8 @@ namespace blast {
                 ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
                 switch (texture->desc.format) {
-                    case FORMAT_R16_TYPELESS:
-                        ivci.format = VK_FORMAT_D16_UNORM;
-                        break;
-                    case FORMAT_R32_TYPELESS:
-                        ivci.format = VK_FORMAT_D32_SFLOAT;
-                        break;
-                    case FORMAT_R24G8_TYPELESS:
+                    case FORMAT_D24_UNORM_S8_UINT:
                         ivci.format = VK_FORMAT_D24_UNORM_S8_UINT;
-                        ivci.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-                        break;
-                    case FORMAT_R32G8X24_TYPELESS:
-                        ivci.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
                         ivci.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
                         break;
                 }
@@ -1777,25 +1763,36 @@ namespace blast {
             attachment_descriptions[valid_attachment_count].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachment_descriptions[valid_attachment_count].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-            attachment_descriptions[valid_attachment_count].initialLayout = ToVulkanImageLayout(attachment.initial_layout);
-            attachment_descriptions[valid_attachment_count].finalLayout = ToVulkanImageLayout(attachment.final_layout);
-
             if (attachment.type == RenderPassAttachment::RENDERTARGET) {
-                attachments[valid_attachment_count] = internal_texture->subresources_rtv[subresource];
+                if (subresource < 0) {
+                    attachments[valid_attachment_count] = internal_texture->rtv;
+                } else {
+                    attachments[valid_attachment_count] = internal_texture->subresources_rtv[subresource];
+                }
+
+                attachment_descriptions[valid_attachment_count].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                attachment_descriptions[valid_attachment_count].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
                 color_attachment_refs[subpass.colorAttachmentCount].sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 color_attachment_refs[subpass.colorAttachmentCount].attachment = valid_attachment_count;
-                color_attachment_refs[subpass.colorAttachmentCount].layout = ToVulkanImageLayout(attachment.subpass_layout);
+                color_attachment_refs[subpass.colorAttachmentCount].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 color_attachment_refs[subpass.colorAttachmentCount].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 subpass.colorAttachmentCount++;
                 subpass.pColorAttachments = color_attachment_refs;
             }
             else if (attachment.type == RenderPassAttachment::DEPTH_STENCIL) {
-                attachments[valid_attachment_count] = internal_texture->subresources_dsv[subresource];
+                if (subresource < 0) {
+                    attachments[valid_attachment_count] = internal_texture->dsv;
+                } else {
+                    attachments[valid_attachment_count] = internal_texture->subresources_dsv[subresource];
+                }
+
+                attachment_descriptions[valid_attachment_count].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                attachment_descriptions[valid_attachment_count].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
                 depth_attachment_ref.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 depth_attachment_ref.attachment = valid_attachment_count;
-                depth_attachment_ref.layout = ToVulkanImageLayout(attachment.subpass_layout);
+                depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                 depth_attachment_ref.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                 subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
@@ -1897,9 +1894,10 @@ namespace blast {
             }
             i++;
         }
+        return internal_renderpass;
     }
 
-    void VulkanDevice::DestroyRenderPass(GfxRenderPassDesc* renderpass) {
+    void VulkanDevice::DestroyRenderPass(GfxRenderPass* renderpass) {
         resource_manager.destroy_locker.lock();
         VulkanRenderPass* internal_renderpass = (VulkanRenderPass*)renderpass;
         uint64_t frame_count = resource_manager.frame_count;
@@ -2122,8 +2120,21 @@ namespace blast {
                 VulkanShader* internal_shader = (VulkanShader*)shader;
                 uint32_t i = 0;
                 for (auto& x : internal_shader->layout_bindings) {
-                    internal_pipeline->layout_bindings.push_back(x);
-                    internal_pipeline->image_view_types.push_back(internal_shader->image_view_types[i]);
+                    bool found = false;
+                    for (auto& y : internal_pipeline->layout_bindings) {
+                        if (x.binding == y.binding) {
+                            assert(x.descriptorCount == y.descriptorCount);
+                            assert(x.descriptorType == y.descriptorType);
+                            found = true;
+                            y.stageFlags |= x.stageFlags;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        internal_pipeline->layout_bindings.push_back(x);
+                        internal_pipeline->image_view_types.push_back(internal_shader->image_view_types[i]);
+                    }
                     i++;
                 }
 
@@ -2314,13 +2325,13 @@ namespace blast {
         dynamic_states[2] = VK_DYNAMIC_STATE_DEPTH_BIAS;
         dynamic_states[3] = VK_DYNAMIC_STATE_BLEND_CONSTANTS;
         dynamic_states[4] = VK_DYNAMIC_STATE_DEPTH_BOUNDS;
-        dynamic_states[5] = VK_DYNAMIC_STATE_STENCIL_REFERENCE;
+        //dynamic_states[5] = VK_DYNAMIC_STATE_STENCIL_REFERENCE;
 
         VkPipelineDynamicStateCreateInfo dynamic_state = {};
         dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         dynamic_state.pNext = NULL;
         dynamic_state.flags = 0;
-        dynamic_state.dynamicStateCount = 6;
+        dynamic_state.dynamicStateCount = 5;
         dynamic_state.pDynamicStates = dynamic_states;
         pipeline_info.pDynamicState = &dynamic_state;
 
@@ -2338,7 +2349,7 @@ namespace blast {
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         if (desc.rs != nullptr) {
-            multisampling.rasterizationSamples = ToVulkanSampleCount(desc.rs->sample_count);
+            multisampling.rasterizationSamples = ToVulkanSampleCount(desc.sample_count);
         }
         if (desc.bs != nullptr) {
             multisampling.alphaToCoverageEnable = desc.bs->alpha_to_coverage_eEnable ? VK_TRUE : VK_FALSE;
@@ -2348,7 +2359,6 @@ namespace blast {
         }
         multisampling.alphaToOneEnable = VK_FALSE;
         pipeline_info.pMultisampleState = &multisampling;
-
 
         // Blending
         uint32_t render_target_count = 0;

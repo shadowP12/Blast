@@ -31,7 +31,7 @@ namespace blast {
 
         virtual GfxRenderPass* CreateRenderPass(const GfxRenderPassDesc& desc) = 0;
 
-        virtual void DestroyRenderPass(GfxRenderPassDesc*) = 0;
+        virtual void DestroyRenderPass(GfxRenderPass*) = 0;
 
         virtual GfxShader* CreateShader(const GfxShaderDesc& desc) = 0;
 
