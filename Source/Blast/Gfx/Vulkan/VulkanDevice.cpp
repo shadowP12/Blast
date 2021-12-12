@@ -2608,6 +2608,8 @@ namespace blast {
                 for (auto& swapchain : active_swapchains[cmd]) {
                     VulkanSwapChain* internal_swapchain = (VulkanSwapChain*)swapchain;
 
+
+
                     queues[submit_queue].submit_swapchains.push_back(internal_swapchain->swapchain);
                     queues[submit_queue].submit_swapchain_image_indices.push_back(internal_swapchain->swapchain_image_index);
                     queues[submit_queue].submit_wait_stages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -2688,20 +2690,23 @@ namespace blast {
                 &internal_swapchain->swapchain_image_index
         ));
 
+        std::vector<VkClearValue> clear_values;
         VkClearValue clear_color = {
                 swapchain->desc.clear_color[0],
                 swapchain->desc.clear_color[1],
                 swapchain->desc.clear_color[2],
                 swapchain->desc.clear_color[3],
         };
+        clear_values.push_back(clear_color);
+
         VkRenderPassBeginInfo renderpass_info = {};
         renderpass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderpass_info.renderPass = internal_swapchain->renderpass;
         renderpass_info.framebuffer = internal_swapchain->swapchain_framebuffers[internal_swapchain->swapchain_image_index];
         renderpass_info.renderArea.offset = { 0, 0 };
         renderpass_info.renderArea.extent = internal_swapchain->swapchain_extent;
-        renderpass_info.clearValueCount = 1;
-        renderpass_info.pClearValues = &clear_color;
+        renderpass_info.clearValueCount = clear_values.size();
+        renderpass_info.pClearValues = clear_values.data();
         vkCmdBeginRenderPass(GetCommandBuffer(internal_cmd), &renderpass_info, VK_SUBPASS_CONTENTS_INLINE);
     }
 

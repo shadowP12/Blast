@@ -790,12 +790,12 @@ namespace blast {
     };
 
     struct GfxBufferBarrier {
-        GfxBuffer* buffer;
+        GfxBuffer* buffer = nullptr;
         ResourceState new_state;
     };
 
     struct GfxTextureBarrier {
-        GfxTexture* texture;
+        GfxTexture* texture = nullptr;
         ResourceState new_state;
     };
 
