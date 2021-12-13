@@ -805,6 +805,7 @@ namespace blast {
     static const uint32_t BLAST_SAMPLER_COUNT = 16;
     struct GfxBindingTable {
         GfxBuffer* cbv[BLAST_CBV_COUNT];
+        uint64_t cbv_size[BLAST_CBV_COUNT];
         uint64_t cbv_offset[BLAST_CBV_COUNT];
         GfxResource* srv[BLAST_SRV_COUNT];
         uint32_t srv_index[BLAST_SRV_COUNT] = {};

@@ -304,12 +304,13 @@ namespace blast {
                         uint32_t original_binding = unrolled_binding - VULKAN_BINDING_SHIFT_B;
                         GfxBuffer* buffer = table.cbv[original_binding];
                         uint64_t offset = table.cbv_offset[original_binding];
+                        uint64_t size = table.cbv_size[original_binding];
 
                         if (buffer != nullptr) {
                             VulkanBuffer* internal_buffer = (VulkanBuffer*)buffer;
                             buffer_infos.back().buffer = internal_buffer->resource;
                             buffer_infos.back().offset = offset;
-                            buffer_infos.back().range = buffer->desc.size;
+                            buffer_infos.back().range = size;
                         }
                     }
                         break;
@@ -2793,12 +2794,13 @@ namespace blast {
         }
     };
 
-    void VulkanDevice::BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t offset) {
+    void VulkanDevice::BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t size, uint64_t offset) {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
         auto& binder = binders[internal_cmd];
-        if (binder.table.cbv[slot] != buffer || binder.table.cbv_offset[slot] != offset) {
+        if (binder.table.cbv[slot] != buffer || binder.table.cbv_offset[slot] != offset || binder.table.cbv_size[slot] != size) {
             binder.table.cbv[slot] = buffer;
             binder.table.cbv_offset[slot] = offset;
+            binder.table.cbv_size[slot] = size;
             binder.dirty = true;
         }
     }

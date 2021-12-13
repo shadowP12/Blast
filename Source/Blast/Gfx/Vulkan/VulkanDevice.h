@@ -79,7 +79,7 @@ namespace blast {
 
         void BindSampler(GfxCommandBuffer* cmd, GfxSampler* sampler, uint32_t slot) override;
 
-        void BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t offset = 0ull) override;
+        void BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t size, uint64_t offset = 0) override;
 
         void BindVertexBuffers(GfxCommandBuffer* cmd, GfxBuffer** vertex_buffers, uint32_t slot, uint32_t count, uint64_t* offsets) override;
 

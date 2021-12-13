@@ -67,7 +67,7 @@ namespace blast {
 
         virtual void BindSampler(GfxCommandBuffer* cmd, GfxSampler* sampler, uint32_t slot) = 0;
 
-        virtual void BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t offset = 0ull) = 0;
+        virtual void BindConstantBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, uint32_t slot, uint64_t size, uint64_t offset = 0) = 0;
 
         virtual void BindVertexBuffers(GfxCommandBuffer* cmd, GfxBuffer** vertex_buffers, uint32_t slot, uint32_t count, uint64_t* offsets) = 0;
 
