@@ -2289,7 +2289,7 @@ namespace blast {
         depthstencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         if (desc.dss != nullptr) {
             depthstencil.depthTestEnable = desc.dss->depth_test ? VK_TRUE : VK_FALSE;
-            depthstencil.depthWriteEnable = desc.dss->depth_write ? VK_FALSE : VK_TRUE;
+            depthstencil.depthWriteEnable = desc.dss->depth_write ? VK_TRUE : VK_FALSE;
             depthstencil.depthCompareOp =  ToVulkanCompareOp(desc.dss->depth_func);
 
             depthstencil.stencilTestEnable = desc.dss->stencil_test ? VK_TRUE : VK_FALSE;

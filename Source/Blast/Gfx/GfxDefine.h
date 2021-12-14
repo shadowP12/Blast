@@ -701,7 +701,7 @@ namespace blast {
     struct GfxDepthStencilState {
         bool depth_test = false;
         bool depth_write = true;
-        CompareMode depth_func = COMPARE_NEVER;
+        CompareMode depth_func = COMPARE_LEQUAL;
         bool stencil_test = false;
         uint8_t stencil_read_mask = 0xff;
         uint8_t stencil_write_mask = 0xff;
@@ -710,7 +710,7 @@ namespace blast {
             StencilOp stencil_fail_op = STENCIL_OP_KEEP;
             StencilOp stencil_depth_fail_op = STENCIL_OP_KEEP;
             StencilOp stencil_pass_op = STENCIL_OP_KEEP;
-            CompareMode stencil_func = COMPARE_NEVER;
+            CompareMode stencil_func = COMPARE_ALWAYS;
         };
         DepthStencilOp front_face;
         DepthStencilOp back_face;
