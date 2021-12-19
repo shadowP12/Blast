@@ -1436,7 +1436,7 @@ namespace blast {
         sci.addressModeU = ToVulkanAddressMode(desc.address_u);
         sci.addressModeV = ToVulkanAddressMode(desc.address_v);
         sci.addressModeW = ToVulkanAddressMode(desc.address_w);
-        sci.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        sci.borderColor = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
         sci.anisotropyEnable = VK_FALSE;
         sci.maxAnisotropy = 0.0f;
         sci.unnormalizedCoordinates = VK_FALSE;
