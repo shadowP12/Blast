@@ -577,12 +577,14 @@ namespace blast {
 
         static RenderPassAttachment RenderTarget(
                 const GfxTexture* resource = nullptr,
+                int32_t subresource = -1,
                 LoadAction load_op = LOAD_LOAD,
                 StoreAction store_op = STORE_STORE
         ) {
             RenderPassAttachment attachment;
             attachment.type = RENDERTARGET;
             attachment.texture = resource;
+            attachment.subresource = subresource;
             attachment.loadop = load_op;
             attachment.storeop = store_op;
             return attachment;
@@ -590,12 +592,14 @@ namespace blast {
 
         static RenderPassAttachment DepthStencil(
                 const GfxTexture* resource = nullptr,
+                int32_t subresource = -1,
                 LoadAction load_op = LOAD_LOAD,
                 StoreAction store_op = STORE_STORE
         ) {
             RenderPassAttachment attachment;
             attachment.type = DEPTH_STENCIL;
             attachment.texture = resource;
+            attachment.subresource = subresource;
             attachment.loadop = load_op;
             attachment.storeop = store_op;
             return attachment;

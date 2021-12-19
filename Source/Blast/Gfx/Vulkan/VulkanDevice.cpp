@@ -1349,10 +1349,10 @@ namespace blast {
                         ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                         break;
                     case VK_FORMAT_D24_UNORM_S8_UINT:
-                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                         break;
                     case VK_FORMAT_D32_SFLOAT_S8_UINT:
-                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                         break;
                 }
 
