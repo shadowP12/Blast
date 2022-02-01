@@ -83,6 +83,7 @@ namespace blast {
         Allocation allocation;
         allocation.buffer = buffer;
         allocation.offset = offset;
+
         offset += AlignTo(data_size, 8);
 
         return allocation;
@@ -3031,7 +3032,7 @@ namespace blast {
         {
             void* dst_data;
             VulkanBuffer* internal_buffer = (VulkanBuffer*)allocation.buffer;
-            vkMapMemory(device, internal_buffer->memory, allocation.offset, VK_WHOLE_SIZE, 0, &dst_data);
+            vkMapMemory(device, internal_buffer->memory, allocation.offset, size, 0, &dst_data);
             memcpy(dst_data, data, static_cast<size_t>(size));
             vkUnmapMemory(device, internal_buffer->memory);
         }
