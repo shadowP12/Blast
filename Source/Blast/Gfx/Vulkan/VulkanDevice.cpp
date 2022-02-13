@@ -1733,7 +1733,7 @@ namespace blast {
             const GfxTexture* texture = attachment.texture;
             const GfxTextureDesc& texdesc = texture->desc;
             int subresource = attachment.subresource;
-            auto internal_texture = (VulkanTexture*)texture;
+            VulkanTexture* internal_texture = (VulkanTexture*)texture;
 
             attachment_descriptions[valid_attachment_count].sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
             attachment_descriptions[valid_attachment_count].format = ToVulkanFormat(texdesc.format);
@@ -1825,13 +1825,20 @@ namespace blast {
                 }
             }
             else if (attachment.type == RenderPassAttachment::RESOLVE) {
+                attachment_descriptions[valid_attachment_count].initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                attachment_descriptions[valid_attachment_count].finalLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
                 resolve_attachment_refs[resolve_count].sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
 
                 if (attachment.texture == nullptr) {
                     resolve_attachment_refs[resolve_count].attachment = VK_ATTACHMENT_UNUSED;
                 }
                 else {
-                    attachments[valid_attachment_count] = internal_texture->subresources_srv[subresource];
+                    if (subresource < 0) {
+                        attachments[valid_attachment_count] = internal_texture->srv;
+                    } else {
+                        attachments[valid_attachment_count] = internal_texture->subresources_srv[subresource];
+                    }
 
                     resolve_attachment_refs[resolve_count].attachment = valid_attachment_count;
                     resolve_attachment_refs[resolve_count].layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
