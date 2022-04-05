@@ -296,7 +296,6 @@ namespace blast {
         VkDebugReportCallbackEXT debug_report_callback = VK_NULL_HANDLE;
         VkPhysicalDevice phy_device = VK_NULL_HANDLE;
         VkPhysicalDeviceProperties phy_device_properties;
-        VkPhysicalDeviceFeatures phy_device_features;
         VkPhysicalDeviceMemoryProperties phy_device_memory_properties;
         VkDevice device = VK_NULL_HANDLE;
         VkDescriptorPool descriptor_pool = VK_NULL_HANDLE;

@@ -814,7 +814,7 @@ namespace blast {
         VkApplicationInfo app_info = {};
         app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         app_info.pEngineName = "BlastEngine";
-        app_info.apiVersion = VK_API_VERSION_1_2;
+        app_info.apiVersion = VK_API_VERSION_1_3;
 
         VkInstanceCreateInfo ici;
         ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -871,8 +871,15 @@ namespace blast {
         phy_device = gpus.front();
 
         vkGetPhysicalDeviceProperties(phy_device, &phy_device_properties);
-        vkGetPhysicalDeviceFeatures(phy_device, &phy_device_features);
         vkGetPhysicalDeviceMemoryProperties(phy_device, &phy_device_memory_properties);
+
+        // feature
+        VkPhysicalDeviceFeatures2KHR phy_device_features2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR };
+        VkPhysicalDeviceVulkan11Features features_1_1 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
+        VkPhysicalDeviceVulkan12Features features_1_2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
+        phy_device_features2.pNext = &features_1_1;
+        features_1_1.pNext = &features_1_2;
+        vkGetPhysicalDeviceFeatures2(phy_device, &phy_device_features2);
 
         uint32_t num_queue_families;
         vkGetPhysicalDeviceQueueFamilyProperties(phy_device, &num_queue_families, nullptr);
@@ -953,11 +960,11 @@ namespace blast {
 
         VkDeviceCreateInfo dci;
         dci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        dci.pNext = nullptr;
+        dci.pNext = &phy_device_features2;
         dci.flags = 0;
         dci.queueCreateInfoCount = qci.size();
         dci.pQueueCreateInfos = qci.data();
-        dci.pEnabledFeatures = &phy_device_features;
+        dci.pEnabledFeatures = nullptr;
         dci.enabledExtensionCount = device_extensions.size();
         dci.ppEnabledExtensionNames = device_extensions.data();
         dci.enabledLayerCount = 0;
