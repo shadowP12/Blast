@@ -3010,7 +3010,7 @@ namespace blast {
         VulkanBuffer* internel_src_buffer = static_cast<VulkanBuffer*>(range.src_buffer);
         VulkanTexture* internel_dst_texture = static_cast<VulkanTexture*>(range.dst_texture);
         VkBufferImageCopy copy = {};
-        copy.bufferOffset = 0;
+        copy.bufferOffset = range.buffer_offset;
         copy.bufferRowLength = 0;
         copy.bufferImageHeight = 0;
         copy.imageSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->desc.format);
@@ -3105,6 +3105,7 @@ namespace blast {
                 copy_range.dst_texture = texture;
                 copy_range.layer = i;
                 copy_range.level = j;
+                copy_range.buffer_offset = allocation.offset;
                 BufferImageCopy(cmd, copy_range);
             }
         }

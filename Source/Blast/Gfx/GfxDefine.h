@@ -789,6 +789,7 @@ namespace blast {
     struct GfxBufferImageCopyRange {
         uint32_t level = 0;
         uint32_t layer = 0;
+        uint32_t buffer_offset = 0;
         GfxBuffer* src_buffer;
         GfxTexture* dst_texture;
     };
