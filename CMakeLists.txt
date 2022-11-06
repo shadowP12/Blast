@@ -6,11 +6,13 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(Blast STATIC)
 target_include_directories(Blast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_sources(Blast PUBLIC
-        Source/Blast/Gfx/GfxDefine.cpp
-        Source/Blast/Gfx/GfxDevice.cpp
-        Source/Blast/Gfx/Vulkan/VulkanDefine.cpp
-        Source/Blast/Gfx/Vulkan/VulkanDevice.cpp
-        Source/Blast/Utility/VulkanShaderCompiler.cpp)
+        Source/GfxDefine.cpp
+        Source/GfxDevice.cpp
+        Source/GfxShaderCompiler.cpp
+        Source/GfxRenderGraph.cpp
+        Source/Vulkan/VulkanDefine.cpp
+        Source/Vulkan/VulkanDevice.cpp
+        Source/Vulkan/VulkanShaderCompiler.cpp)
 
 # 默认启动验证层
 target_compile_definitions(Blast PUBLIC VULKAN_DEBUG)

@@ -29,8 +29,6 @@ namespace blast {
 
         void DestroyTexture(GfxTexture*) override;
 
-        int32_t CreateSubresource(GfxBuffer*, SubResourceType, uint32_t, uint32_t) override;
-
         int32_t CreateSubresource(GfxTexture*, SubResourceType, uint32_t, uint32_t, uint32_t, uint32_t) override;
 
         GfxSampler* CreateSampler(const GfxSamplerDesc& desc) override;
@@ -65,17 +63,13 @@ namespace blast {
 
         void RenderPassEnd(GfxCommandBuffer* cmd) override;
 
-        void BindScissorRects(GfxCommandBuffer* cmd, uint32_t num_rects, Rect* rects) override;
+        void BindScissor(GfxCommandBuffer* cmd, int32_t left, int32_t top, int32_t right, int32_t bottom, uint32_t idx = 0) override;
 
-        void BindViewports(GfxCommandBuffer* cmd, uint32_t num_viewports, Viewport* viewports) override;
+        void BindViewport(GfxCommandBuffer* cmd, float x, float y, float w, float h, float min_depth = 0.0f, float max_depth = 1.0f, uint32_t idx = 0) override;
 
         void BindResource(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource = -1) override;
 
-        void BindResources(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) override;
-
         void BindUAV(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource = -1) override;
-
-        void BindUAVs(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) override;
 
         void BindSampler(GfxCommandBuffer* cmd, GfxSampler* sampler, uint32_t slot) override;
 
@@ -105,18 +99,17 @@ namespace blast {
 
         void Dispatch(GfxCommandBuffer* cmd, uint32_t thread_group_x, uint32_t thread_group_y, uint32_t thread_group_z) override;
 
-        void BufferCopy(GfxCommandBuffer* cmd, const GfxBufferCopyRange& range) override;
-
-        void ImageCopy(GfxCommandBuffer* cmd, const GfxImageCopyRange& range) override;
-
-        void BufferImageCopy(GfxCommandBuffer* cmd, const GfxBufferImageCopyRange& range) override;
-
         void UpdateBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, const void* data, uint64_t size = 0, uint64_t offset = 0) override;
 
         void UpdateTexture(GfxCommandBuffer* cmd, GfxTexture* texture, const void* data, uint32_t layer = 0, uint32_t level = 0) override;
 
-        void SetBarrier(GfxCommandBuffer* cmd, uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
-                                uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) override;
+        void SetBarrier(GfxCommandBuffer* cmd, uint32_t num_barriers, GfxResourceBarrier* barriers) override;
+
+        void BufferCopy(GfxCommandBuffer* cmd, const GfxBufferCopyRange& range);
+
+        void ImageCopy(GfxCommandBuffer* cmd, const GfxImageCopyRange& range);
+
+        void BufferImageCopy(GfxCommandBuffer* cmd, const GfxBufferImageCopyRange& range);
 
     protected:
         uint32_t FindMemoryType(const uint32_t& typeFilter, const VkMemoryPropertyFlags& properties);
@@ -290,6 +283,9 @@ namespace blast {
             uint32_t size;
         };
         DeferredPushConstantData pushconstants[BLAST_CMD_COUNT] = {};
+
+        VkRect2D scissors[BLAST_CMD_COUNT][BLAST_SCISSOR_COUNT];
+        VkViewport viewports[BLAST_CMD_COUNT][BLAST_VIEWPORT_COUNT];
 
         VkInstance instance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT debug_messenger = VK_NULL_HANDLE;

@@ -1,5 +1,5 @@
 #pragma once
-#include "Blast/Gfx/GfxDefine.h"
+#include "GfxDefine.h"
 #include <vector>
 #include <string>
 
@@ -50,8 +50,10 @@ namespace blast {
         std::vector<GfxShaderVariable> variables;
     };
 
-    class ShaderCompiler {
+    class GfxShaderCompiler {
     public:
+        static GfxShaderCompiler* CreateShaderCompiler();
+
         virtual ShaderCompileResult Compile(const ShaderCompileDesc& desc) = 0;
     };
 }

@@ -750,7 +750,6 @@ namespace blast {
     }
 
     VkAccessFlags ToVulkanAccessFlags(ResourceState state) {
-        // note: 通过当前资源的使用状态来决定access flags
         VkAccessFlags ret = 0;
         if (state & RESOURCE_STATE_COPY_SOURCE) {
             ret |= VK_ACCESS_TRANSFER_READ_BIT;
@@ -787,7 +786,6 @@ namespace blast {
     }
 
     VkImageLayout ToVulkanImageLayout(ResourceState state) {
-        // note: 通过当前资源的使用状态来决定image layout
         if (state & RESOURCE_STATE_COPY_SOURCE)
             return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 

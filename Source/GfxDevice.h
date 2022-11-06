@@ -9,6 +9,8 @@ namespace blast {
 
         virtual ~GfxDevice() = default;
 
+        static GfxDevice* CreateDevice();
+
         virtual GfxBuffer* CreateBuffer(const GfxBufferDesc& desc) = 0;
 
         virtual void DestroyBuffer(GfxBuffer*) = 0;
@@ -16,8 +18,6 @@ namespace blast {
         virtual GfxTexture* CreateTexture(const GfxTextureDesc& desc) = 0;
 
         virtual void DestroyTexture(GfxTexture*) = 0;
-
-        virtual int32_t CreateSubresource(GfxBuffer*, SubResourceType, uint32_t, uint32_t) = 0;
 
         virtual int32_t CreateSubresource(GfxTexture*, SubResourceType, uint32_t, uint32_t, uint32_t, uint32_t) = 0;
 
@@ -53,17 +53,13 @@ namespace blast {
 
         virtual void RenderPassEnd(GfxCommandBuffer* cmd) = 0;
 
-        virtual void BindScissorRects(GfxCommandBuffer* cmd, uint32_t num_rects, Rect* rects) = 0;
+        virtual void BindScissor(GfxCommandBuffer* cmd, int32_t left, int32_t top, int32_t right, int32_t bottom, uint32_t idx = 0) = 0;
 
-        virtual void BindViewports(GfxCommandBuffer* cmd, uint32_t num_viewports, Viewport* viewports) = 0;
+        virtual void BindViewport(GfxCommandBuffer* cmd, float x, float y, float w, float h, float min_depth = 0.0f, float max_depth = 1.0f, uint32_t idx = 0) = 0;
 
         virtual void BindResource(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource = -1) = 0;
 
-        virtual void BindResources(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) = 0;
-
         virtual void BindUAV(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource = -1) = 0;
-
-        virtual void BindUAVs(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) = 0;
 
         virtual void BindSampler(GfxCommandBuffer* cmd, GfxSampler* sampler, uint32_t slot) = 0;
 
@@ -93,18 +89,11 @@ namespace blast {
 
         virtual void Dispatch(GfxCommandBuffer* cmd, uint32_t thread_group_x, uint32_t thread_group_y, uint32_t thread_group_z) = 0;
 
-        virtual void BufferCopy(GfxCommandBuffer* cmd, const GfxBufferCopyRange& range) = 0;
-
-        virtual void ImageCopy(GfxCommandBuffer* cmd, const GfxImageCopyRange& range) = 0;
-
-        virtual void BufferImageCopy(GfxCommandBuffer* cmd, const GfxBufferImageCopyRange& range) = 0;
-
         virtual void UpdateBuffer(GfxCommandBuffer* cmd, GfxBuffer* buffer, const void* data, uint64_t size = 0, uint64_t offset = 0) = 0;
 
         virtual void UpdateTexture(GfxCommandBuffer* cmd, GfxTexture* texture, const void* data, uint32_t layer = 0, uint32_t level = 0) = 0;
 
-        virtual void SetBarrier(GfxCommandBuffer* cmd, uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
-                                uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) = 0;
+        virtual void SetBarrier(GfxCommandBuffer* cmd, uint32_t num_barriers, GfxResourceBarrier* barriers) = 0;
 
     protected:
         uint64_t frame_count = 0;

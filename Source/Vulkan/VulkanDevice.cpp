@@ -1093,7 +1093,9 @@ namespace blast {
 
     GfxBuffer* VulkanDevice::CreateBuffer(const GfxBufferDesc& desc) {
         VulkanBuffer* internal_buffer = new VulkanBuffer();
-        internal_buffer->desc = desc;
+        internal_buffer->size = desc.size;
+        internal_buffer->mem_usage = desc.mem_usage;
+        internal_buffer->res_usage = desc.res_usage;
 
         VkBufferCreateInfo buffer_info;
         buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1168,7 +1170,17 @@ namespace blast {
 
     GfxTexture* VulkanDevice::CreateTexture(const GfxTextureDesc& desc) {
         VulkanTexture* internal_texture = new VulkanTexture();
-        internal_texture->desc = desc;
+        internal_texture->width = desc.width;
+        internal_texture->height = desc.height;
+        internal_texture->depth = desc.depth;
+        internal_texture->num_layers = desc.num_layers;
+        internal_texture->num_levels = desc.num_levels;
+        internal_texture->format = desc.format;
+        internal_texture->clear = desc.clear;
+        internal_texture->sample_count = desc.sample_count;
+        internal_texture->state = desc.state;
+        internal_texture->mem_usage = desc.mem_usage;
+        internal_texture->res_usage = desc.res_usage;
 
         VkImageType image_type = VK_IMAGE_TYPE_MAX_ENUM;
         if (desc.depth > 1)
@@ -1195,7 +1207,7 @@ namespace blast {
         image_info.queueFamilyIndexCount = 0;
         image_info.pQueueFamilyIndices = nullptr;
         image_info.flags = 0;
-        if (RESOURCE_USAGE_TEXTURE_CUBE == (desc.res_usage & RESOURCE_USAGE_TEXTURE_CUBE)) {
+        if (RESOURCE_USAGE_CUBE_TEXTURE == (desc.res_usage & RESOURCE_USAGE_CUBE_TEXTURE)) {
             image_info.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
         }
         if (image_type == VK_IMAGE_TYPE_3D) {
@@ -1298,10 +1310,6 @@ namespace blast {
         resource_manager.destroy_locker.unlock();
     }
 
-    int32_t VulkanDevice::CreateSubresource(GfxBuffer* buffer, SubResourceType type, uint32_t size, uint32_t offset) {
-        return -1;
-    }
-
     int32_t VulkanDevice::CreateSubresource(GfxTexture* texture, SubResourceType type, uint32_t first_slice, uint32_t slice_count, uint32_t first_mip, uint32_t mip_count) {
         VulkanTexture* internal_texture = (VulkanTexture*) texture;
 
@@ -1314,12 +1322,12 @@ namespace blast {
         ivci.subresourceRange.layerCount = slice_count;
         ivci.subresourceRange.baseMipLevel = first_mip;
         ivci.subresourceRange.levelCount = mip_count;
-        ivci.format = ToVulkanFormat(texture->desc.format);
+        ivci.format = ToVulkanFormat(texture->format);
 
         VkImageType image_type = VK_IMAGE_TYPE_MAX_ENUM;
-        if (texture->desc.depth > 1)
+        if (texture->depth > 1)
             image_type = VK_IMAGE_TYPE_3D;
-        else if (texture->desc.height > 1)
+        else if (texture->height > 1)
             image_type = VK_IMAGE_TYPE_2D;
         else
             image_type = VK_IMAGE_TYPE_1D;
@@ -1327,16 +1335,16 @@ namespace blast {
         VkImageViewType view_type = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
         switch (image_type) {
             case VK_IMAGE_TYPE_1D:
-                view_type = texture->desc.num_layers > 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_1D;
+                view_type = texture->num_layers > 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_1D;
                 break;
             case VK_IMAGE_TYPE_2D:
-                if (RESOURCE_USAGE_TEXTURE_CUBE == (texture->desc.res_usage & RESOURCE_USAGE_TEXTURE_CUBE))
-                    view_type = (texture->desc.num_layers > 6) ? VK_IMAGE_VIEW_TYPE_CUBE_ARRAY : VK_IMAGE_VIEW_TYPE_CUBE;
+                if (RESOURCE_USAGE_CUBE_TEXTURE == (texture->res_usage & RESOURCE_USAGE_CUBE_TEXTURE))
+                    view_type = (texture->num_layers > 6) ? VK_IMAGE_VIEW_TYPE_CUBE_ARRAY : VK_IMAGE_VIEW_TYPE_CUBE;
                 else
-                    view_type = texture->desc.num_layers > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
+                    view_type = texture->num_layers > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
                 break;
             case VK_IMAGE_TYPE_3D:
-                if (texture->desc.num_layers > 1)
+                if (texture->num_layers > 1)
                     assert(false);
 
                 view_type = VK_IMAGE_VIEW_TYPE_3D;
@@ -1408,7 +1416,7 @@ namespace blast {
                 ivci.subresourceRange.levelCount = 1;
                 ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-                switch (texture->desc.format) {
+                switch (texture->format) {
                     case FORMAT_D24_UNORM_S8_UINT:
                         ivci.format = VK_FORMAT_D24_UNORM_S8_UINT;
                         ivci.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
@@ -1718,8 +1726,8 @@ namespace blast {
         hash_combine(internal_renderpass->hash, desc.attachments.size());
         for (auto& attachment : desc.attachments) {
             if (attachment.type == RenderPassAttachment::RENDERTARGET || attachment.type == RenderPassAttachment::DEPTH_STENCIL) {
-                hash_combine(internal_renderpass->hash, attachment.texture->desc.format);
-                hash_combine(internal_renderpass->hash, attachment.texture->desc.sample_count);
+                hash_combine(internal_renderpass->hash, attachment.texture->format);
+                hash_combine(internal_renderpass->hash, attachment.texture->sample_count);
             }
         }
 
@@ -1738,13 +1746,12 @@ namespace blast {
         uint32_t valid_attachment_count = 0;
         for (auto& attachment : desc.attachments) {
             const GfxTexture* texture = attachment.texture;
-            const GfxTextureDesc& texdesc = texture->desc;
             int subresource = attachment.subresource;
             VulkanTexture* internal_texture = (VulkanTexture*)texture;
 
             attachment_descriptions[valid_attachment_count].sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            attachment_descriptions[valid_attachment_count].format = ToVulkanFormat(texdesc.format);
-            attachment_descriptions[valid_attachment_count].samples = (VkSampleCountFlagBits)texdesc.sample_count;
+            attachment_descriptions[valid_attachment_count].format = ToVulkanFormat(texture->format);
+            attachment_descriptions[valid_attachment_count].samples = (VkSampleCountFlagBits)texture->sample_count;
 
             switch (attachment.loadop) {
                 default:
@@ -1805,7 +1812,7 @@ namespace blast {
                 depth_attachment_ref.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                 subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
-                if (IsFormatStencilSupport(texdesc.format)) {
+                if (IsFormatStencilSupport(texture->format)) {
                     depth_attachment_ref.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
                     switch (attachment.loadop) {
                         default:
@@ -1868,15 +1875,14 @@ namespace blast {
         rpci.pSubpasses = &subpass;
         VK_ASSERT(vkCreateRenderPass2(device, &rpci, nullptr, &internal_renderpass->renderpass));
 
-        const GfxTextureDesc& texdesc = desc.attachments[0].texture->desc;
         auto internal_texture = (VulkanTexture*)desc.attachments[0].texture;
         VkFramebufferCreateInfo fci = {};
         fci.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         fci.renderPass = internal_renderpass->renderpass;
         fci.attachmentCount = valid_attachment_count;
         fci.pAttachments = attachments;
-        fci.width = texdesc.width;
-        fci.height = texdesc.height;
+        fci.width = internal_texture->width;
+        fci.height = internal_texture->height;
         fci.layers = 1;
         VK_ASSERT(vkCreateFramebuffer(device, &fci, nullptr, &internal_renderpass->framebuffer));
 
@@ -1894,7 +1900,7 @@ namespace blast {
             if (desc.attachments[i].type == RenderPassAttachment::RESOLVE || attachment.texture == nullptr)
                 continue;
 
-            const ClearValue& clear = desc.attachments[i].texture->desc.clear;
+            const ClearValue& clear = desc.attachments[i].texture->clear;
             if (desc.attachments[i].type == RenderPassAttachment::RENDERTARGET) {
                 internal_renderpass->clear_colors[i].color.float32[0] = clear.color[0];
                 internal_renderpass->clear_colors[i].color.float32[1] = clear.color[1];
@@ -2551,24 +2557,18 @@ namespace blast {
         GetFrameResources().descriptor_pools[cmd].Reset();
         binders[cmd].Reset();
 
-        if (type == QUEUE_GRAPHICS) {
-            VkRect2D scissors[8];
-            for (int i = 0; i < 8; ++i) {
-                scissors[i].offset.x = 0;
-                scissors[i].offset.y = 0;
-                scissors[i].extent.width = 65535;
-                scissors[i].extent.height = 65535;
-            }
-            vkCmdSetScissor(GetCommandBuffer(cmd), 0, 8, scissors);
-
-            float blend_constants[] = { 1,1,1,1 };
-            vkCmdSetBlendConstants(GetCommandBuffer(cmd), blend_constants);
-        }
-
         active_pipeline[cmd] = nullptr;
         active_cs[cmd] = nullptr;
         dirty_pipeline[cmd] = false;
         pushconstants[cmd] = {};
+        for (int i = 0; i < BLAST_SCISSOR_COUNT; ++i)
+        {
+            scissors[cmd][i] = {};
+        }
+        for (int i = 0; i < BLAST_VIEWPORT_COUNT; ++i)
+        {
+            viewports[cmd][i] = {};
+        }
         active_swapchains[cmd].clear();
         return internal_cmd;
     }
@@ -2623,9 +2623,6 @@ namespace blast {
 
                 for (auto& swapchain : active_swapchains[cmd]) {
                     VulkanSwapChain* internal_swapchain = (VulkanSwapChain*)swapchain;
-
-
-
                     queues[submit_queue].submit_swapchains.push_back(internal_swapchain->swapchain);
                     queues[submit_queue].submit_swapchain_image_indices.push_back(internal_swapchain->swapchain_image_index);
                     queues[submit_queue].submit_wait_stages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -2738,30 +2735,24 @@ namespace blast {
         vkCmdEndRenderPass(GetCommandBuffer(internal_cmd));
     }
 
-    void VulkanDevice::BindScissorRects(GfxCommandBuffer* cmd, uint32_t num_rects, Rect* rects) {
+    void VulkanDevice::BindScissor(GfxCommandBuffer* cmd, int32_t left, int32_t top, int32_t right, int32_t bottom, uint32_t idx) {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
-        VkRect2D scissors[16];
-        for(uint32_t i = 0; i < num_rects; ++i) {
-            scissors[i].extent.width = abs(rects[i].right - rects[i].left);
-            scissors[i].extent.height = abs(rects[i].top - rects[i].bottom);
-            scissors[i].offset.x = std::max(0, rects[i].left);
-            scissors[i].offset.y = std::max(0, rects[i].top);
-        }
-        vkCmdSetScissor(GetCommandBuffer(internal_cmd), 0, num_rects, scissors);
+        scissors[internal_cmd][idx].extent.width = abs(right - left);
+        scissors[internal_cmd][idx].extent.height = abs(top - bottom);
+        scissors[internal_cmd][idx].offset.x = std::max(0, left);
+        scissors[internal_cmd][idx].offset.y = std::max(0, top);
+        vkCmdSetScissor(GetCommandBuffer(internal_cmd), 0, BLAST_VIEWPORT_COUNT, scissors[internal_cmd]);
     }
 
-    void VulkanDevice::BindViewports(GfxCommandBuffer* cmd, uint32_t num_viewports, Viewport* viewports) {
+    void VulkanDevice::BindViewport(GfxCommandBuffer* cmd, float x, float y, float w, float h, float min_depth, float max_depth, uint32_t idx) {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
-        VkViewport vp[16];
-        for (uint32_t i = 0; i < num_viewports; ++i) {
-            vp[i].x = viewports[i].x;
-            vp[i].y = viewports[i].y;
-            vp[i].width = viewports[i].w;
-            vp[i].height = viewports[i].h;
-            vp[i].minDepth = viewports[i].min_depth;
-            vp[i].maxDepth = viewports[i].max_depth;
-        }
-        vkCmdSetViewport(GetCommandBuffer(internal_cmd), 0, num_viewports, vp);
+        viewports[internal_cmd][idx].x = x;
+        viewports[internal_cmd][idx].y = y;
+        viewports[internal_cmd][idx].width = w;
+        viewports[internal_cmd][idx].height = h;
+        viewports[internal_cmd][idx].minDepth = min_depth;
+        viewports[internal_cmd][idx].maxDepth = max_depth;
+        vkCmdSetViewport(GetCommandBuffer(internal_cmd), 0, BLAST_VIEWPORT_COUNT, viewports[internal_cmd]);
     }
 
     void VulkanDevice::BindResource(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource) {
@@ -2774,14 +2765,6 @@ namespace blast {
         }
     }
 
-    void VulkanDevice::BindResources(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) {
-        if (resources != nullptr) {
-            for (uint32_t i = 0; i < count; ++i) {
-                BindResource(cmd, resources[i], slot + i, -1);
-            }
-        }
-    }
-
     void VulkanDevice::BindUAV(GfxCommandBuffer* cmd, GfxResource* resource, uint32_t slot, int32_t subresource) {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
         auto& binder = binders[internal_cmd];
@@ -2789,14 +2772,6 @@ namespace blast {
             binder.table.uav[slot] = resource;
             binder.table.uav_index[slot] = subresource;
             binder.dirty = true;
-        }
-    }
-
-    void VulkanDevice::BindUAVs(GfxCommandBuffer* cmd, GfxResource** resources, uint32_t slot, uint32_t count) {
-        if (resources != nullptr) {
-            for (uint32_t i = 0; i < count; ++i) {
-                BindUAV(cmd, resources[i], slot + i, -1);
-            }
         }
     }
 
@@ -2984,13 +2959,13 @@ namespace blast {
         copy.extent.height = range.height;
         copy.extent.depth = range.depth;
 
-        copy.srcSubresource.aspectMask = ToVulkanAspectMask(internel_src_texture->desc.format);
+        copy.srcSubresource.aspectMask = ToVulkanAspectMask(internel_src_texture->format);
         copy.srcSubresource.baseArrayLayer = range.src_layer;
         copy.srcSubresource.mipLevel = range.src_level;
         copy.srcSubresource.layerCount = 1;
         copy.srcOffset = { 0, 0, 0 };
 
-        copy.dstSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->desc.format);
+        copy.dstSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->format);
         copy.dstSubresource.baseArrayLayer = range.dst_layer;
         copy.dstSubresource.mipLevel = range.dst_level;
         copy.dstSubresource.layerCount = 1;
@@ -3013,16 +2988,16 @@ namespace blast {
         copy.bufferOffset = range.buffer_offset;
         copy.bufferRowLength = 0;
         copy.bufferImageHeight = 0;
-        copy.imageSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->desc.format);
+        copy.imageSubresource.aspectMask = ToVulkanAspectMask(internel_dst_texture->format);
         copy.imageSubresource.mipLevel = range.level;
         copy.imageSubresource.baseArrayLayer = range.layer;
         copy.imageSubresource.layerCount = 1;
         copy.imageOffset.x = 0;
         copy.imageOffset.y = 0;
         copy.imageOffset.z = 0;
-        copy.imageExtent.width = internel_dst_texture->desc.width;
-        copy.imageExtent.height = internel_dst_texture->desc.height;
-        copy.imageExtent.depth = internel_dst_texture->desc.depth;
+        copy.imageExtent.width = internel_dst_texture->width;
+        copy.imageExtent.height = internel_dst_texture->height;
+        copy.imageExtent.depth = internel_dst_texture->depth;
 
         VkCommandBuffer command_buffer;
         if (((VulkanCommandBuffer*)cmd)->is_copy) {
@@ -3065,18 +3040,18 @@ namespace blast {
         for (uint32_t i = 0; i < layer + 1; ++i) {
             for (uint32_t j = 0; j < level + 1; ++j) {
                 uint32_t image_size = 0;
-                if (texture->desc.depth > 1) {
-                    image_size = texture->desc.width >> j;
-                    image_size *= texture->desc.height >> j;
-                    image_size *= texture->desc.depth >> j;
-                    image_size *= blast::GetFormatStride(texture->desc.format);
-                } else if (texture->desc.height > 1) {
-                    image_size = texture->desc.width >> j;
-                    image_size *= texture->desc.height >> j;
-                    image_size *= blast::GetFormatStride(texture->desc.format);
+                if (texture->depth > 1) {
+                    image_size = texture->width >> j;
+                    image_size *= texture->height >> j;
+                    image_size *= texture->depth >> j;
+                    image_size *= blast::GetFormatStride(texture->format);
+                } else if (texture->height > 1) {
+                    image_size = texture->width >> j;
+                    image_size *= texture->height >> j;
+                    image_size *= blast::GetFormatStride(texture->format);
                 } else {
-                    image_size = texture->desc.width >> j;
-                    image_size *= blast::GetFormatStride(texture->desc.format);
+                    image_size = texture->width >> j;
+                    image_size *= blast::GetFormatStride(texture->format);
                 }
                 total_image_size += image_size;
             }
@@ -3111,87 +3086,86 @@ namespace blast {
         }
     }
 
-    void VulkanDevice::SetBarrier(GfxCommandBuffer* cmd, uint32_t num_buffer_barriers, GfxBufferBarrier* buffer_barriers,
-                    uint32_t num_texture_barriers, GfxTextureBarrier* texture_barriers) {
+    void VulkanDevice::SetBarrier(GfxCommandBuffer* cmd, uint32_t num_barriers, GfxResourceBarrier* barriers) {
         std::vector<VkImageMemoryBarrier> internel_image_barriers;
         std::vector<VkBufferMemoryBarrier> internel_buffer_barriers;
 
         VkAccessFlags src_access_flags = 0;
         VkAccessFlags dst_access_flags = 0;
 
-        for (uint32_t i = 0; i < num_buffer_barriers; ++i) {
-            GfxBufferBarrier* trans = &buffer_barriers[i];
-            VulkanBuffer* buffer = static_cast<VulkanBuffer*>(trans->buffer);
-            bool flag = false;
-            VkBufferMemoryBarrier buffer_barrier = {};
-            if (!(trans->new_state & buffer->res_state)) {
-                flag = true;
-                buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-                buffer_barrier.pNext = NULL;
-                buffer_barrier.srcAccessMask = ToVulkanAccessFlags(buffer->res_state);
-                buffer_barrier.dstAccessMask = ToVulkanAccessFlags(trans->new_state);
+        for (uint32_t i = 0; i < num_barriers; ++i) {
+            GfxResourceBarrier* barrier = &barriers[i];
+            GfxResource* resource = barrier->resource;
+            if (resource->GetType() == GfxResource::ResourceType::BUFFER) {
+                VulkanBuffer* buffer = dynamic_cast<VulkanBuffer*>(resource);
+                bool flag = false;
+                VkBufferMemoryBarrier buffer_barrier = {};
+                if (!(barrier->new_state & buffer->res_state)) {
+                    flag = true;
+                    buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+                    buffer_barrier.pNext = NULL;
+                    buffer_barrier.srcAccessMask = ToVulkanAccessFlags(buffer->res_state);
+                    buffer_barrier.dstAccessMask = ToVulkanAccessFlags(barrier->new_state);
 
-                buffer->res_state = trans->new_state;
-            }
-            else if(trans->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
-                flag = true;
-                buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-                buffer_barrier.pNext = NULL;
-                buffer_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                buffer_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-            }
+                    buffer->res_state = barrier->new_state;
+                }
+                else if(barrier->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
+                    flag = true;
+                    buffer_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+                    buffer_barrier.pNext = NULL;
+                    buffer_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                    buffer_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+                }
 
-            if(flag) {
-                buffer_barrier.buffer = buffer->resource;
-                buffer_barrier.size = VK_WHOLE_SIZE;
-                buffer_barrier.offset = 0;
-                buffer_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                buffer_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                if(flag) {
+                    buffer_barrier.buffer = buffer->resource;
+                    buffer_barrier.size = VK_WHOLE_SIZE;
+                    buffer_barrier.offset = 0;
+                    buffer_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    buffer_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-                src_access_flags |= buffer_barrier.srcAccessMask;
-                dst_access_flags |= buffer_barrier.dstAccessMask;
-                internel_buffer_barriers.push_back(buffer_barrier);
-            }
-        }
+                    src_access_flags |= buffer_barrier.srcAccessMask;
+                    dst_access_flags |= buffer_barrier.dstAccessMask;
+                    internel_buffer_barriers.push_back(buffer_barrier);
+                }
+            } else if (resource->GetType() == GfxResource::ResourceType::TEXTURE) {
+                VulkanTexture* texture = dynamic_cast<VulkanTexture*>(resource);
+                bool flag = false;
+                VkImageMemoryBarrier image_barrier = {};
+                if (!(barrier->new_state & texture->res_state)) {
+                    flag = true;
+                    image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                    image_barrier.pNext = nullptr;
+                    image_barrier.srcAccessMask = ToVulkanAccessFlags(texture->res_state);
+                    image_barrier.dstAccessMask = ToVulkanAccessFlags(barrier->new_state);
+                    image_barrier.oldLayout = ToVulkanImageLayout(texture->res_state);
+                    image_barrier.newLayout = ToVulkanImageLayout(barrier->new_state);
 
-        for (uint32_t i = 0; i < num_texture_barriers; ++i) {
-            GfxTextureBarrier* trans = &texture_barriers[i];
-            VulkanTexture* texture = static_cast<VulkanTexture*>(trans->texture);
-            bool flag = false;
-            VkImageMemoryBarrier image_barrier = {};
-            if (!(trans->new_state & texture->res_state)) {
-                flag = true;
-                image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                image_barrier.pNext = NULL;
-                image_barrier.srcAccessMask = ToVulkanAccessFlags(texture->res_state);
-                image_barrier.dstAccessMask = ToVulkanAccessFlags(trans->new_state);
-                image_barrier.oldLayout = ToVulkanImageLayout(texture->res_state);
-                image_barrier.newLayout = ToVulkanImageLayout(trans->new_state);
+                    texture->res_state = barrier->new_state;
+                }
+                else if(barrier->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
+                    flag = true;
+                    image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                    image_barrier.pNext = nullptr;
+                    image_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                    image_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+                    image_barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                    image_barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                }
 
-                texture->res_state = trans->new_state;
-            }
-            else if(trans->new_state == RESOURCE_STATE_UNORDERED_ACCESS) {
-                flag = true;
-                image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                image_barrier.pNext = NULL;
-                image_barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                image_barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-                image_barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-                image_barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-            }
-
-            if(flag) {
-                image_barrier.image = texture->resource;
-                image_barrier.subresourceRange.aspectMask = ToVulkanAspectMask(texture->desc.format);
-                image_barrier.subresourceRange.baseMipLevel = 0;
-                image_barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-                image_barrier.subresourceRange.baseArrayLayer = 0;
-                image_barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-                image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                src_access_flags |= image_barrier.srcAccessMask;
-                dst_access_flags |= image_barrier.dstAccessMask;
-                internel_image_barriers.push_back(image_barrier);
+                if(flag) {
+                    image_barrier.image = texture->resource;
+                    image_barrier.subresourceRange.aspectMask = ToVulkanAspectMask(texture->format);
+                    image_barrier.subresourceRange.baseMipLevel = 0;
+                    image_barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+                    image_barrier.subresourceRange.baseArrayLayer = 0;
+                    image_barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+                    image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    src_access_flags |= image_barrier.srcAccessMask;
+                    dst_access_flags |= image_barrier.dstAccessMask;
+                    internel_image_barriers.push_back(image_barrier);
+                }
             }
         }
 
@@ -3208,8 +3182,8 @@ namespace blast {
         VkPipelineStageFlags src_stage_mask = ToPipelineStageFlags(src_access_flags, queue_type);
         VkPipelineStageFlags dst_stage_mask = ToPipelineStageFlags(dst_access_flags, queue_type);
 
-        if (internel_image_barriers.size() || internel_buffer_barriers.size()) {
-            vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, 0, 0, NULL,
+        if (!internel_image_barriers.empty() || !internel_buffer_barriers.empty()) {
+            vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, 0, 0, nullptr,
                                  internel_buffer_barriers.size(), internel_buffer_barriers.data(),
                                  internel_image_barriers.size(), internel_image_barriers.data());
         }

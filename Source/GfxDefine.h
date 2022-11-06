@@ -60,9 +60,11 @@
 #define MAX_VERTEX_ATTRIBS 15
 #define MAX_RENDER_TARGET_ATTACHMENTS 4
 
-#define BLAST_CMD_COUNT 32
+#define BLAST_CMD_COUNT 8
 #define BLAST_QUEUE_COUNT 2
 #define BLAST_BUFFER_COUNT 2
+#define BLAST_VIEWPORT_COUNT 1
+#define BLAST_SCISSOR_COUNT 1
 
 namespace blast {
     // hash
@@ -284,7 +286,7 @@ namespace blast {
         RESOURCE_USAGE_INDEX_BUFFER = 1 << 2,
         RESOURCE_USAGE_INDIRECT_BUFFER = 1 << 3,
         RESOURCE_USAGE_RW_BUFFER = 1 << 4,
-        RESOURCE_USAGE_TEXTURE_CUBE = 1 << 5,
+        RESOURCE_USAGE_CUBE_TEXTURE = 1 << 5,
         RESOURCE_USAGE_RENDER_TARGET = 1 << 6,
         RESOURCE_USAGE_DEPTH_STENCIL = 1 << 7,
         RESOURCE_USAGE_SHADER_RESOURCE = 1 << 8,
@@ -451,13 +453,13 @@ namespace blast {
     BLAST_MAKE_ENUM_FLAG(uint32_t, ColorComponentFlag)
 
     enum SubResourceType {
-        // shader resource view
+        // Shader resource view
         SRV = 0,
-        // unordered access view
+        // Unordered access view
         UAV,
-        // render target view
+        // Render target view
         RTV,
-        // depth stencil view
+        // Depth stencil view
         DSV
     };
 
@@ -467,22 +469,6 @@ namespace blast {
             float depth;
             uint32_t stencil;
         } depthstencil;
-    };
-
-    struct Rect {
-        int32_t left = 0;
-        int32_t top = 0;
-        int32_t right = 0;
-        int32_t bottom = 0;
-    };
-
-    struct Viewport {
-        float x = 0.0f;
-        float y = 0.0f;
-        float w = 0.0f;
-        float h = 0.0f;
-        float min_depth = 0.0f;
-        float max_depth = 1.0f;
     };
 
     struct GfxSamplerDesc {
@@ -508,9 +494,17 @@ namespace blast {
 
     class GfxResource {
     public:
+        enum class ResourceType {
+            BUFFER,
+            TEXTURE,
+            UNKNOWN_TYPE,
+        };
+
         GfxResource() = default;
 
         ~GfxResource() = default;
+
+        virtual ResourceType GetType() { return ResourceType::UNKNOWN_TYPE; }
 
     protected:
         MemoryUsage mem_usage;
@@ -530,10 +524,12 @@ namespace blast {
 
         ~GfxBuffer() = default;
 
-        const GfxBufferDesc& GetDesc() const { return desc; }
+        virtual ResourceType GetType() override { return ResourceType::BUFFER; }
 
     public:
-        GfxBufferDesc desc;
+        uint32_t size{};
+        MemoryUsage mem_usage;
+        ResourceUsage res_usage;
     };
 
     struct GfxTextureDesc {
@@ -556,10 +552,20 @@ namespace blast {
 
         ~GfxTexture() = default;
 
-        const GfxTextureDesc& GetDesc() const { return desc; }
+        virtual ResourceType GetType() override { return ResourceType::TEXTURE; }
 
     public:
-        GfxTextureDesc desc;
+        uint32_t width;
+        uint32_t height;
+        uint32_t depth;
+        uint32_t num_layers;
+        uint32_t num_levels;
+        Format format;
+        ClearValue clear;
+        SampleCount sample_count;
+        ResourceState state;
+        MemoryUsage mem_usage;
+        ResourceUsage res_usage;
     };
 
     struct RenderPassAttachment {
@@ -721,9 +727,7 @@ namespace blast {
     };
 
     struct GfxRasterizerState {
-        // 默认为0
         int32_t depth_bias = 0;
-        // 默认为0
         float slope_scaled_depth_bias = 0.0;
         FillMode fill_mode = FILL_SOLID;
         FrontFace front_face = FRONT_FACE_CCW;
@@ -794,14 +798,9 @@ namespace blast {
         GfxTexture* dst_texture;
     };
 
-    struct GfxBufferBarrier {
-        GfxBuffer* buffer = nullptr;
-        ResourceState new_state;
-    };
-
-    struct GfxTextureBarrier {
-        GfxTexture* texture = nullptr;
-        ResourceState new_state;
+    struct GfxResourceBarrier {
+        GfxResource* resource = nullptr;
+        ResourceState new_state = RESOURCE_STATE_COMMON;
     };
 
     static const uint32_t BLAST_CBV_COUNT = 15;

@@ -1,8 +1,8 @@
 #pragma once
-#include "ShaderCompiler.h"
+#include "../GfxShaderCompiler.h"
 
 namespace blast {
-    class VulkanShaderCompiler : public ShaderCompiler {
+    class VulkanShaderCompiler : public GfxShaderCompiler {
     public:
         VulkanShaderCompiler();
 
