@@ -484,7 +484,7 @@ namespace blast {
     public:
         GfxSampler() = default;
 
-        ~GfxSampler() = default;
+        virtual ~GfxSampler() = default;
 
         const GfxSamplerDesc& GetDesc() const { return desc; }
 
@@ -502,7 +502,7 @@ namespace blast {
 
         GfxResource() = default;
 
-        ~GfxResource() = default;
+        virtual ~GfxResource() = default;
 
         virtual ResourceType GetType() { return ResourceType::UNKNOWN_TYPE; }
 
@@ -522,7 +522,7 @@ namespace blast {
     public:
         GfxBuffer() = default;
 
-        ~GfxBuffer() = default;
+        virtual ~GfxBuffer() = default;
 
         virtual ResourceType GetType() override { return ResourceType::BUFFER; }
 
@@ -550,7 +550,7 @@ namespace blast {
     public:
         GfxTexture() = default;
 
-        ~GfxTexture() = default;
+        virtual ~GfxTexture() = default;
 
         virtual ResourceType GetType() override { return ResourceType::TEXTURE; }
 
@@ -628,7 +628,7 @@ namespace blast {
     public:
         GfxRenderPass() = default;
 
-        ~GfxRenderPass() = default;
+        virtual ~GfxRenderPass() = default;
 
         const GfxRenderPassDesc& GetDesc() const { return desc; }
 
@@ -652,7 +652,7 @@ namespace blast {
     public:
         GfxSwapChain() = default;
 
-        ~GfxSwapChain() = default;
+        virtual ~GfxSwapChain() = default;
 
         const GfxSwapChainDesc& GetDesc() const { return desc; }
 
@@ -670,7 +670,7 @@ namespace blast {
     public:
         GfxShader() = default;
 
-        ~GfxShader() = default;
+        virtual ~GfxShader() = default;
 
         ShaderStage GetStage() { return stage; }
 
@@ -755,7 +755,7 @@ namespace blast {
     public:
         GfxPipeline() = default;
 
-        ~GfxPipeline() = default;
+        virtual ~GfxPipeline() = default;
 
         const GfxPipelineDesc& GetDesc() const { return desc; }
 
@@ -767,7 +767,7 @@ namespace blast {
     public:
         GfxCommandBuffer() = default;
 
-        ~GfxCommandBuffer() = default;
+        virtual ~GfxCommandBuffer() = default;
     };
 
     struct GfxBufferCopyRange {

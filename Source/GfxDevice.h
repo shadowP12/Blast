@@ -13,33 +13,19 @@ namespace blast {
 
         virtual GfxBuffer* CreateBuffer(const GfxBufferDesc& desc) = 0;
 
-        virtual void DestroyBuffer(GfxBuffer*) = 0;
-
         virtual GfxTexture* CreateTexture(const GfxTextureDesc& desc) = 0;
-
-        virtual void DestroyTexture(GfxTexture*) = 0;
 
         virtual int32_t CreateSubresource(GfxTexture*, SubResourceType, uint32_t, uint32_t, uint32_t, uint32_t) = 0;
 
         virtual GfxSampler* CreateSampler(const GfxSamplerDesc& desc) = 0;
 
-        virtual void DestroySampler(GfxSampler*) = 0;
-
         virtual GfxSwapChain* CreateSwapChain(const GfxSwapChainDesc& desc, GfxSwapChain* old_swapchain = nullptr) = 0;
-
-        virtual void DestroySwapChain(GfxSwapChain*) = 0;
 
         virtual GfxRenderPass* CreateRenderPass(const GfxRenderPassDesc& desc) = 0;
 
-        virtual void DestroyRenderPass(GfxRenderPass*) = 0;
-
         virtual GfxShader* CreateShader(const GfxShaderDesc& desc) = 0;
 
-        virtual void DestroyShader(GfxShader*) = 0;
-
         virtual GfxPipeline* CreatePipeline(const GfxPipelineDesc& desc) = 0;
-
-        virtual void DestroyPipeline(GfxPipeline*) = 0;
 
         virtual GfxCommandBuffer* RequestCommandBuffer(QueueType type) = 0;
 
@@ -94,6 +80,21 @@ namespace blast {
         virtual void UpdateTexture(GfxCommandBuffer* cmd, GfxTexture* texture, const void* data, uint32_t layer = 0, uint32_t level = 0) = 0;
 
         virtual void SetBarrier(GfxCommandBuffer* cmd, uint32_t num_barriers, GfxResourceBarrier* barriers) = 0;
+
+    private:
+        virtual void DestroySampler(GfxSampler*) = 0;
+
+        virtual void DestroyBuffer(GfxBuffer*) = 0;
+
+        virtual void DestroyTexture(GfxTexture*) = 0;
+
+        virtual void DestroySwapChain(GfxSwapChain*) = 0;
+
+        virtual void DestroyRenderPass(GfxRenderPass*) = 0;
+
+        virtual void DestroyShader(GfxShader*) = 0;
+
+        virtual void DestroyPipeline(GfxPipeline*) = 0;
 
     protected:
         uint64_t frame_count = 0;

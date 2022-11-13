@@ -1,4 +1,5 @@
 #include "VulkanDevice.h"
+#include "VulkanResource.h"
 #include "spirv_reflect.h"
 
 namespace blast {
@@ -1092,7 +1093,7 @@ namespace blast {
     }
 
     GfxBuffer* VulkanDevice::CreateBuffer(const GfxBufferDesc& desc) {
-        VulkanBuffer* internal_buffer = new VulkanBuffer();
+        VulkanBuffer* internal_buffer = new VulkanBuffer(this);
         internal_buffer->size = desc.size;
         internal_buffer->mem_usage = desc.mem_usage;
         internal_buffer->res_usage = desc.res_usage;
@@ -1164,12 +1165,11 @@ namespace blast {
         VulkanBuffer* internal_buffer = (VulkanBuffer*)buffer;
         uint64_t frame_count = resource_manager.frame_count;
         resource_manager.destroyer_buffers.push_back(std::make_pair(std::make_pair(internal_buffer->resource, internal_buffer->memory), frame_count));
-        BLAST_SAFE_DELETE(buffer);
         resource_manager.destroy_locker.unlock();
     }
 
     GfxTexture* VulkanDevice::CreateTexture(const GfxTextureDesc& desc) {
-        VulkanTexture* internal_texture = new VulkanTexture();
+        VulkanTexture* internal_texture = new VulkanTexture(this);
         internal_texture->width = desc.width;
         internal_texture->height = desc.height;
         internal_texture->depth = desc.depth;
@@ -1306,7 +1306,6 @@ namespace blast {
             resource_manager.destroyer_imageviews.push_back(std::make_pair(x, frame_count));
         }
 
-        BLAST_SAFE_DELETE(texture);
         resource_manager.destroy_locker.unlock();
     }
 
@@ -1441,7 +1440,7 @@ namespace blast {
     }
 
     GfxSampler* VulkanDevice::CreateSampler(const GfxSamplerDesc& desc) {
-        VulkanSampler* internal_sampler = new VulkanSampler();
+        VulkanSampler* internal_sampler = new VulkanSampler(this);
         internal_sampler->desc = desc;
 
         VkSamplerCreateInfo sci = {};
@@ -1468,7 +1467,6 @@ namespace blast {
         VulkanSampler* internal_sampler = (VulkanSampler*)sampler;
         uint64_t frame_count = resource_manager.frame_count;
         resource_manager.destroyer_samplers.push_back(std::make_pair(internal_sampler->sampler, frame_count));
-        BLAST_SAFE_DELETE(sampler);
         resource_manager.destroy_locker.unlock();
     }
 
@@ -1477,7 +1475,7 @@ namespace blast {
         if (old_swapchain) {
             internal_swapchain = (VulkanSwapChain*)old_swapchain;
         } else {
-            internal_swapchain = new VulkanSwapChain();
+            internal_swapchain = new VulkanSwapChain(this);
         }
         internal_swapchain->desc = desc;
 
@@ -1715,11 +1713,10 @@ namespace blast {
         vkDestroySurfaceKHR(instance, internal_swapchain->surface, nullptr);
         vkDestroySemaphore(device, internal_swapchain->swapchain_acquire_semaphore, nullptr);
         vkDestroySemaphore(device, internal_swapchain->swapchain_release_semaphore, nullptr);
-        BLAST_SAFE_DELETE(swapchain);
     }
 
     GfxRenderPass* VulkanDevice::CreateRenderPass(const GfxRenderPassDesc& desc) {
-        auto internal_renderpass = new VulkanRenderPass();
+        auto internal_renderpass = new VulkanRenderPass(this);
         internal_renderpass->desc = desc;
 
         internal_renderpass->hash = 0;
@@ -1925,12 +1922,11 @@ namespace blast {
         uint64_t frame_count = resource_manager.frame_count;
         resource_manager.destroyer_renderpasses.push_back(std::make_pair(internal_renderpass->renderpass, frame_count));
         resource_manager.destroyer_framebuffers.push_back(std::make_pair(internal_renderpass->framebuffer, frame_count));
-        BLAST_SAFE_DELETE(renderpass);
         resource_manager.destroy_locker.unlock();
     }
 
     GfxShader* VulkanDevice::CreateShader(const GfxShaderDesc& desc) {
-        VulkanShader* internal_shader = new VulkanShader();
+        VulkanShader* internal_shader = new VulkanShader(this);
         internal_shader->stage = desc.stage;
 
         VkShaderModuleCreateInfo smci = {};
@@ -2111,12 +2107,11 @@ namespace blast {
             resource_manager.destroyer_pipeline_layouts.push_back(std::make_pair(internal_shader->pipeline_layout_cs, frame_count));
             resource_manager.destroyer_descriptor_set_layouts.push_back(std::make_pair(internal_shader->descriptor_set_layout, frame_count));
         }
-        BLAST_SAFE_DELETE(shader);
         resource_manager.destroy_locker.unlock();
     }
 
     GfxPipeline* VulkanDevice::CreatePipeline(const GfxPipelineDesc& desc) {
-        VulkanPipeline* internal_pipeline = new VulkanPipeline();
+        VulkanPipeline* internal_pipeline = new VulkanPipeline(this);
         internal_pipeline->desc = desc;
 
         internal_pipeline->hash = 0;
@@ -2488,7 +2483,6 @@ namespace blast {
         resource_manager.destroyer_pipelines.push_back(std::make_pair(internal_pipeline->pipeline, frame_count));
         resource_manager.destroyer_pipeline_layouts.push_back(std::make_pair(internal_pipeline->pipeline_layout, frame_count));
         resource_manager.destroyer_descriptor_set_layouts.push_back(std::make_pair(internal_pipeline->descriptor_set_layout, frame_count));
-        BLAST_SAFE_DELETE(pipeline);
         resource_manager.destroy_locker.unlock();
     }
 

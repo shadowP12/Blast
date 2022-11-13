@@ -12,6 +12,7 @@ target_sources(Blast PUBLIC
         Source/GfxRenderGraph.cpp
         Source/Vulkan/VulkanDefine.cpp
         Source/Vulkan/VulkanDevice.cpp
+        Source/Vulkan/VulkanResource.cpp
         Source/Vulkan/VulkanShaderCompiler.cpp)
 
 # 默认启动验证层
