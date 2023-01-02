@@ -1491,7 +1491,7 @@ namespace blast {
 #endif
         }
 
-        // get present family
+        // Get present family
         uint32_t present_family = VK_QUEUE_FAMILY_IGNORED;
         uint32_t family_index = 0;
         for (const auto& queue_family : queue_family_properties) {
@@ -1525,7 +1525,7 @@ namespace blast {
         std::vector<VkPresentModeKHR> swapchain_present_modes(present_mode_count);
         VK_ASSERT(vkGetPhysicalDeviceSurfacePresentModesKHR(phy_device, internal_swapchain->surface, &present_mode_count, swapchain_present_modes.data()));
 
-        // todo: using outside format
+        // Todo: Using outside format
         VkSurfaceFormatKHR surface_format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
         surface_format.format = VK_FORMAT_B8G8R8A8_UNORM;
 
@@ -1589,7 +1589,7 @@ namespace blast {
             vkDestroySwapchainKHR(device, scci.oldSwapchain, nullptr);
         }
 
-        // images
+        // Images
         VK_ASSERT(vkGetSwapchainImagesKHR(device, internal_swapchain->swapchain, &image_count, nullptr));
         internal_swapchain->swapchain_images.resize(image_count);
         VK_ASSERT(vkGetSwapchainImagesKHR(device, internal_swapchain->swapchain, &image_count, internal_swapchain->swapchain_images.data()));
@@ -1639,12 +1639,12 @@ namespace blast {
 
             VK_ASSERT(vkCreateRenderPass(device, &rpci, nullptr, &internal_swapchain->renderpass));
 
-            // 计算renderpass的hash
+            // Compute renderpass hash
             internal_swapchain->renderpass_hash = 0;
             hash_combine(internal_swapchain->renderpass_hash, internal_swapchain->swapchain_image_format);
         }
 
-        // create swap chain render targets
+        // Create swap chain render targets
         internal_swapchain->swapchain_image_views.resize(internal_swapchain->swapchain_images.size());
         internal_swapchain->swapchain_framebuffers.resize(internal_swapchain->swapchain_images.size());
         for (uint32_t i = 0; i < internal_swapchain->swapchain_images.size(); ++i) {
@@ -2686,16 +2686,24 @@ namespace blast {
         uint32_t internal_cmd = ((VulkanCommandBuffer*)cmd)->idx;
         VulkanSwapChain* internal_swapchain = (VulkanSwapChain*)swapchain;
 
-        active_swapchains[internal_cmd].push_back(swapchain);
-
-        VK_ASSERT(vkAcquireNextImageKHR(
+        bool has_active_swapchain = false;
+        for (uint32_t i = 0; i < active_swapchains[internal_cmd].size(); ++i) {
+            if (active_swapchains[internal_cmd][i] == swapchain) {
+                has_active_swapchain = true;
+                break;
+            }
+        }
+        if (!has_active_swapchain) {
+            active_swapchains[internal_cmd].push_back(swapchain);
+            VK_ASSERT(vkAcquireNextImageKHR(
                 device,
                 internal_swapchain->swapchain,
                 0xFFFFFFFFFFFFFFFF,
                 internal_swapchain->swapchain_acquire_semaphore,
                 VK_NULL_HANDLE,
                 &internal_swapchain->swapchain_image_index
-        ));
+            ));
+        }
 
         std::vector<VkClearValue> clear_values;
         VkClearValue clear_color = {
