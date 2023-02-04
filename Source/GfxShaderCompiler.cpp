@@ -3,8 +3,10 @@
 // Vulkan
 #include "Vulkan/VulkanShaderCompiler.h"
 
-namespace blast {
-    GfxShaderCompiler* GfxShaderCompiler::CreateShaderCompiler() {
-        return new VulkanShaderCompiler();
-    }
+namespace blast
+{
+GfxShaderCompiler* GfxShaderCompiler::CreateShaderCompiler()
+{
+    return new VulkanShaderCompiler();
 }
+}// namespace blast

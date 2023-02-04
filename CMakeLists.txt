@@ -2,23 +2,23 @@ cmake_minimum_required(VERSION 3.13)
 project(Blast)
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(Blast STATIC)
 target_include_directories(Blast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_sources(Blast PUBLIC
         Source/GfxDefine.cpp
         Source/GfxDevice.cpp
-        Source/GfxShaderCompiler.cpp
-        Source/GfxRenderGraph.cpp
+        Source/GfxShaderCompiler.cpp)
+
+target_sources(Blast PUBLIC
         Source/Vulkan/VulkanDefine.cpp
         Source/Vulkan/VulkanDevice.cpp
         Source/Vulkan/VulkanResource.cpp
         Source/Vulkan/VulkanShaderCompiler.cpp)
 
-# 默认启动验证层
+# Enable vulkan debug layout
 target_compile_definitions(Blast PUBLIC VULKAN_DEBUG)
 
-# 处理max/min报错
+# Handle minmax
 target_compile_definitions(Blast PUBLIC NOMINMAX)
 
 # volk
